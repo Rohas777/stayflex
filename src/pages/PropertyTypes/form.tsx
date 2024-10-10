@@ -9,44 +9,21 @@ import { FormLabel, FormInput } from "@/components/Base/Form";
 import { useState } from "react";
 import TomSelect from "@/components/Base/TomSelect";
 import { RegionCreateType } from "@/stores/reducers/regions/types";
+import { PropertyTypeCreateType } from "@/stores/reducers/property-types/types";
 
-interface RegionFormProps {
+interface PropertyTypeFormProps {
     isCreate: boolean;
     onCreate: (name: RegionCreateType) => void;
     onUpdate: (name: RegionCreateType) => void;
-    regionData?: {
-        name: string;
-        server: number;
-    };
+    propertyTypeName: string;
 }
 
-function RegionForm({
+function PropertyTypeForm({
     isCreate,
     onCreate,
     onUpdate,
-    regionData,
-}: RegionFormProps) {
-    const [select, setSelect] = useState(
-        !isCreate ? String(regionData?.server) : "1"
-    );
-    const [serversData, setServersData] = useState([
-        {
-            id: 1,
-            name: "Server-1",
-        },
-        {
-            id: 2,
-            name: "Server-2",
-        },
-        {
-            id: 3,
-            name: "Server-3",
-        },
-        {
-            id: 4,
-            name: "Server-4",
-        },
-    ]);
+    propertyTypeName,
+}: PropertyTypeFormProps) {
     const schema = yup
         .object({
             name: yup.string().required(),
@@ -81,24 +58,22 @@ function RegionForm({
                 stopOnFocus: true,
             }).showToast();
             const formData = new FormData(event.target);
-            const region: RegionCreateType = {
+            const propertyType: PropertyTypeCreateType = {
                 name: String(formData.get("name")),
             };
             if (isCreate) {
-                onCreate(region);
+                onCreate(propertyType);
             } else {
-                onUpdate(region);
+                onUpdate(propertyType);
             }
         }
     };
-
-    console.log(regionData);
 
     return (
         <>
             <div className="p-5">
                 <div className="mt-5 text-lg font-bold text-center">
-                    {isCreate ? "Добваить" : "Редактировать"} регион
+                    {isCreate ? "Добваить" : "Редактировать"} тип недвижимости
                 </div>
                 <form className="validate-form mt-5" onSubmit={onSubmit}>
                     <div className="input-form mt-3">
@@ -120,7 +95,7 @@ function RegionForm({
                                 "border-danger": errors.name,
                             })}
                             defaultValue={
-                                !isCreate ? regionData?.name : undefined
+                                !isCreate ? propertyTypeName : undefined
                             }
                             placeholder="Название"
                         />
@@ -130,36 +105,6 @@ function RegionForm({
                                     errors.name.message}
                             </div>
                         )}
-                    </div>
-                    <div className="mt-3">
-                        <FormLabel
-                            htmlFor="validation-form-server"
-                            className="flex flex-col w-full sm:flex-row"
-                        >
-                            Сервер
-                            <span className="mt-1 text-xs sm:ml-auto sm:mt-0 text-slate-500">
-                                Обязательное
-                            </span>
-                        </FormLabel>
-                        <TomSelect
-                            id="validation-form-server"
-                            value={select}
-                            name="server"
-                            onChange={(e) => {
-                                setSelect(e.target.value);
-                            }}
-                            options={{
-                                controlInput: undefined,
-                                searchField: undefined,
-                            }}
-                            className="w-full"
-                        >
-                            {serversData.map((server) => (
-                                <option key={server.id} value={server.id}>
-                                    {server.name}
-                                </option>
-                            ))}
-                        </TomSelect>
                     </div>
                     <Button
                         type="submit"
@@ -174,4 +119,4 @@ function RegionForm({
     );
 }
 
-export default RegionForm;
+export default PropertyTypeForm;

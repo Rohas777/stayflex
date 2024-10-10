@@ -9,5 +9,5 @@ export interface CityState {
 
 export interface CityCreateType {
     name: string;
-    regionID: number;
+    region_id: number;
 }

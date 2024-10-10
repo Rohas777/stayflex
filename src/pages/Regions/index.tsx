@@ -149,7 +149,6 @@ function Main() {
                                 animation: "shift-away",
                             });
                             a.append(editA, deleteA);
-                            a.addEventListener("hover", function () {});
                             deleteA.addEventListener("click", function () {
                                 setDeleteConfirmationModal(true);
                                 const rowId = cell.getRow().getData().id;

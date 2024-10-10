@@ -15,10 +15,16 @@ import { deleteUser, fetchUsers } from "@/stores/reducers/users/actions";
 import tippy from "tippy.js";
 import { Link } from "react-router-dom";
 import { propertyTypeSlice } from "@/stores/reducers/property-types/slice";
-import { fetchPropertyTypes } from "@/stores/reducers/property-types/actions";
+import {
+    createPropertyType,
+    fetchPropertyTypes,
+} from "@/stores/reducers/property-types/actions";
 import { Status } from "@/stores/reducers/types";
 import LoadingIcon from "@/components/Base/LoadingIcon";
 import { ListPlus } from "lucide-react";
+import { PropertyTypeCreateType } from "@/stores/reducers/property-types/types";
+import Notification from "@/components/Base/Notification";
+import PropertyTypeForm from "./form";
 
 window.DateTime = DateTime;
 interface Response {
@@ -28,11 +34,16 @@ interface Response {
 }
 
 function Main() {
+    const [buttonModalPreview, setButtonModalPreview] = useState(false);
+    const [isCreatePopup, setIsCreatePopup] = useState(true);
     const [deleteConfirmationModal, setDeleteConfirmationModal] =
         useState(false);
     const [columnAcionFocusId, setcolumnAcionFocusId] = useState<number | null>(
         null
     );
+    const [propertyType, setPropertyType] = useState<{
+        name: string;
+    } | null>(null);
 
     const tableRef = createRef<HTMLDivElement>();
     const tabulator = useRef<Tabulator>();
@@ -117,6 +128,7 @@ function Main() {
                         resizable: false,
                         headerSort: false,
                         formatter(cell) {
+                            const response: Response = cell.getData();
                             const a = stringToHTML(
                                 `<div class="flex lg:justify-center items-center"></div>`
                             );
@@ -139,12 +151,24 @@ function Main() {
                                 animation: "shift-away",
                             });
                             a.append(editA, deleteA);
-                            a.addEventListener("hover", function () {});
                             deleteA.addEventListener("click", function () {
                                 setDeleteConfirmationModal(true);
                                 const rowId = cell.getRow().getData().id;
-                                console.log(rowId);
+                                setPropertyType({
+                                    name: response.name!,
+                                });
                                 setcolumnAcionFocusId(rowId);
+                            });
+                            editA.addEventListener("click", function (event) {
+                                event.preventDefault();
+                                const row = tableData.find(
+                                    (row) => row.id === response.id
+                                );
+                                setPropertyType({
+                                    name: response.name!,
+                                });
+                                setIsCreatePopup(false);
+                                setButtonModalPreview(true);
                             });
                             return a;
                         },
@@ -261,11 +285,20 @@ function Main() {
             setDeleteConfirmationModal(false);
         }
     };
+    const onCreate = (propertyTypeName: PropertyTypeCreateType) => {
+        dispatch(createPropertyType(propertyTypeName));
+        dispatch(fetchPropertyTypes());
+        setButtonModalPreview(false);
+    };
+    const onUpdate = (region: PropertyTypeCreateType) => {
+        // dispatch(createRegion(region));
+        // dispatch(fetchRegions());
+        // setButtonModalPreview(false);
+    };
 
     const { propertyTypes, status, error } = useAppSelector(
         (state) => state.propertyType
     );
-    const {} = propertyTypeSlice.actions;
     const dispatch = useAppDispatch();
 
     useEffect(() => {
@@ -281,9 +314,11 @@ function Main() {
                 name: propertyType.name,
                 objects: Math.floor(Math.random() * 101),
             }));
-            tabulator.current?.setData(formattedData).then(function () {
-                reInitTabulator();
-            });
+            tabulator.current
+                ?.setData(formattedData.reverse())
+                .then(function () {
+                    reInitTabulator();
+                });
         }
     }, [propertyTypes]);
 
@@ -294,12 +329,20 @@ function Main() {
                     Типы недвижимости
                 </h2>
                 <div className="flex w-full mt-4 sm:w-auto sm:mt-0">
-                    <Link to="create">
-                        <Button variant="primary" className="mr-2 shadow-md">
-                            <ListPlus className="size-5 mr-2" />
-                            Добавить
-                        </Button>
-                    </Link>
+                    <Button
+                        as="a"
+                        href="#"
+                        variant="primary"
+                        className="mr-2 shadow-md"
+                        onClick={(event: React.MouseEvent) => {
+                            event.preventDefault();
+                            setIsCreatePopup(true);
+                            setButtonModalPreview(true);
+                        }}
+                    >
+                        <ListPlus className="size-5 mr-2" />
+                        Добавить
+                    </Button>
                 </div>
             </div>
             {/* BEGIN: HTML Table Data */}
@@ -471,10 +514,11 @@ function Main() {
                             icon="XCircle"
                             className="w-16 h-16 mx-auto mt-3 text-danger"
                         />
-                        <div className="mt-5 text-3xl">Are you sure?</div>
+                        <div className="mt-5 text-3xl">Вы уверены?</div>
                         <div className="mt-2 text-slate-500">
-                            Do you really want to delete these records? <br />
-                            This process cannot be undone.
+                            Вы уверены, что хотите удалить тип недвижимости "
+                            {propertyType?.name}"? <br />
+                            Это действие нельзя будет отменить.
                         </div>
                     </div>
                     <div className="px-5 pb-8 text-center">
@@ -486,7 +530,7 @@ function Main() {
                             }}
                             className="w-24 mr-1"
                         >
-                            Cancel
+                            Отмена
                         </Button>
                         <Button
                             variant="danger"
@@ -496,12 +540,53 @@ function Main() {
                                 onDelete();
                             }}
                         >
-                            Delete
+                            Удалить
                         </Button>
                     </div>
                 </Dialog.Panel>
             </Dialog>
             {/* END: Delete Confirmation Modal */}
+            {/* BEGIN: Modal Content */}
+            <Dialog
+                open={buttonModalPreview}
+                onClose={() => {
+                    setButtonModalPreview(false);
+                    setPropertyType(null);
+                }}
+            >
+                <Dialog.Panel>
+                    <a
+                        onClick={(event: React.MouseEvent) => {
+                            event.preventDefault();
+                            setButtonModalPreview(false);
+                        }}
+                        className="absolute top-0 right-0 mt-3 mr-3"
+                        href="#"
+                    >
+                        <Lucide icon="X" className="w-8 h-8 text-slate-400" />
+                    </a>
+                    <PropertyTypeForm
+                        isCreate={isCreatePopup}
+                        propertyTypeName={propertyType?.name!}
+                        onCreate={onCreate}
+                        onUpdate={onUpdate}
+                    />
+                </Dialog.Panel>
+            </Dialog>
+            {/* END: Modal Content */}
+            {/* BEGIN: Success Notification Content */}
+            <Notification
+                id="success-notification-content"
+                className="flex hidden"
+            >
+                <Lucide icon="CheckCircle" className="text-success" />
+                <div className="ml-4 mr-4">
+                    <div className="font-medium">
+                        Тип недвижимости успешно добавлен
+                    </div>
+                </div>
+            </Notification>
+            {/* END: Success Notification Content */}
         </>
     );
 }

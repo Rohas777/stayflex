@@ -18,7 +18,7 @@ interface CityFormProps {
     regions: IRegion[];
     cityData?: {
         name: string;
-        regionID: number;
+        region: number;
         server: number;
     };
 }
@@ -34,7 +34,7 @@ function CityForm({
         !isCreate ? String(cityData?.server) : "1"
     );
     const [selectRegion, setSelectRegion] = useState(
-        !isCreate ? String(cityData?.regionID) : "empty"
+        !isCreate ? String(cityData?.region) : String(regions[0]?.id)
     );
     const [serversData, setServersData] = useState([
         {
@@ -57,13 +57,6 @@ function CityForm({
     const schema = yup
         .object({
             name: yup.string().required("'Название' это обязательное поле"),
-            region: yup.string().required("'Регион' это обязательное поле"),
-            // .mixed()
-            // .oneOf(
-            //     regions.map((region) => region.id),
-            //     "Выбрано недопустимое значение"
-            // )
-            // .required(),
         })
         .required();
     const {
@@ -77,7 +70,6 @@ function CityForm({
     const onSubmit = async (event: React.ChangeEvent<HTMLFormElement>) => {
         event.preventDefault();
         const result = await trigger();
-        console.log(result);
         if (!result) {
             return;
         } else {
@@ -97,8 +89,9 @@ function CityForm({
             const formData = new FormData(event.target);
             const city: CityCreateType = {
                 name: String(formData.get("name")),
-                regionID: 1,
+                region_id: Number(selectRegion),
             };
+
             if (isCreate) {
                 onCreate(city);
             } else {
@@ -111,7 +104,7 @@ function CityForm({
         <>
             <div className="p-5">
                 <div className="mt-5 text-lg font-bold text-center">
-                    Добваить регион
+                    {isCreate ? "Добваить" : "Редактировать"} город
                 </div>
                 <form className="validate-form mt-5" onSubmit={onSubmit}>
                     <div className="input-form mt-3">
@@ -155,21 +148,17 @@ function CityForm({
                             </span>
                         </FormLabel>
                         <TomSelect
-                            {...register("region")}
                             id="validation-form-region"
                             value={selectRegion}
                             name="region"
                             onChange={(e) => {
                                 setSelectRegion(e.target.value);
-                                trigger("region");
                             }}
                             options={{
                                 controlInput: undefined,
                                 searchField: undefined,
                             }}
-                            className={clsx({
-                                "w-full border-danger": errors.region,
-                            })}
+                            className="w-full"
                         >
                             {regions.map((region) => (
                                 <option key={region.id} value={region.id}>
@@ -177,12 +166,6 @@ function CityForm({
                                 </option>
                             ))}
                         </TomSelect>
-                        {errors.region && (
-                            <div className="mt-2 text-danger">
-                                {typeof errors.region.message === "string" &&
-                                    errors.region.message}
-                            </div>
-                        )}
                     </div>
                     <div className="mt-3">
                         <FormLabel

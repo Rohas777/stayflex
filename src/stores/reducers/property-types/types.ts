@@ -6,3 +6,7 @@ export interface PropertyTypeState {
     status: Status;
     error: string | null;
 }
+
+export interface PropertyTypeCreateType {
+    name: string;
+}

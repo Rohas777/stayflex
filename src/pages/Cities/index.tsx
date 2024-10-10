@@ -28,7 +28,10 @@ window.DateTime = DateTime;
 interface Response {
     id?: number;
     name?: string;
-    region?: string;
+    region?: {
+        name: string;
+        id: number;
+    };
     objects?: number;
 }
 
@@ -37,7 +40,10 @@ function Main() {
     const [isCreatePopup, setIsCreatePopup] = useState(true);
     const [cityData, setCityData] = useState<{
         name: string;
-        region: string;
+        region: {
+            name: string;
+            id: number;
+        };
         server: number;
     } | null>(null);
     const [deleteConfirmationModal, setDeleteConfirmationModal] =
@@ -113,7 +119,9 @@ function Main() {
                         formatter(cell) {
                             const response: Response = cell.getData();
                             return `<div>
-                                        <div class="font-medium whitespace-nowrap">${response.region}</div>
+                                        <div class="font-medium whitespace-nowrap">${
+                                            response.region!.name
+                                        }</div>
                                     </div>`;
                         },
                     },
@@ -145,6 +153,7 @@ function Main() {
                         resizable: false,
                         headerSort: false,
                         formatter(cell) {
+                            const response: Response = cell.getData();
                             const a = stringToHTML(
                                 `<div class="flex lg:justify-center items-center"></div>`
                             );
@@ -167,12 +176,35 @@ function Main() {
                                 animation: "shift-away",
                             });
                             a.append(editA, deleteA);
-                            a.addEventListener("hover", function () {});
                             deleteA.addEventListener("click", function () {
                                 setDeleteConfirmationModal(true);
                                 const rowId = cell.getRow().getData().id;
-                                console.log(rowId);
+                                setCityData({
+                                    name: response.name!,
+                                    region: {
+                                        name: response.region!.name,
+                                        id: response.region!.id,
+                                    },
+                                    server: 3,
+                                });
                                 setcolumnAcionFocusId(rowId);
+                            });
+                            editA.addEventListener("click", function (event) {
+                                event.preventDefault();
+                                const rowId = cell.getRow().getData().id;
+                                const row = tableData.find(
+                                    (row) => row.id === response.id
+                                );
+                                setCityData({
+                                    name: response.name!,
+                                    region: {
+                                        name: response.region!.name,
+                                        id: response.region!.id,
+                                    },
+                                    server: 3,
+                                });
+                                setIsCreatePopup(false);
+                                setButtonModalPreview(true);
                             });
                             return a;
                         },
@@ -297,6 +329,7 @@ function Main() {
         }
     };
     const onCreate = (city: CityCreateType) => {
+        console.log(city);
         dispatch(createCity(city));
         dispatch(fetchCities());
         setButtonModalPreview(false);
@@ -324,12 +357,17 @@ function Main() {
             const formattedData = cities.map((city) => ({
                 id: city.id,
                 name: city.name,
-                region: city.region.name,
+                region: {
+                    name: city.region.name,
+                    id: city.region.id,
+                },
                 objects: Math.floor(Math.random() * 101),
             }));
-            tabulator.current?.setData(formattedData).then(function () {
-                reInitTabulator();
-            });
+            tabulator.current
+                ?.setData(formattedData.reverse())
+                .then(function () {
+                    reInitTabulator();
+                });
         }
     }, [cities]);
 
@@ -511,50 +549,6 @@ function Main() {
             </div>
             {/* END: HTML Table Data */}
 
-            {/* BEGIN: Delete Confirmation Modal */}
-            <Dialog
-                open={deleteConfirmationModal}
-                onClose={() => {
-                    setDeleteConfirmationModal(false);
-                }}
-            >
-                <Dialog.Panel>
-                    <div className="p-5 text-center">
-                        <Lucide
-                            icon="XCircle"
-                            className="w-16 h-16 mx-auto mt-3 text-danger"
-                        />
-                        <div className="mt-5 text-3xl">Are you sure?</div>
-                        <div className="mt-2 text-slate-500">
-                            Do you really want to delete these records? <br />
-                            This process cannot be undone.
-                        </div>
-                    </div>
-                    <div className="px-5 pb-8 text-center">
-                        <Button
-                            variant="outline-secondary"
-                            type="button"
-                            onClick={() => {
-                                setDeleteConfirmationModal(false);
-                            }}
-                            className="w-24 mr-1"
-                        >
-                            Cancel
-                        </Button>
-                        <Button
-                            variant="danger"
-                            type="button"
-                            className="w-24"
-                            onClick={() => {
-                                onDelete();
-                            }}
-                        >
-                            Delete
-                        </Button>
-                    </div>
-                </Dialog.Panel>
-            </Dialog>
-            {/* END: Delete Confirmation Modal */}
             {/* BEGIN: Modal Content */}
             <Dialog
                 open={buttonModalPreview}
@@ -580,7 +574,7 @@ function Main() {
                         cityData={{
                             name: cityData ? cityData.name! : "",
                             server: cityData ? cityData.server : 1,
-                            regionID: Number(cityData?.region) || 0,
+                            region: cityData?.region.id || 0,
                         }}
                         onCreate={onCreate}
                         onUpdate={onUpdate}
@@ -588,6 +582,51 @@ function Main() {
                 </Dialog.Panel>
             </Dialog>
             {/* END: Modal Content */}
+            {/* BEGIN: Delete Confirmation Modal */}
+            <Dialog
+                open={deleteConfirmationModal}
+                onClose={() => {
+                    setDeleteConfirmationModal(false);
+                }}
+            >
+                <Dialog.Panel>
+                    <div className="p-5 text-center">
+                        <Lucide
+                            icon="XCircle"
+                            className="w-16 h-16 mx-auto mt-3 text-danger"
+                        />
+                        <div className="mt-5 text-3xl">Вы уверены?</div>
+                        <div className="mt-2 text-slate-500">
+                            Вы уверены, что хотите удалить город "
+                            {cityData?.name}"? <br />
+                            Это действие нельзя будет отменить.
+                        </div>
+                    </div>
+                    <div className="px-5 pb-8 text-center">
+                        <Button
+                            variant="outline-secondary"
+                            type="button"
+                            onClick={() => {
+                                setDeleteConfirmationModal(false);
+                            }}
+                            className="w-24 mr-1"
+                        >
+                            Отмена
+                        </Button>
+                        <Button
+                            variant="danger"
+                            type="button"
+                            className="w-24"
+                            onClick={() => {
+                                onDelete();
+                            }}
+                        >
+                            Удалить
+                        </Button>
+                    </div>
+                </Dialog.Panel>
+            </Dialog>
+            {/* END: Delete Confirmation Modal */}
             {/* BEGIN: Success Notification Content */}
             <Notification
                 id="success-notification-content"
@@ -595,7 +634,7 @@ function Main() {
             >
                 <Lucide icon="CheckCircle" className="text-success" />
                 <div className="ml-4 mr-4">
-                    <div className="font-medium">Регион успешно добавлен</div>
+                    <div className="font-medium">Город успешно добавлен</div>
                 </div>
             </Notification>
             {/* END: Success Notification Content */}
