@@ -6,3 +6,7 @@ export interface RegionState {
     status: Status;
     error: string | null;
 }
+
+export interface RegionCreateType {
+    name: string;
+}

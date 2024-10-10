@@ -79,6 +79,7 @@ import Cities from "../pages/Cities";
 import PropertyTypes from "../pages/PropertyTypes";
 import Conveniences from "../pages/Conveniences";
 import Objects from "../pages/Objects";
+import ObjectsClient from "../pages/ObjectsClient";
 import Clients from "../pages/Clients";
 import Reservations from "../pages/Reservations";
 import ReservationsClient from "../pages/ReservationsClient";
@@ -129,7 +130,7 @@ function Router() {
                 },
                 {
                     path: "objects",
-                    element: <Objects />,
+                    element: <ObjectsClient />,
                 },
                 {
                     path: "admin-clients",

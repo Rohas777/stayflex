@@ -10,11 +10,12 @@ import { TabulatorFull as Tabulator } from "tabulator-tables";
 import { stringToHTML } from "@/utils/helper";
 import { DateTime } from "luxon";
 import { useAppDispatch, useAppSelector } from "@/stores/hooks";
+import { userSlice } from "@/stores/reducers/users/slice";
 import { deleteUser, fetchUsers } from "@/stores/reducers/users/actions";
 import tippy from "tippy.js";
 import { Link } from "react-router-dom";
-import { convenienceSlice } from "@/stores/reducers/conveniences/slice";
-import { fetchConveniences } from "@/stores/reducers/conveniences/actions";
+import { propertyTypeSlice } from "@/stores/reducers/property-types/slice";
+import { fetchPropertyTypes } from "@/stores/reducers/property-types/actions";
 import { Status } from "@/stores/reducers/types";
 import LoadingIcon from "@/components/Base/LoadingIcon";
 import { ListPlus } from "lucide-react";
@@ -23,8 +24,6 @@ window.DateTime = DateTime;
 interface Response {
     id?: number;
     name?: string;
-    objects?: number;
-    photo?: string;
 }
 
 function Main() {
@@ -42,7 +41,24 @@ function Main() {
         value: "",
     });
 
-    const [tableData, setTableData] = useState<Response[]>([]);
+    const [tableData, setTableData] = useState<Response[]>([
+        {
+            id: 1,
+            name: "На набережной",
+        },
+        {
+            id: 2,
+            name: "Арбат",
+        },
+        {
+            id: 3,
+            name: "Студия",
+        },
+        {
+            id: 4,
+            name: "Ленина",
+        },
+    ]);
 
     const initTabulator = () => {
         if (tableRef.current) {
@@ -84,43 +100,28 @@ function Main() {
                         sorter: "string",
                         formatter(cell) {
                             const response: Response = cell.getData();
-                            return `<div class="flex items-center justify-center">
-                                        <img src="${response.photo}" alt="" class="w-10 h-10 mr-2"/>
+                            return `<div>
                                         <div class="font-medium whitespace-nowrap">${response.name}</div>
                                     </div>`;
                         },
                     },
                     {
-                        title: "ОБЪЕКТЫ",
-                        minWidth: 200,
-                        field: "objects",
-                        hozAlign: "center",
-                        headerHozAlign: "center",
-                        vertAlign: "middle",
-                        print: false,
-                        download: false,
-                        sorter: "number",
-                        formatter(cell) {
-                            const response: Response = cell.getData();
-                            return `<div class="flex lg:justify-center">
-                                        <div class="font-medium whitespace-nowrap">${response.objects}</div>
-                                    </div>`;
-                        },
-                    },
-                    {
                         title: "",
-                        minWidth: 200,
                         field: "",
                         responsive: 1,
-                        hozAlign: "right",
-                        headerHozAlign: "center",
-                        vertAlign: "middle",
+                        minWidth: 30,
                         resizable: false,
                         headerSort: false,
+                        hozAlign: "right",
+                        vertAlign: "middle",
                         formatter(cell) {
                             const a = stringToHTML(
                                 `<div class="flex lg:justify-center items-center"></div>`
                             );
+                            const dateA =
+                                stringToHTML(`<a class="flex items-center mr-3 w-7 h-7 p-1 border border-black rounded-md hover:opacity-70" href="javascript:;">
+                                <i data-lucide="calendar"></i>
+                              </a>`);
                             const editA =
                                 stringToHTML(`<a class="flex items-center mr-3 w-7 h-7 p-1 border border-black rounded-md hover:opacity-70" href="javascript:;">
                                 <i data-lucide="pencil"></i>
@@ -129,6 +130,11 @@ function Main() {
                                 stringToHTML(`<a class="flex items-center text-danger w-7 h-7 p-1 border border-danger rounded-md hover:opacity-70" href="javascript:;">
                                 <i data-lucide="trash-2"></i>
                               </a>`);
+                            tippy(dateA, {
+                                content: "Брони",
+                                placement: "bottom",
+                                animation: "shift-away",
+                            });
                             tippy(editA, {
                                 content: "Редактировать",
                                 placement: "bottom",
@@ -139,7 +145,18 @@ function Main() {
                                 placement: "bottom",
                                 animation: "shift-away",
                             });
-                            a.append(editA, deleteA);
+                            const switcher = stringToHTML(
+                                `<label class="inline-flex items-center cursor-pointer mr-3">
+                                    <input type="checkbox" value="" class="sr-only peer">
+                                    <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                                </label>`
+                            );
+                            tippy(switcher, {
+                                content: "Активен?",
+                                placement: "bottom",
+                                animation: "shift-away",
+                            });
+                            a.append(switcher, dateA, editA, deleteA);
                             a.addEventListener("hover", function () {});
                             deleteA.addEventListener("click", function () {
                                 setDeleteConfirmationModal(true);
@@ -153,15 +170,8 @@ function Main() {
 
                     // For print format
                     {
-                        title: "NAME",
+                        title: "НАЗВАНИЕ",
                         field: "name",
-                        visible: false,
-                        print: true,
-                        download: true,
-                    },
-                    {
-                        title: "OBJECTS",
-                        field: "objects",
                         visible: false,
                         print: true,
                         download: true,
@@ -254,6 +264,7 @@ function Main() {
             });
         }
     };
+
     const onDelete = () => {
         if (columnAcionFocusId) {
             dispatch(deleteUser(String(columnAcionFocusId)));
@@ -262,36 +273,35 @@ function Main() {
         }
     };
 
-    const { conveniences, status, error } = useAppSelector(
-        (state) => state.convenience
+    const { propertyTypes, status, error } = useAppSelector(
+        (state) => state.propertyType
     );
-    const {} = convenienceSlice.actions;
+    const {} = propertyTypeSlice.actions;
     const dispatch = useAppDispatch();
 
     useEffect(() => {
         initTabulator();
         reInitOnResizeWindow();
 
-        dispatch(fetchConveniences());
+        dispatch(fetchPropertyTypes());
     }, []);
     useEffect(() => {
-        if (conveniences.length) {
-            const formattedData = conveniences.map((convenience) => ({
-                id: convenience.id,
-                name: convenience.name,
+        if (propertyTypes.length) {
+            const formattedData = propertyTypes.map((propertyType) => ({
+                id: propertyType.id,
+                name: propertyType.name,
                 objects: Math.floor(Math.random() * 101),
-                photo: "/src/assets/images/conveniences/1.png",
             }));
             tabulator.current?.setData(formattedData).then(function () {
                 reInitTabulator();
             });
         }
-    }, [conveniences]);
+    }, [propertyTypes]);
 
     return (
         <>
             <div className="flex flex-col items-center mt-8 intro-y sm:flex-row">
-                <h2 className="mr-auto text-lg font-medium">Удобства</h2>
+                <h2 className="mr-auto text-lg font-medium">Объекты</h2>
                 <div className="flex w-full mt-4 sm:w-auto sm:mt-0">
                     <Link to="create">
                         <Button variant="primary" className="mr-2 shadow-md">
@@ -335,7 +345,6 @@ function Main() {
                                 className="w-full mt-2 2xl:w-full sm:mt-0 sm:w-auto"
                             >
                                 <option value="name">Название</option>
-                                <option value="objects">Объекты</option>
                             </FormSelect>
                         </div>
                         <div className="items-center mt-2 sm:flex sm:mr-4 xl:mt-0">

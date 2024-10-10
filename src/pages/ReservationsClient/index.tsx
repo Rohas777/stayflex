@@ -47,7 +47,7 @@ function Main() {
             id: 1,
             object: "Квартира на набережной",
             date: "07.09.2023 - 09.09.2024",
-            status: "В обработке",
+            status: "Одобрено",
         },
         {
             id: 1,
@@ -91,7 +91,7 @@ function Main() {
 
                     // For HTML table
                     {
-                        title: "OBJECT",
+                        title: "ОБЪЕКТ",
                         minWidth: 200,
                         responsive: 0,
                         field: "object",
@@ -108,7 +108,7 @@ function Main() {
                         },
                     },
                     {
-                        title: "DATE",
+                        title: "ДАТА",
                         minWidth: 200,
                         responsive: 0,
                         field: "date",
@@ -126,7 +126,7 @@ function Main() {
                         },
                     },
                     {
-                        title: "STATUS",
+                        title: "СТАТУС",
                         minWidth: 200,
                         field: "status",
                         hozAlign: "center",
@@ -134,7 +134,7 @@ function Main() {
                         vertAlign: "middle",
                         print: false,
                         download: false,
-                        sorter: "number",
+                        sorter: "string",
                         formatter(cell) {
                             const response: Response = cell.getData();
                             return `<div>
@@ -149,10 +149,9 @@ function Main() {
                         field: "",
                         responsive: 1,
                         hozAlign: "right",
-                        headerHozAlign: "center",
                         vertAlign: "middle",
-                        print: false,
-                        download: false,
+                        resizable: false,
+                        headerSort: false,
                         formatter(cell) {
                             const response: Response = cell.getData();
                             const a = stringToHTML(
@@ -163,7 +162,7 @@ function Main() {
                                 <i data-lucide="info"></i>
                               </a>`);
                             tippy(info, {
-                                content: "Info",
+                                content: "Подробнее",
                                 placement: "bottom",
                                 animation: "shift-away",
                             });
@@ -183,15 +182,22 @@ function Main() {
 
                     // For print format
                     {
-                        title: "NAME",
-                        field: "name",
+                        title: "OBJECT",
+                        field: "object",
                         visible: false,
                         print: true,
                         download: true,
                     },
                     {
-                        title: "OBJECTS",
-                        field: "objects",
+                        title: "DATE",
+                        field: "date",
+                        visible: false,
+                        print: true,
+                        download: true,
+                    },
+                    {
+                        title: "STATUS",
+                        field: "status",
                         visible: false,
                         print: true,
                         download: true,
@@ -284,11 +290,6 @@ function Main() {
             });
         }
     };
-    const onPrint = () => {
-        if (tabulator.current) {
-            tabulator.current.print();
-        }
-    };
 
     const { propertyTypes, status, error } = useAppSelector(
         (state) => state.propertyType
@@ -319,7 +320,7 @@ function Main() {
         <>
             <div className="flex flex-col items-center mt-8 intro-y sm:flex-row">
                 <h2 className="mr-auto text-lg font-medium">
-                    List of client reservations - {clientData.name}
+                    Список броней клиента - {clientData.name}
                 </h2>
             </div>
             {/* BEGIN: HTML Table Data */}
@@ -342,7 +343,7 @@ function Main() {
                     >
                         <div className="items-center sm:flex sm:mr-4">
                             <label className="flex-none w-12 mr-2 xl:w-auto xl:flex-initial">
-                                Field
+                                Поле
                             </label>
                             <FormSelect
                                 id="tabulator-html-filter-field"
@@ -355,13 +356,13 @@ function Main() {
                                 }}
                                 className="w-full mt-2 2xl:w-full sm:mt-0 sm:w-auto"
                             >
-                                <option value="name">Name</option>
-                                <option value="objects">Objects</option>
+                                <option value="object">Объект</option>
+                                <option value="status">Статус</option>
                             </FormSelect>
                         </div>
                         <div className="items-center mt-2 sm:flex sm:mr-4 xl:mt-0">
                             <label className="flex-none w-12 mr-2 xl:w-auto xl:flex-initial">
-                                Type
+                                Тип
                             </label>
                             <FormSelect
                                 id="tabulator-html-filter-type"
@@ -385,7 +386,7 @@ function Main() {
                         </div>
                         <div className="items-center mt-2 sm:flex sm:mr-4 xl:mt-0">
                             <label className="flex-none w-12 mr-2 xl:w-auto xl:flex-initial">
-                                Value
+                                Значение
                             </label>
                             <FormInput
                                 id="tabulator-html-filter-value"
@@ -398,7 +399,7 @@ function Main() {
                                 }}
                                 type="text"
                                 className="mt-2 sm:w-40 2xl:w-full sm:mt-0"
-                                placeholder="Search..."
+                                placeholder="Поиск..."
                             />
                         </div>
                         <div className="mt-2 xl:mt-0">
@@ -409,16 +410,16 @@ function Main() {
                                 className="w-full sm:w-16"
                                 onClick={onFilter}
                             >
-                                Go
+                                Начать
                             </Button>
                             <Button
                                 id="tabulator-html-filter-reset"
                                 variant="secondary"
                                 type="button"
-                                className="w-full mt-2 sm:w-16 sm:mt-0 sm:ml-1"
+                                className="w-full mt-2 sm:w-20 sm:mt-0 sm:ml-1"
                                 onClick={onResetFilter}
                             >
-                                Reset
+                                Сбросить
                             </Button>
                         </div>
                     </form>
@@ -433,7 +434,7 @@ function Main() {
                                     icon="FileText"
                                     className="w-4 h-4 mr-2"
                                 />{" "}
-                                Export
+                                Экспорт
                                 <Lucide
                                     icon="ChevronDown"
                                     className="w-4 h-4 ml-auto sm:ml-2"
@@ -445,28 +446,28 @@ function Main() {
                                         icon="FileText"
                                         className="w-4 h-4 mr-2"
                                     />{" "}
-                                    Export CSV
+                                    Экспорт CSV
                                 </Menu.Item>
                                 <Menu.Item onClick={onExportJson}>
                                     <Lucide
                                         icon="FileText"
                                         className="w-4 h-4 mr-2"
                                     />{" "}
-                                    Export JSON
+                                    Экспорт JSON
                                 </Menu.Item>
                                 <Menu.Item onClick={onExportXlsx}>
                                     <Lucide
                                         icon="FileText"
                                         className="w-4 h-4 mr-2"
                                     />{" "}
-                                    Export XLSX
+                                    Экспорт XLSX
                                 </Menu.Item>
                                 <Menu.Item onClick={onExportHtml}>
                                     <Lucide
                                         icon="FileText"
                                         className="w-4 h-4 mr-2"
                                     />{" "}
-                                    Export HTML
+                                    Экспорт HTML
                                 </Menu.Item>
                             </Menu.Items>
                         </Menu>

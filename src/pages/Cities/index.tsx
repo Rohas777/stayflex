@@ -15,10 +15,14 @@ import { deleteUser, fetchUsers } from "@/stores/reducers/users/actions";
 import tippy from "tippy.js";
 import { Link } from "react-router-dom";
 import { citySlice } from "@/stores/reducers/cities/slice";
-import { fetchCities } from "@/stores/reducers/cities/actions";
+import { createCity, fetchCities } from "@/stores/reducers/cities/actions";
 import { Status } from "@/stores/reducers/types";
 import LoadingIcon from "@/components/Base/LoadingIcon";
 import { ListPlus } from "lucide-react";
+import Notification from "@/components/Base/Notification";
+import CityForm from "./form";
+import { CityCreateType } from "@/stores/reducers/cities/types";
+import { fetchRegions } from "@/stores/reducers/regions/actions";
 
 window.DateTime = DateTime;
 interface Response {
@@ -29,6 +33,13 @@ interface Response {
 }
 
 function Main() {
+    const [buttonModalPreview, setButtonModalPreview] = useState(false);
+    const [isCreatePopup, setIsCreatePopup] = useState(true);
+    const [cityData, setCityData] = useState<{
+        name: string;
+        region: string;
+        server: number;
+    } | null>(null);
     const [deleteConfirmationModal, setDeleteConfirmationModal] =
         useState(false);
     const [columnAcionFocusId, setcolumnAcionFocusId] = useState<number | null>(
@@ -75,7 +86,7 @@ function Main() {
 
                     // For HTML table
                     {
-                        title: "NAME",
+                        title: "НАЗВАНИЕ",
                         minWidth: 200,
                         responsive: 0,
                         field: "name",
@@ -91,7 +102,7 @@ function Main() {
                         },
                     },
                     {
-                        title: "REGION",
+                        title: "РЕГИОН",
                         minWidth: 200,
                         responsive: 0,
                         field: "region",
@@ -107,7 +118,7 @@ function Main() {
                         },
                     },
                     {
-                        title: "OBJECTS",
+                        title: "ОБЪЕКТЫ",
                         minWidth: 200,
                         field: "objects",
                         hozAlign: "center",
@@ -124,15 +135,15 @@ function Main() {
                         },
                     },
                     {
-                        title: "ACTIONS",
+                        title: "",
                         minWidth: 200,
-                        field: "actions",
+                        field: "",
                         responsive: 1,
                         hozAlign: "right",
                         headerHozAlign: "center",
                         vertAlign: "middle",
-                        print: false,
-                        download: false,
+                        resizable: false,
+                        headerSort: false,
                         formatter(cell) {
                             const a = stringToHTML(
                                 `<div class="flex lg:justify-center items-center"></div>`
@@ -146,27 +157,16 @@ function Main() {
                                 <i data-lucide="trash-2"></i>
                               </a>`);
                             tippy(editA, {
-                                content: "Edit",
+                                content: "Редактировать",
                                 placement: "bottom",
                                 animation: "shift-away",
                             });
                             tippy(deleteA, {
-                                content: "Delete",
+                                content: "Удалить",
                                 placement: "bottom",
                                 animation: "shift-away",
                             });
-                            const switcher = stringToHTML(
-                                `<label class="inline-flex items-center cursor-pointer mr-3">
-                                    <input type="checkbox" value="" class="sr-only peer">
-                                    <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-                                </label>`
-                            );
-                            tippy(switcher, {
-                                content: "Is active?",
-                                placement: "bottom",
-                                animation: "shift-away",
-                            });
-                            a.append(switcher, editA, deleteA);
+                            a.append(editA, deleteA);
                             a.addEventListener("hover", function () {});
                             deleteA.addEventListener("click", function () {
                                 setDeleteConfirmationModal(true);
@@ -187,15 +187,15 @@ function Main() {
                         download: true,
                     },
                     {
-                        title: "OBJECTS",
-                        field: "objects",
+                        title: "REGION",
+                        field: "region",
                         visible: false,
                         print: true,
                         download: true,
                     },
                     {
-                        title: "REGION",
-                        field: "region",
+                        title: "OBJECTS",
+                        field: "objects",
                         visible: false,
                         print: true,
                         download: true,
@@ -288,11 +288,6 @@ function Main() {
             });
         }
     };
-    const onPrint = () => {
-        if (tabulator.current) {
-            tabulator.current.print();
-        }
-    };
 
     const onDelete = () => {
         if (columnAcionFocusId) {
@@ -301,9 +296,20 @@ function Main() {
             setDeleteConfirmationModal(false);
         }
     };
+    const onCreate = (city: CityCreateType) => {
+        dispatch(createCity(city));
+        dispatch(fetchCities());
+        setButtonModalPreview(false);
+    };
+    const onUpdate = (city: CityCreateType) => {
+        // dispatch(createRegion(city));
+        // dispatch(fetchRegions());
+        // setButtonModalPreview(false);
+    };
 
     const { cities, status, error } = useAppSelector((state) => state.city);
-    const {} = citySlice.actions;
+    const regionsSelector = useAppSelector((state) => state.region);
+    const regions = regionsSelector.regions;
     const dispatch = useAppDispatch();
 
     useEffect(() => {
@@ -311,6 +317,7 @@ function Main() {
         reInitOnResizeWindow();
 
         dispatch(fetchCities());
+        dispatch(fetchRegions());
     }, []);
     useEffect(() => {
         if (cities.length) {
@@ -329,14 +336,22 @@ function Main() {
     return (
         <>
             <div className="flex flex-col items-center mt-8 intro-y sm:flex-row">
-                <h2 className="mr-auto text-lg font-medium">Cities</h2>
+                <h2 className="mr-auto text-lg font-medium">Города</h2>
                 <div className="flex w-full mt-4 sm:w-auto sm:mt-0">
-                    <Link to="create">
-                        <Button variant="primary" className="mr-2 shadow-md">
-                            <ListPlus className="size-5 mr-2" />
-                            Добавить
-                        </Button>
-                    </Link>
+                    <Button
+                        as="a"
+                        href="#"
+                        variant="primary"
+                        className="mr-2 shadow-md"
+                        onClick={(event: React.MouseEvent) => {
+                            event.preventDefault();
+                            setIsCreatePopup(true);
+                            setButtonModalPreview(true);
+                        }}
+                    >
+                        <ListPlus className="size-5 mr-2" />
+                        Добавить
+                    </Button>
                 </div>
             </div>
             {/* BEGIN: HTML Table Data */}
@@ -359,7 +374,7 @@ function Main() {
                     >
                         <div className="items-center sm:flex sm:mr-4">
                             <label className="flex-none w-12 mr-2 xl:w-auto xl:flex-initial">
-                                Field
+                                Поле
                             </label>
                             <FormSelect
                                 id="tabulator-html-filter-field"
@@ -372,13 +387,14 @@ function Main() {
                                 }}
                                 className="w-full mt-2 2xl:w-full sm:mt-0 sm:w-auto"
                             >
-                                <option value="name">Name</option>
-                                <option value="objects">Objects</option>
+                                <option value="name">Название</option>
+                                <option value="region">Регион</option>
+                                <option value="objects">Объекты</option>
                             </FormSelect>
                         </div>
                         <div className="items-center mt-2 sm:flex sm:mr-4 xl:mt-0">
                             <label className="flex-none w-12 mr-2 xl:w-auto xl:flex-initial">
-                                Type
+                                Тип
                             </label>
                             <FormSelect
                                 id="tabulator-html-filter-type"
@@ -402,7 +418,7 @@ function Main() {
                         </div>
                         <div className="items-center mt-2 sm:flex sm:mr-4 xl:mt-0">
                             <label className="flex-none w-12 mr-2 xl:w-auto xl:flex-initial">
-                                Value
+                                Значение
                             </label>
                             <FormInput
                                 id="tabulator-html-filter-value"
@@ -415,7 +431,7 @@ function Main() {
                                 }}
                                 type="text"
                                 className="mt-2 sm:w-40 2xl:w-full sm:mt-0"
-                                placeholder="Search..."
+                                placeholder="Поиск..."
                             />
                         </div>
                         <div className="mt-2 xl:mt-0">
@@ -426,29 +442,20 @@ function Main() {
                                 className="w-full sm:w-16"
                                 onClick={onFilter}
                             >
-                                Go
+                                Начать
                             </Button>
                             <Button
                                 id="tabulator-html-filter-reset"
                                 variant="secondary"
                                 type="button"
-                                className="w-full mt-2 sm:w-16 sm:mt-0 sm:ml-1"
+                                className="w-full mt-2 sm:w-20 sm:mt-0 sm:ml-1"
                                 onClick={onResetFilter}
                             >
-                                Reset
+                                Сбросить
                             </Button>
                         </div>
                     </form>
                     <div className="flex mt-5 sm:mt-0">
-                        <Button
-                            id="tabulator-print"
-                            variant="outline-secondary"
-                            className="w-1/2 mr-2 sm:w-auto"
-                            onClick={onPrint}
-                        >
-                            <Lucide icon="Printer" className="w-4 h-4 mr-2" />{" "}
-                            Print
-                        </Button>
                         <Menu className="w-1/2 sm:w-auto">
                             <Menu.Button
                                 as={Button}
@@ -459,7 +466,7 @@ function Main() {
                                     icon="FileText"
                                     className="w-4 h-4 mr-2"
                                 />{" "}
-                                Export
+                                Экспорт
                                 <Lucide
                                     icon="ChevronDown"
                                     className="w-4 h-4 ml-auto sm:ml-2"
@@ -471,28 +478,28 @@ function Main() {
                                         icon="FileText"
                                         className="w-4 h-4 mr-2"
                                     />{" "}
-                                    Export CSV
+                                    Экспорт CSV
                                 </Menu.Item>
                                 <Menu.Item onClick={onExportJson}>
                                     <Lucide
                                         icon="FileText"
                                         className="w-4 h-4 mr-2"
                                     />{" "}
-                                    Export JSON
+                                    Экспорт JSON
                                 </Menu.Item>
                                 <Menu.Item onClick={onExportXlsx}>
                                     <Lucide
                                         icon="FileText"
                                         className="w-4 h-4 mr-2"
                                     />{" "}
-                                    Export XLSX
+                                    Экспорт XLSX
                                 </Menu.Item>
                                 <Menu.Item onClick={onExportHtml}>
                                     <Lucide
                                         icon="FileText"
                                         className="w-4 h-4 mr-2"
                                     />{" "}
-                                    Export HTML
+                                    Экспорт HTML
                                 </Menu.Item>
                             </Menu.Items>
                         </Menu>
@@ -548,6 +555,50 @@ function Main() {
                 </Dialog.Panel>
             </Dialog>
             {/* END: Delete Confirmation Modal */}
+            {/* BEGIN: Modal Content */}
+            <Dialog
+                open={buttonModalPreview}
+                onClose={() => {
+                    setButtonModalPreview(false);
+                    setCityData(null);
+                }}
+            >
+                <Dialog.Panel>
+                    <a
+                        onClick={(event: React.MouseEvent) => {
+                            event.preventDefault();
+                            setButtonModalPreview(false);
+                        }}
+                        className="absolute top-0 right-0 mt-3 mr-3"
+                        href="#"
+                    >
+                        <Lucide icon="X" className="w-8 h-8 text-slate-400" />
+                    </a>
+                    <CityForm
+                        isCreate={isCreatePopup}
+                        regions={regions}
+                        cityData={{
+                            name: cityData ? cityData.name! : "",
+                            server: cityData ? cityData.server : 1,
+                            regionID: Number(cityData?.region) || 0,
+                        }}
+                        onCreate={onCreate}
+                        onUpdate={onUpdate}
+                    />
+                </Dialog.Panel>
+            </Dialog>
+            {/* END: Modal Content */}
+            {/* BEGIN: Success Notification Content */}
+            <Notification
+                id="success-notification-content"
+                className="flex hidden"
+            >
+                <Lucide icon="CheckCircle" className="text-success" />
+                <div className="ml-4 mr-4">
+                    <div className="font-medium">Регион успешно добавлен</div>
+                </div>
+            </Notification>
+            {/* END: Success Notification Content */}
         </>
     );
 }

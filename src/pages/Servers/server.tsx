@@ -5,7 +5,7 @@ import * as yup from "yup";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import Toastify from "toastify-js";
-import { FormLabel, FormInput, FormTextarea } from "@/components/Base/Form";
+import { FormLabel, FormInput } from "@/components/Base/Form";
 
 type ServerProps = {
     checked?: boolean;
@@ -79,9 +79,9 @@ function Server({ data, checked = true }: ServerProps) {
                                 htmlFor="validation-form-1"
                                 className="flex flex-col w-full sm:flex-row"
                             >
-                                Name
+                                Имя
                                 <span className="mt-1 text-xs sm:ml-auto sm:mt-0 text-slate-500">
-                                    Required
+                                    Обязательное
                                 </span>
                             </FormLabel>
                             <FormInput
@@ -109,7 +109,7 @@ function Server({ data, checked = true }: ServerProps) {
                             >
                                 IP
                                 <span className="mt-1 text-xs sm:ml-auto sm:mt-0 text-slate-500">
-                                    Required
+                                    Обязательное
                                 </span>
                             </FormLabel>
                             <FormInput
@@ -137,9 +137,9 @@ function Server({ data, checked = true }: ServerProps) {
                                 htmlFor="validation-form-4"
                                 className="flex flex-col w-full sm:flex-row"
                             >
-                                Login
+                                Логин
                                 <span className="mt-1 text-xs sm:ml-auto sm:mt-0 text-slate-500">
-                                    Required
+                                    Обязательное
                                 </span>
                             </FormLabel>
                             <FormInput
@@ -165,9 +165,9 @@ function Server({ data, checked = true }: ServerProps) {
                                 htmlFor="validation-form-3"
                                 className="flex flex-col w-full sm:flex-row"
                             >
-                                Password
+                                Пароль
                                 <span className="mt-1 text-xs sm:ml-auto sm:mt-0 text-slate-500">
-                                    Required
+                                    Обязательное
                                 </span>
                             </FormLabel>
                             <FormInput
@@ -194,7 +194,7 @@ function Server({ data, checked = true }: ServerProps) {
                         type="submit"
                         className="block ml-auto mt-5"
                     >
-                        Save
+                        Сохранить
                     </Button>
                 </form>
             </AccordionWithSwitcher>

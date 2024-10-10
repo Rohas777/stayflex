@@ -6,3 +6,8 @@ export interface CityState {
     status: Status;
     error: string | null;
 }
+
+export interface CityCreateType {
+    name: string;
+    regionID: number;
+}

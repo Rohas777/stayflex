@@ -1,10 +1,10 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { instance } from "@/vars";
 
-export const fetchPropertyTypes = createAsyncThunk(
-    "propertyType/fetchAll",
+export const fetchConveniences = createAsyncThunk(
+    "convenience/fetchAll",
     async (_, thunkAPI) => {
-        const response = await instance.get("/property-type/all");
+        const response = await instance.get("/convenience/all");
         return response.data;
     }
 );
