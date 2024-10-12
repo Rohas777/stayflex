@@ -7,14 +7,14 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import Toastify from "toastify-js";
 import { FormLabel, FormInput } from "@/components/Base/Form";
 import { useState } from "react";
-import TomSelect from "@/components/Base/TomSelect";
+import TomSelect from "@/components/Base/CustomTomSelect";
 import { RegionCreateType } from "@/stores/reducers/regions/types";
 import { PropertyTypeCreateType } from "@/stores/reducers/property-types/types";
 
 interface PropertyTypeFormProps {
     isCreate: boolean;
-    onCreate: (name: RegionCreateType) => void;
-    onUpdate: (name: RegionCreateType) => void;
+    onCreate: (name: PropertyTypeCreateType) => void;
+    onUpdate: (name: PropertyTypeCreateType) => void;
     propertyTypeName: string;
 }
 
@@ -26,7 +26,7 @@ function PropertyTypeForm({
 }: PropertyTypeFormProps) {
     const schema = yup
         .object({
-            name: yup.string().required(),
+            name: yup.string().required("'Название' это обязательное поле"),
         })
         .required();
 

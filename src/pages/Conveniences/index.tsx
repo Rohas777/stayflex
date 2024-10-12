@@ -12,22 +12,35 @@ import { DateTime } from "luxon";
 import { useAppDispatch, useAppSelector } from "@/stores/hooks";
 import { deleteUser, fetchUsers } from "@/stores/reducers/users/actions";
 import tippy from "tippy.js";
-import { Link } from "react-router-dom";
 import { convenienceSlice } from "@/stores/reducers/conveniences/slice";
-import { fetchConveniences } from "@/stores/reducers/conveniences/actions";
+import {
+    createConvenience,
+    fetchConveniences,
+} from "@/stores/reducers/conveniences/actions";
 import { Status } from "@/stores/reducers/types";
 import LoadingIcon from "@/components/Base/LoadingIcon";
 import { ListPlus } from "lucide-react";
+import ConvenienceForm from "./form";
+import Notification from "@/components/Base/Notification";
+import { ConvenienceCreateType } from "@/stores/reducers/conveniences/types";
+import Toastify from "toastify-js";
 
 window.DateTime = DateTime;
 interface Response {
     id?: number;
     name?: string;
     objects?: number;
-    photo?: string;
+    icon?: string;
 }
 
 function Main() {
+    const [buttonModalPreview, setButtonModalPreview] = useState(false);
+    const [isCreatePopup, setIsCreatePopup] = useState(true);
+    const [convenienceData, setConvenienceData] = useState<{
+        name: string;
+        icon: string;
+    } | null>(null);
+
     const [deleteConfirmationModal, setDeleteConfirmationModal] =
         useState(false);
     const [columnAcionFocusId, setcolumnAcionFocusId] = useState<number | null>(
@@ -85,7 +98,7 @@ function Main() {
                         formatter(cell) {
                             const response: Response = cell.getData();
                             return `<div class="flex items-center justify-center">
-                                        <img src="${response.photo}" alt="" class="w-10 h-10 mr-2"/>
+                                        <img src="${response.icon}" alt="" class="w-10 h-10 mr-2"/>
                                         <div class="font-medium whitespace-nowrap">${response.name}</div>
                                     </div>`;
                         },
@@ -118,6 +131,7 @@ function Main() {
                         resizable: false,
                         headerSort: false,
                         formatter(cell) {
+                            const response: Response = cell.getData();
                             const a = stringToHTML(
                                 `<div class="flex lg:justify-center items-center"></div>`
                             );
@@ -140,12 +154,23 @@ function Main() {
                                 animation: "shift-away",
                             });
                             a.append(editA, deleteA);
-                            a.addEventListener("hover", function () {});
                             deleteA.addEventListener("click", function () {
                                 setDeleteConfirmationModal(true);
                                 const rowId = cell.getRow().getData().id;
-                                console.log(rowId);
+                                setConvenienceData({
+                                    name: response.name!,
+                                    icon: response.icon!,
+                                });
                                 setcolumnAcionFocusId(rowId);
+                            });
+                            editA.addEventListener("click", function (event) {
+                                event.preventDefault();
+                                setConvenienceData({
+                                    name: response.name!,
+                                    icon: response.icon!,
+                                });
+                                setIsCreatePopup(false);
+                                setButtonModalPreview(true);
                             });
                             return a;
                         },
@@ -262,6 +287,30 @@ function Main() {
         }
     };
 
+    const onCreate = async (convenienceData: ConvenienceCreateType) => {
+        await dispatch(createConvenience(convenienceData));
+        await dispatch(fetchConveniences());
+        await setButtonModalPreview(false);
+
+        const successEl = document
+            .querySelectorAll("#success-notification-content")[0]
+            .cloneNode(true) as HTMLElement;
+        successEl.classList.remove("hidden");
+        await Toastify({
+            node: successEl,
+            duration: 3000,
+            newWindow: true,
+            close: true,
+            gravity: "top",
+            position: "right",
+            stopOnFocus: true,
+        }).showToast();
+    };
+    const onUpdate = (convenience: ConvenienceCreateType) => {
+        // dispatch(createPropertyType(convenience));
+        // dispatch(fetchPropertyTypes());
+        // setButtonModalPreview(false);
+    };
     const { conveniences, status, error } = useAppSelector(
         (state) => state.convenience
     );
@@ -280,11 +329,13 @@ function Main() {
                 id: convenience.id,
                 name: convenience.name,
                 objects: Math.floor(Math.random() * 101),
-                photo: "/src/assets/images/conveniences/1.png",
+                icon: "/src/assets/images/conveniences/1.png",
             }));
-            tabulator.current?.setData(formattedData).then(function () {
-                reInitTabulator();
-            });
+            tabulator.current
+                ?.setData(formattedData.reverse())
+                .then(function () {
+                    reInitTabulator();
+                });
         }
     }, [conveniences]);
 
@@ -293,18 +344,26 @@ function Main() {
             <div className="flex flex-col items-center mt-8 intro-y sm:flex-row">
                 <h2 className="mr-auto text-lg font-medium">Удобства</h2>
                 <div className="flex w-full mt-4 sm:w-auto sm:mt-0">
-                    <Link to="create">
-                        <Button variant="primary" className="mr-2 shadow-md">
-                            <ListPlus className="size-5 mr-2" />
-                            Добавить
-                        </Button>
-                    </Link>
+                    <Button
+                        as="a"
+                        href="#"
+                        variant="primary"
+                        className="mr-2 shadow-md"
+                        onClick={(event: React.MouseEvent) => {
+                            event.preventDefault();
+                            setIsCreatePopup(true);
+                            setButtonModalPreview(true);
+                        }}
+                    >
+                        <ListPlus className="size-5 mr-2" />
+                        Добавить
+                    </Button>
                 </div>
             </div>
             {/* BEGIN: HTML Table Data */}
             <div className="p-5 mt-5 intro-y box">
                 {status === Status.LOADING && (
-                    <div className="absolute z-50 bg-slate-50 bg-opacity-70 flex justify-center items-center w-full h-full">
+                    <div className="absolute z-[70] bg-slate-50 bg-opacity-70 flex justify-center items-center w-full h-full">
                         <div className="w-10 h-10">
                             <LoadingIcon icon="ball-triangle" />
                         </div>
@@ -456,7 +515,6 @@ function Main() {
                 </div>
             </div>
             {/* END: HTML Table Data */}
-
             {/* BEGIN: Delete Confirmation Modal */}
             <Dialog
                 open={deleteConfirmationModal}
@@ -470,10 +528,11 @@ function Main() {
                             icon="XCircle"
                             className="w-16 h-16 mx-auto mt-3 text-danger"
                         />
-                        <div className="mt-5 text-3xl">Are you sure?</div>
+                        <div className="mt-5 text-3xl">Вы уверены?</div>
                         <div className="mt-2 text-slate-500">
-                            Do you really want to delete these records? <br />
-                            This process cannot be undone.
+                            Вы уверены, что хотите удалить тип недвижимости "
+                            {convenienceData?.name}"? <br />
+                            Это действие нельзя будет отменить.
                         </div>
                     </div>
                     <div className="px-5 pb-8 text-center">
@@ -485,7 +544,7 @@ function Main() {
                             }}
                             className="w-24 mr-1"
                         >
-                            Cancel
+                            Отмена
                         </Button>
                         <Button
                             variant="danger"
@@ -495,12 +554,54 @@ function Main() {
                                 onDelete();
                             }}
                         >
-                            Delete
+                            Удалить
                         </Button>
                     </div>
                 </Dialog.Panel>
             </Dialog>
             {/* END: Delete Confirmation Modal */}
+            {/* BEGIN: Modal Content */}
+            <Dialog
+                open={buttonModalPreview}
+                onClose={() => {
+                    setButtonModalPreview(false);
+                    setConvenienceData(isCreatePopup ? null : convenienceData);
+                }}
+            >
+                <Dialog.Panel>
+                    <a
+                        onClick={(event: React.MouseEvent) => {
+                            event.preventDefault();
+                            setButtonModalPreview(false);
+                        }}
+                        className="absolute top-0 right-0 mt-3 mr-3"
+                        href="#"
+                    >
+                        <Lucide icon="X" className="w-8 h-8 text-slate-400" />
+                    </a>
+                    <ConvenienceForm
+                        isCreate={isCreatePopup}
+                        currentConvenience={convenienceData!}
+                        onCreate={onCreate}
+                        onUpdate={onUpdate}
+                        status={status}
+                    />
+                </Dialog.Panel>
+            </Dialog>
+            {/* END: Modal Content */}
+            {/* BEGIN: Success Notification Content */}
+            <Notification
+                id="success-notification-content"
+                className="flex hidden"
+            >
+                <Lucide icon="CheckCircle" className="text-success" />
+                <div className="ml-4 mr-4">
+                    <div className="font-medium">
+                        Удобство успешно добавлено
+                    </div>
+                </div>
+            </Notification>
+            {/* END: Success Notification Content */}
         </>
     );
 }

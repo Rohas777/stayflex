@@ -4,7 +4,7 @@ import Lucide from "@/components/Base/Lucide";
 import { Link } from "react-router-dom";
 import Server from "./server";
 import { useState } from "react";
-import TomSelect from "@/components/Base/TomSelect";
+import TomSelect from "@/components/Base/CustomTomSelect";
 import { ListPlus } from "lucide-react";
 
 function Main() {

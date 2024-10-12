@@ -7,7 +7,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import Toastify from "toastify-js";
 import { FormLabel, FormInput } from "@/components/Base/Form";
 import { useState } from "react";
-import TomSelect from "@/components/Base/TomSelect";
+import TomSelect from "@/components/Base/CustomTomSelect";
 import { RegionCreateType } from "@/stores/reducers/regions/types";
 
 interface RegionFormProps {
@@ -49,7 +49,7 @@ function RegionForm({
     ]);
     const schema = yup
         .object({
-            name: yup.string().required(),
+            name: yup.string().required("'Название' это обязательное поле"),
         })
         .required();
 

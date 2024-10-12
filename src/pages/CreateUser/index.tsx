@@ -289,7 +289,7 @@ function Main() {
         }
     };
 
-    const { users, isLoading, error } = useAppSelector((state) => state.user);
+    const { users, status, error } = useAppSelector((state) => state.user);
     const {} = userSlice.actions;
     const dispatch = useAppDispatch();
 

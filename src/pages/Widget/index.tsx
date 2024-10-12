@@ -3,7 +3,7 @@ import Notification from "@/components/Base/Notification";
 import Lucide from "@/components/Base/Lucide";
 import { Link } from "react-router-dom";
 import { useState } from "react";
-import TomSelect from "@/components/Base/TomSelect";
+import TomSelect from "@/components/Base/CustomTomSelect";
 import { ListPlus } from "lucide-react";
 
 function Main() {

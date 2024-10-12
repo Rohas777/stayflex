@@ -19,6 +19,7 @@ import { fetchPropertyTypes } from "@/stores/reducers/property-types/actions";
 import { Status } from "@/stores/reducers/types";
 import LoadingIcon from "@/components/Base/LoadingIcon";
 import { ListPlus } from "lucide-react";
+import { fetchObjects } from "@/stores/reducers/objects/actions";
 
 window.DateTime = DateTime;
 interface Response {
@@ -32,6 +33,12 @@ function Main() {
     const [columnAcionFocusId, setcolumnAcionFocusId] = useState<number | null>(
         null
     );
+    const [buttonModalPreview, setButtonModalPreview] = useState(false);
+    const [isCreatePopup, setIsCreatePopup] = useState(true);
+    const [objectData, setObjectData] = useState<{
+        name: string;
+        icon: string;
+    } | null>(null);
 
     const tableRef = createRef<HTMLDivElement>();
     const tabulator = useRef<Tabulator>();
@@ -41,24 +48,7 @@ function Main() {
         value: "",
     });
 
-    const [tableData, setTableData] = useState<Response[]>([
-        {
-            id: 1,
-            name: "На набережной",
-        },
-        {
-            id: 2,
-            name: "Арбат",
-        },
-        {
-            id: 3,
-            name: "Студия",
-        },
-        {
-            id: 4,
-            name: "Ленина",
-        },
-    ]);
+    const [tableData, setTableData] = useState<Response[]>([]);
 
     const initTabulator = () => {
         if (tableRef.current) {
@@ -273,30 +263,28 @@ function Main() {
         }
     };
 
-    const { propertyTypes, status, error } = useAppSelector(
-        (state) => state.propertyType
-    );
-    const {} = propertyTypeSlice.actions;
+    const { objects, status, error } = useAppSelector((state) => state.object);
     const dispatch = useAppDispatch();
 
     useEffect(() => {
         initTabulator();
         reInitOnResizeWindow();
 
-        dispatch(fetchPropertyTypes());
+        dispatch(fetchObjects());
     }, []);
     useEffect(() => {
-        if (propertyTypes.length) {
-            const formattedData = propertyTypes.map((propertyType) => ({
-                id: propertyType.id,
-                name: propertyType.name,
-                objects: Math.floor(Math.random() * 101),
+        if (objects.length) {
+            const formattedData = objects.map((object) => ({
+                id: object.id,
+                name: object.name,
             }));
-            tabulator.current?.setData(formattedData).then(function () {
-                reInitTabulator();
-            });
+            tabulator.current
+                ?.setData(formattedData.reverse())
+                .then(function () {
+                    reInitTabulator();
+                });
         }
-    }, [propertyTypes]);
+    }, [objects]);
 
     return (
         <>
@@ -345,6 +333,7 @@ function Main() {
                                 className="w-full mt-2 2xl:w-full sm:mt-0 sm:w-auto"
                             >
                                 <option value="name">Название</option>
+                                <option value="owner">Владелец</option>
                             </FormSelect>
                         </div>
                         <div className="items-center mt-2 sm:flex sm:mr-4 xl:mt-0">

@@ -6,3 +6,8 @@ export interface ConvenienceState {
     status: Status;
     error: string | null;
 }
+
+export interface ConvenienceCreateType {
+    convenience_name: string;
+    file: File;
+}

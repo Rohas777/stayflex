@@ -7,7 +7,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import Toastify from "toastify-js";
 import { FormLabel, FormInput } from "@/components/Base/Form";
 import { useState } from "react";
-import TomSelect from "@/components/Base/TomSelect";
+import TomSelect from "@/components/Base/CustomTomSelect";
 import { CityCreateType } from "@/stores/reducers/cities/types";
 import { IRegion } from "@/stores/models/IRegion";
 

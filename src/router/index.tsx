@@ -1,10 +1,7 @@
 import { useRoutes } from "react-router-dom";
 import DashboardOverview1 from "../pages/DashboardOverview1";
-import DashboardOverview2 from "../pages/DashboardOverview2";
-import DashboardOverview3 from "../pages/DashboardOverview3";
 import DashboardOverview4 from "../pages/DashboardOverview4";
 import Categories from "../pages/Categories";
-import AddProduct from "../pages/AddProduct";
 import ProductList from "../pages/ProductList";
 import ProductGrid from "../pages/ProductGrid";
 import TransactionList from "../pages/TransactionList";
@@ -52,7 +49,6 @@ import Notification from "../pages/Notification";
 import Tab from "../pages/Tab";
 import Accordion from "../pages/Accordion";
 import Button from "../pages/Button";
-import Alert from "../pages/Alert";
 import ProgressBar from "../pages/ProgressBar";
 import Tooltip from "../pages/Tooltip";
 import Dropdown from "../pages/Dropdown";
@@ -72,7 +68,7 @@ import ImageZoom from "../pages/ImageZoom";
 import Layout from "../themes";
 
 import Users from "../pages/Users";
-import UsersCreate from "../pages/UsersCreate";
+import CreateUser from "../pages/CreateUser";
 import Servers from "../pages/Servers";
 import Regions from "../pages/Regions";
 import Cities from "../pages/Cities";
@@ -80,6 +76,7 @@ import PropertyTypes from "../pages/PropertyTypes";
 import Conveniences from "../pages/Conveniences";
 import Objects from "../pages/Objects";
 import ObjectsClient from "../pages/ObjectsClient";
+import CreateObject from "../pages/CreateObject";
 import Clients from "../pages/Clients";
 import Reservations from "../pages/Reservations";
 import ReservationsClient from "../pages/ReservationsClient";
@@ -102,7 +99,7 @@ function Router() {
                 },
                 {
                     path: "users/create",
-                    element: <UsersCreate />,
+                    element: <CreateUser />,
                 },
                 {
                     path: "servers",
@@ -133,6 +130,10 @@ function Router() {
                     element: <ObjectsClient />,
                 },
                 {
+                    path: "objects/create",
+                    element: <CreateObject />,
+                },
+                {
                     path: "admin-clients",
                     element: <Clients />,
                 },
@@ -161,24 +162,12 @@ function Router() {
                     element: <Widget />,
                 },
                 {
-                    path: "dashboard-overview-2",
-                    element: <DashboardOverview2 />,
-                },
-                {
-                    path: "dashboard-overview-3",
-                    element: <DashboardOverview3 />,
-                },
-                {
                     path: "dashboard-overview-4",
                     element: <DashboardOverview4 />,
                 },
                 {
                     path: "categories",
                     element: <Categories />,
-                },
-                {
-                    path: "add-product",
-                    element: <AddProduct />,
                 },
                 {
                     path: "product-list",
@@ -355,10 +344,6 @@ function Router() {
                 {
                     path: "button",
                     element: <Button />,
-                },
-                {
-                    path: "alert",
-                    element: <Alert />,
                 },
                 {
                     path: "progress-bar",

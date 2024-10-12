@@ -8,6 +8,7 @@ import regionReducer from "./reducers/regions/slice";
 import cityReducer from "./reducers/cities/slice";
 import propertyTypeReducer from "./reducers/property-types/slice";
 import convenienceReducer from "./reducers/conveniences/slice";
+import objectReducer from "./reducers/objects/slice";
 
 export const store = configureStore({
     reducer: {
@@ -20,6 +21,7 @@ export const store = configureStore({
         city: cityReducer,
         propertyType: propertyTypeReducer,
         convenience: convenienceReducer,
+        object: objectReducer,
     },
 });
 
