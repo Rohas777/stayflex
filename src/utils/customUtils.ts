@@ -12,3 +12,8 @@ export const stopLoader = (
     setIsLoaderOpen(false);
     unlock();
 };
+
+export const convertDateString = (str: string) => {
+    const [year, month, day] = str.split("-");
+    return `${day}.${month}.${year}`;
+};

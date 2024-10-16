@@ -13,11 +13,16 @@ import { useAppDispatch, useAppSelector } from "@/stores/hooks";
 import tippy from "tippy.js";
 import { Link } from "react-router-dom";
 import { reservationSlice } from "@/stores/reducers/reservations/slice";
-import { fetchReservations } from "@/stores/reducers/reservations/actions";
+import {
+    fetchReservationById,
+    fetchReservations,
+} from "@/stores/reducers/reservations/actions";
 import { Status } from "@/stores/reducers/types";
 import LoadingIcon from "@/components/Base/LoadingIcon";
 import { ListPlus } from "lucide-react";
 import TomSelect from "tom-select/src/tom-select";
+import Modal from "./modal";
+import { convertDateString } from "@/utils/customUtils";
 
 window.DateTime = DateTime;
 interface Response {
@@ -25,7 +30,7 @@ interface Response {
     object?: string;
     date?: string;
     name?: string;
-    status?: boolean;
+    status?: string;
     phone?: string;
     email?: string;
 }
@@ -140,16 +145,37 @@ function Main() {
                             const a = stringToHTML(
                                 `<div class="flex lg:justify-center items-center"></div>`
                             );
+                            const statuses = [
+                                {
+                                    value: "0",
+                                    label: "Без статуса",
+                                },
+                                {
+                                    value: "new",
+                                    label: "Новая",
+                                },
+                                {
+                                    value: "active",
+                                    label: "Одобрена",
+                                },
+                                {
+                                    value: "declined",
+                                    label: "Отклонена",
+                                },
+                            ];
+
+                            const options = statuses.map((status) => {
+                                return `<option value="${status.value}" ${
+                                    response.status === status.value
+                                        ? "selected"
+                                        : ""
+                                }>${status.label}</option>`;
+                            });
+
                             const selector =
                                 stringToHTML(`<select class="min-w-40 cursor-pointer bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                                    <option value="processing" ${
-                                        !response.status ? "selected" : ""
-                                    }>В обработке</option>
-                                                <option value="active" ${
-                                                    response.status
-                                                        ? "selected"
-                                                        : ""
-                                                }>Одобрено</option>`);
+                                    ${options.join("")}
+                                    </select>`);
                             a.append(selector);
                             a.addEventListener("hover", function () {});
                             selector.addEventListener("click", function () {});
@@ -187,6 +213,7 @@ function Main() {
                                 const row = tableData.find(
                                     (row) => row.id === response.id
                                 );
+                                dispatch(fetchReservationById(response.id!));
                                 setRowAcionFocus(row ? row : null);
                                 setButtonModalPreview(true);
                             });
@@ -312,16 +339,11 @@ function Main() {
         }
     };
 
-    const { reservations, statusAll, error } = useAppSelector(
+    const { reservations, reservationById, statusAll, error } = useAppSelector(
         (state) => state.reservation
     );
     const {} = reservationSlice.actions;
     const dispatch = useAppDispatch();
-
-    function convertDateString(str: string) {
-        const [year, month, day] = str.split("-");
-        return `${day}.${month}.${year}`;
-    }
 
     useEffect(() => {
         initTabulator();
@@ -537,43 +559,7 @@ function Main() {
                     >
                         <Lucide icon="X" className="w-8 h-8 text-slate-400" />
                     </a>
-                    <div className="p-5">
-                        <div className="mt-5 text-lg font-bold text-center">
-                            Информация по брони
-                        </div>
-                        <ul className="mt-7">
-                            <li>
-                                <strong className="inline-block w-20">
-                                    Объект:
-                                </strong>
-                                {rowAcionFocus?.object}
-                            </li>
-                            <li>
-                                <strong className="inline-block mt-3 w-20">
-                                    Имя:
-                                </strong>
-                                {rowAcionFocus?.name}
-                            </li>
-                            <li>
-                                <strong className="inline-block mt-3 w-20">
-                                    Номер:
-                                </strong>
-                                {rowAcionFocus?.phone}
-                            </li>
-                            <li>
-                                <strong className="inline-block mt-3 w-20">
-                                    Email:
-                                </strong>
-                                {rowAcionFocus?.email}
-                            </li>
-                            <li>
-                                <strong className="inline-block mt-3 mb-10 w-20">
-                                    Дата:
-                                </strong>
-                                {rowAcionFocus?.date}
-                            </li>
-                        </ul>
-                    </div>
+                    <Modal />
                 </Dialog.Panel>
             </Dialog>
             {/* END: Delete Confirmation Modal */}
