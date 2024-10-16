@@ -10,15 +10,14 @@ import { TabulatorFull as Tabulator } from "tabulator-tables";
 import { stringToHTML } from "@/utils/helper";
 import { DateTime } from "luxon";
 import { useAppDispatch, useAppSelector } from "@/stores/hooks";
-import { userSlice } from "@/stores/reducers/users/slice";
-import { deleteUser, fetchUsers } from "@/stores/reducers/users/actions";
 import tippy from "tippy.js";
 import { Link } from "react-router-dom";
-import { propertyTypeSlice } from "@/stores/reducers/property-types/slice";
-import { fetchPropertyTypes } from "@/stores/reducers/property-types/actions";
+import { reservationSlice } from "@/stores/reducers/reservations/slice";
+import { fetchReservations } from "@/stores/reducers/reservations/actions";
 import { Status } from "@/stores/reducers/types";
 import LoadingIcon from "@/components/Base/LoadingIcon";
 import { ListPlus } from "lucide-react";
+import TomSelect from "tom-select/src/tom-select";
 
 window.DateTime = DateTime;
 interface Response {
@@ -34,6 +33,7 @@ interface Response {
 function Main() {
     const [buttonModalPreview, setButtonModalPreview] = useState(false);
     const [rowAcionFocus, setRowAcionFocus] = useState<Response | null>(null);
+    const [isLoaderOpen, setIsLoaderOpen] = useState(false);
 
     const tableRef = createRef<HTMLDivElement>();
     const tabulator = useRef<Tabulator>();
@@ -43,35 +43,7 @@ function Main() {
         value: "",
     });
 
-    const [tableData, setTableData] = useState<Response[]>([
-        {
-            id: 1,
-            name: "Иванов И.И.",
-            object: "Квартира на набережной",
-            date: "07.09.2023 - 09.09.2024",
-            status: false,
-            phone: "+7 (777) 777-77-77",
-            email: "email@gmail.com",
-        },
-        {
-            id: 2,
-            name: "Иванов И.И.",
-            object: "Квартира на набережной",
-            date: "07.09.2024 - 09.09.2025",
-            status: true,
-            phone: "+7 (777) 777-77-77",
-            email: "email@gmail.com",
-        },
-        {
-            id: 4,
-            name: "Иванов И.И.",
-            object: "Квартира на набережной",
-            date: "07.09.2024 - 09.09.2024",
-            status: false,
-            phone: "+7 (777) 777-77-77",
-            email: "email@gmail.com",
-        },
-    ]);
+    const [tableData, setTableData] = useState<Response[]>([]);
 
     const initTabulator = () => {
         if (tableRef.current) {
@@ -340,30 +312,43 @@ function Main() {
         }
     };
 
-    const { propertyTypes, status, error } = useAppSelector(
-        (state) => state.propertyType
+    const { reservations, statusAll, error } = useAppSelector(
+        (state) => state.reservation
     );
-    const {} = propertyTypeSlice.actions;
+    const {} = reservationSlice.actions;
     const dispatch = useAppDispatch();
+
+    function convertDateString(str: string) {
+        const [year, month, day] = str.split("-");
+        return `${day}.${month}.${year}`;
+    }
 
     useEffect(() => {
         initTabulator();
         reInitOnResizeWindow();
 
-        dispatch(fetchPropertyTypes());
+        dispatch(fetchReservations());
     }, []);
+
     useEffect(() => {
-        if (propertyTypes.length) {
-            // const formattedData = propertyTypes.map((propertyType) => ({
-            //     id: propertyType.id,
-            //     name: propertyType.name,
-            //     objects: Math.floor(Math.random() * 101),
-            // }));
-            // tabulator.current?.setData(formattedData).then(function () {
-            //     reInitTabulator();
-            // });
+        if (reservations.length) {
+            const formattedData = reservations.map((reservation) => ({
+                id: reservation.id,
+                object: reservation.object.name,
+                date:
+                    convertDateString(reservation.start_date) +
+                    " - " +
+                    convertDateString(reservation.end_date),
+                name: reservation.client.fullname,
+                status: reservation.status,
+            }));
+            tabulator.current
+                ?.setData(formattedData.reverse())
+                .then(function () {
+                    reInitTabulator();
+                });
         }
-    }, [propertyTypes]);
+    }, [reservations]);
 
     return (
         <>
@@ -380,7 +365,7 @@ function Main() {
             </div>
             {/* BEGIN: HTML Table Data */}
             <div className="p-5 mt-5 intro-y box">
-                {status === Status.LOADING && (
+                {statusAll === Status.LOADING && (
                     <div className="absolute z-50 bg-slate-50 bg-opacity-70 flex justify-center items-center w-full h-full">
                         <div className="w-10 h-10">
                             <LoadingIcon icon="ball-triangle" />

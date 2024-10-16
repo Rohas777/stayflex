@@ -11,42 +11,65 @@ import {
     FormTextarea,
 } from "@/components/Base/Form";
 import { useEffect, useRef, useState } from "react";
-import Dropzone, { DropzoneElement } from "@/components/Base/Dropzone";
-import { TariffCreateType } from "@/stores/reducers/tariffs/types";
+import {
+    TariffCreateType,
+    TariffUpdateType,
+} from "@/stores/reducers/tariffs/types";
 import { Status } from "@/stores/reducers/types";
 import LoadingIcon from "@/components/Base/LoadingIcon";
 import { useAppDispatch, useAppSelector } from "@/stores/hooks";
-import { fetchTariffById } from "@/stores/reducers/tariffs/actions";
 import * as lucideIcons from "lucide-react";
 import TomSelect from "@/components/Base/TomSelect";
 import Lucide from "@/components/Base/Lucide";
+import { startLoader, stopLoader } from "@/utils/customUtils";
+import { useNavigate } from "react-router-dom";
+import { tariffSlice } from "@/stores/reducers/tariffs/slice";
 
 type IconType = keyof typeof lucideIcons.icons;
 
 interface TariffFormProps {
     isCreate: boolean;
     onCreate: (tariffData: TariffCreateType) => void;
-    onUpdate: (tariffData: TariffCreateType) => void;
-    currentTariffId: number;
+    onUpdate: (tariffData: TariffUpdateType) => void;
     icons: IconType[];
 }
-
-function TariffForm({
-    isCreate,
-    onCreate,
-    onUpdate,
-    icons,
-    currentTariffId,
-}: TariffFormProps) {
-    const dropzoneValidationRef = useRef<DropzoneElement>();
-    const [uploadedIcon, setUploadedIcon] = useState<File | null>(null);
-    const [dropzoneError, setDropzoneError] = useState<string | null>(null);
-    const [selectedIcon, setSelectedIcon] = useState<string>("-1");
-
-    const { tariffById, status, error } = useAppSelector(
+type CustomErrors = {
+    isValid: boolean;
+    icon: string | null;
+};
+function TariffForm({ isCreate, onCreate, onUpdate, icons }: TariffFormProps) {
+    const { tariffById, statusByID, isCreated, error } = useAppSelector(
         (state) => state.tariff
     );
-    const dispatch = useAppDispatch();
+    const [selectedIcon, setSelectedIcon] = useState<string>("-1");
+    const [isLoaderOpen, setIsLoaderOpen] = useState(false);
+
+    const [customErrors, setCustomErrors] = useState<CustomErrors>({
+        isValid: true,
+        icon: null,
+    });
+
+    const vaildateWithoutYup = () => {
+        const errors: CustomErrors = {
+            isValid: true,
+            icon: null,
+        };
+        if (
+            selectedIcon === "-1" ||
+            !icons.includes(selectedIcon as IconType)
+        ) {
+            errors.icon = "Обязательно выберите иконку";
+        }
+
+        Object.keys(errors).forEach((key) => {
+            if (errors[key as keyof CustomErrors] && key != "isValid") {
+                errors.isValid = false;
+                return;
+            }
+        });
+        setCustomErrors(errors);
+        return errors;
+    };
 
     const schema = yup
         .object({
@@ -81,58 +104,63 @@ function TariffForm({
     });
     const onSubmit = async (event: React.ChangeEvent<HTMLFormElement>) => {
         event.preventDefault();
+        startLoader(setIsLoaderOpen);
+        const customResult = vaildateWithoutYup();
         const result = await trigger();
-        if ((!uploadedIcon && !result) || !uploadedIcon) {
-            dropzoneValidationRef.current?.classList.add(
-                "border-danger-important"
-            );
-            setDropzoneError("Обязательно загрузите иконку");
-            return;
-        }
-        if (!result) {
+        if (!result || !customResult.isValid) {
+            stopLoader(setIsLoaderOpen);
             return;
         }
         const formData = new FormData(event.target);
-        // const tariffData: TariffCreateType = {
-        //     tariff_name: JSON.stringify({
-        //         name: String(formData.get("name")),
-        //     }),
-        //     file: uploadedIcon,
-        // };
+        const tariffData: TariffCreateType = {
+            name: String(formData.get("name")),
+            daily_price: Number(formData.get("daily_price")),
+            object_count: Number(formData.get("object_count")),
+            description: String(formData.get("description")),
+            icon: selectedIcon,
+        };
 
-        // if (isCreate) {
-        //     onCreate(tariffData);
-        // } else {
-        //     onUpdate(tariffData);
-        // }
+        if (isCreate) {
+            onCreate(tariffData);
+        } else {
+            const tariffUpdateData: TariffUpdateType = {
+                ...tariffData,
+                id: tariffById?.id!,
+            };
+            onUpdate(tariffUpdateData);
+        }
     };
 
     useEffect(() => {
-        const elDropzoneValidationRef = dropzoneValidationRef.current;
-        if (elDropzoneValidationRef) {
-            elDropzoneValidationRef.dropzone.on("success", (file) => {
-                setUploadedIcon(file);
-                setDropzoneError(null);
-                dropzoneValidationRef.current?.classList.remove(
-                    "border-danger-important"
-                );
-            });
-            elDropzoneValidationRef.dropzone.on("removedfile", () => {
-                setUploadedIcon(null);
-            });
-            elDropzoneValidationRef.dropzone.on("error", (file) => {
-                elDropzoneValidationRef.dropzone.removeFile(file);
-            });
+        if (statusByID === Status.SUCCESS && !isCreate) {
+            setSelectedIcon(tariffById?.icon ? tariffById?.icon : "-1");
         }
+    }, [statusByID]);
 
-        if (!isCreate) {
-            dispatch(fetchTariffById(currentTariffId));
+    useEffect(() => {
+        if (statusByID === Status.ERROR) {
+            stopLoader(setIsLoaderOpen);
+            console.log(error);
         }
-    }, []);
+    }, [isCreated, statusByID]);
+
+    if (statusByID === Status.LOADING) {
+        return (
+            <>
+                <div className="w-full h-screen relative">
+                    <div className="absolute inset-0 z-[70] bg-slate-50 bg-opacity-70 flex justify-center items-center w-full h-full">
+                        <div className="w-10 h-10">
+                            <LoadingIcon icon="ball-triangle" />
+                        </div>
+                    </div>
+                </div>
+            </>
+        );
+    }
 
     return (
         <>
-            {status === Status.LOADING && (
+            {isLoaderOpen && (
                 <div className="fixed inset-0 z-[70] bg-slate-50 bg-opacity-70 flex justify-center items-center w-full h-full">
                     <div className="w-10 h-10">
                         <LoadingIcon icon="ball-triangle" />
@@ -141,7 +169,7 @@ function TariffForm({
             )}
             <div className="p-5">
                 <div className="mt-5 text-lg font-bold text-center">
-                    {isCreate ? "Добваить" : "Редактировать"} удобство
+                    {isCreate ? "Добваить" : "Редактировать"} тариф
                 </div>
                 <form className="validate-form mt-5" onSubmit={onSubmit}>
                     <div className="input-form mt-3">
@@ -154,8 +182,13 @@ function TariffForm({
                                 Обязательное
                             </span>
                         </FormLabel>
-                        <div className="flex items-center gap-2">
-                            {selectedIcon != "-1" && (
+                        <div
+                            className={clsx("flex items-center gap-2", {
+                                "rounded-md border border-danger":
+                                    customErrors.icon,
+                            })}
+                        >
+                            {icons.includes(selectedIcon as IconType) && (
                                 <Lucide icon={selectedIcon as IconType} />
                             )}
                             <TomSelect
@@ -164,11 +197,20 @@ function TariffForm({
                                 name="icon"
                                 onChange={(e) => {
                                     setSelectedIcon(e.target.value);
+                                    setCustomErrors((prev) => ({
+                                        ...prev,
+                                        icon: null,
+                                    }));
                                 }}
                                 options={{
                                     placeholder: "Выберите иконку",
                                 }}
                                 className="w-full"
+                                defaultValue={
+                                    !isCreate && tariffById?.icon
+                                        ? tariffById?.icon
+                                        : undefined
+                                }
                             >
                                 {icons.map((icon) => (
                                     <option key={icon} value={icon}>
@@ -178,22 +220,12 @@ function TariffForm({
                             </TomSelect>
                         </div>
 
-                        {errors.name && (
+                        {customErrors.icon && (
                             <div className="mt-2 text-danger">
-                                {typeof errors.name.message === "string" &&
-                                    errors.name.message}
+                                {typeof customErrors.icon === "string" &&
+                                    customErrors.icon}
                             </div>
                         )}
-                        {/* {!isCreate && (
-                            <div className="flex justify-end items-center gap-2">
-                                <p>Текущая иконка: </p>
-                                <img
-                                    className="size-12"
-                                    src={tariffById?.icon}
-                                    alt=""
-                                />
-                            </div>
-                        )} */}
                     </div>
                     <div className="input-form mt-3">
                         <FormLabel

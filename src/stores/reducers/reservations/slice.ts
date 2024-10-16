@@ -1,24 +1,24 @@
 import { AnyAction, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Status } from "../types";
-import { TariffState } from "./types";
+import { ReservationState } from "./types";
 import {
-    createTariff,
-    fetchTariffById,
-    fetchTariffs,
-    updateTariff,
+    createReservation,
+    fetchReservationById,
+    fetchReservations,
+    updateReservation,
 } from "./actions";
 
-const initialState: TariffState = {
-    tariffs: [],
-    tariffById: null,
+const initialState: ReservationState = {
+    reservations: [],
+    reservationById: null,
     statusAll: Status.LOADING,
     statusByID: Status.LOADING,
     error: null,
     isCreated: false,
 };
 
-export const tariffSlice = createSlice({
-    name: "tariff",
+export const reservationSlice = createSlice({
+    name: "reservation",
     initialState,
     reducers: {
         resetIsCreated: (state) => {
@@ -27,36 +27,36 @@ export const tariffSlice = createSlice({
     },
     extraReducers(builder) {
         builder
-            .addCase(fetchTariffs.fulfilled, (state, action) => {
+            .addCase(fetchReservations.fulfilled, (state, action) => {
                 state.statusAll = Status.SUCCESS;
-                state.tariffs = action.payload;
+                state.reservations = action.payload;
             })
-            .addCase(fetchTariffs.pending, (state) => {
+            .addCase(fetchReservations.pending, (state) => {
                 state.statusAll = Status.LOADING;
-                state.tariffs = [];
+                state.reservations = [];
             })
-            .addCase(fetchTariffs.rejected, (state) => {
+            .addCase(fetchReservations.rejected, (state) => {
                 state.statusByID = Status.ERROR;
-                state.tariffs = [];
+                state.reservations = [];
             });
         builder
-            .addCase(fetchTariffById.fulfilled, (state, action) => {
+            .addCase(fetchReservationById.fulfilled, (state, action) => {
                 state.statusByID = Status.SUCCESS;
-                state.tariffById = action.payload;
+                state.reservationById = action.payload;
             })
-            .addCase(fetchTariffById.pending, (state) => {
+            .addCase(fetchReservationById.pending, (state) => {
                 state.statusByID = Status.LOADING;
-                state.tariffById = null;
+                state.reservationById = null;
             })
-            .addCase(fetchTariffById.rejected, (state) => {
-                state.tariffById = null;
+            .addCase(fetchReservationById.rejected, (state) => {
+                state.reservationById = null;
                 state.statusByID = Status.ERROR;
             });
         builder
-            .addCase(createTariff.fulfilled, (state) => {
+            .addCase(createReservation.fulfilled, (state) => {
                 state.isCreated = true;
             })
-            .addCase(updateTariff.fulfilled, (state) => {
+            .addCase(updateReservation.fulfilled, (state) => {
                 state.isCreated = true;
             });
         // .addCase(deletUser.fulfilled, (state, action) => {
@@ -77,7 +77,7 @@ export const tariffSlice = createSlice({
     },
 });
 
-export default tariffSlice.reducer;
+export default reservationSlice.reducer;
 
 const isRejected = (action: AnyAction) => {
     return action.type.endsWith("rejected");

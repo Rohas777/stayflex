@@ -1,20 +1,30 @@
-import _ from "lodash";
+import _, { update } from "lodash";
 import Button from "@/components/Base/Button";
 import Lucide from "@/components/Base/Lucide";
 import { useLocation } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import { ListPlus } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/stores/hooks";
-import { createTariff, fetchTariffs } from "@/stores/reducers/tariffs/actions";
+import {
+    createTariff,
+    fetchTariffById,
+    fetchTariffs,
+    updateTariff,
+} from "@/stores/reducers/tariffs/actions";
 import { Status } from "@/stores/reducers/types";
 import LoadingIcon from "@/components/Base/LoadingIcon";
 import { ITariff } from "@/stores/models/ITariff";
 import { Dialog } from "@/components/Base/Headless";
 import TariffForm from "./form";
-import { TariffCreateType } from "@/stores/reducers/tariffs/types";
+import {
+    TariffCreateType,
+    TariffUpdateType,
+} from "@/stores/reducers/tariffs/types";
 import Toastify from "toastify-js";
 import Notification from "@/components/Base/Notification";
 import * as lucideIcons from "lucide-react";
+import { stopLoader } from "@/utils/customUtils";
+import { tariffSlice } from "@/stores/reducers/tariffs/slice";
 
 type IconType = keyof typeof lucideIcons.icons;
 function Main() {
@@ -22,54 +32,66 @@ function Main() {
     const [isCreatePopup, setIsCreatePopup] = useState(true);
     const [isLoaderOpen, setIsLoaderOpen] = useState(false);
     const [tariffId, setTariffId] = useState<number | null>(null);
-    const [iconsToChoose, setIconsToChoose] = useState<IconType[]>([]);
+    const iconsToChoose: IconType[] = [
+        "CreditCard",
+        "Briefcase",
+        "ShoppingBag",
+        "Activity",
+        "Box",
+        "Send",
+    ];
 
-    const mountedRef = useRef(false);
-
-    const { tariffs, status, error } = useAppSelector((state) => state.tariff);
+    const { tariffs, statusAll, isCreated, statusByID, error } = useAppSelector(
+        (state) => state.tariff
+    );
+    const { resetIsCreated } = tariffSlice.actions;
     const dispatch = useAppDispatch();
 
     const onCreate = async (tariffData: TariffCreateType) => {
         await dispatch(createTariff(tariffData));
-        await dispatch(fetchTariffs());
-        await setButtonModalPreview(false);
-
-        const successEl = document
-            .querySelectorAll("#success-notification-content")[0]
-            .cloneNode(true) as HTMLElement;
-        successEl.classList.remove("hidden");
-        await Toastify({
-            node: successEl,
-            duration: 3000,
-            newWindow: true,
-            close: true,
-            gravity: "top",
-            position: "right",
-            stopOnFocus: true,
-        }).showToast();
     };
-    const onUpdate = (tariff: TariffCreateType) => {
-        // dispatch(createPropertyType(tariff));
-        // dispatch(fetchPropertyTypes());
-        // setButtonModalPreview(false);
+    const onUpdate = async (tariffData: TariffUpdateType) => {
+        await dispatch(updateTariff(tariffData));
     };
+    useEffect(() => {
+        if (statusByID === Status.ERROR) {
+            stopLoader(setIsLoaderOpen);
+            console.log(error);
+        }
+        if (isCreated) {
+            dispatch(fetchTariffs());
+            setButtonModalPreview(false);
+            const successEl = document
+                .querySelectorAll(
+                    isCreatePopup
+                        ? "#success-notification-content"
+                        : "#success-update-notification-content"
+                )[0]
+                .cloneNode(true) as HTMLElement;
+            successEl.classList.remove("hidden");
+            Toastify({
+                node: successEl,
+                duration: 3000,
+                newWindow: true,
+                close: true,
+                gravity: "top",
+                position: "right",
+                stopOnFocus: true,
+            }).showToast();
+            stopLoader(setIsLoaderOpen);
+            dispatch(resetIsCreated());
+        }
+    }, [isCreated, statusByID]);
 
-    const { icons } = lucideIcons;
     const chunkTariffs = (array: ITariff[], size: number) =>
         Array.from({ length: Math.ceil(array.length / size) }, (_, index) =>
             array.slice(index * size, index * size + size)
         );
     useEffect(() => {
         dispatch(fetchTariffs());
-
-        if (!mountedRef.current) {
-            setIconsToChoose(Object.keys(icons) as IconType[]);
-        } else {
-            mountedRef.current = true;
-        }
     }, []);
 
-    if (status === Status.LOADING && !isLoaderOpen) {
+    if (statusAll === Status.LOADING && !isLoaderOpen) {
         return (
             <>
                 <div className="w-full h-screen relative">
@@ -115,10 +137,14 @@ function Main() {
                             key={tariff.id}
                             className="flex-1 px-5 py-16 intro-y"
                         >
-                            <Lucide
-                                icon="CreditCard"
-                                className="block w-12 h-12 mx-auto text-primary"
-                            />
+                            {iconsToChoose.includes(
+                                tariff.icon as IconType
+                            ) && (
+                                <Lucide
+                                    icon={tariff.icon as IconType}
+                                    className="block w-12 h-12 mx-auto text-primary"
+                                />
+                            )}
                             <div className="mt-10 text-xl font-medium text-center">
                                 {tariff.name}
                             </div>
@@ -146,6 +172,12 @@ function Main() {
                                 rounded
                                 type="button"
                                 className="flex items-center px-4 py-3 mx-auto mt-8"
+                                onClick={() => {
+                                    setTariffId(tariff.id);
+                                    setIsCreatePopup(false);
+                                    setButtonModalPreview(true);
+                                    dispatch(fetchTariffById(tariff.id));
+                                }}
                             >
                                 <Lucide
                                     icon="Pencil"
@@ -157,210 +189,6 @@ function Main() {
                     ))}
                 </div>
             ))}
-            <div className="flex flex-col mt-5 intro-y box lg:flex-row">
-                <div className="flex-1 px-5 py-16 intro-y">
-                    <Lucide
-                        icon="CreditCard"
-                        className="block w-12 h-12 mx-auto text-primary"
-                    />
-                    <div className="mt-10 text-xl font-medium text-center">
-                        Basic Plan
-                    </div>
-                    <div className="mt-5 text-center text-slate-600 dark:text-slate-500">
-                        1 Domain <span className="mx-1">•</span> 10 Users{" "}
-                        <span className="mx-1">•</span> 20 Copies
-                    </div>
-                    <div className="px-10 mx-auto mt-2 text-center text-slate-500">
-                        Lorem Ipsum is simply dummy text of the printing and
-                        typesetting industry.
-                    </div>
-                    <div className="flex justify-center">
-                        <div className="relative mx-auto mt-8 text-5xl font-semibold">
-                            <span className="absolute top-0 left-0 -ml-4 text-2xl">
-                                $
-                            </span>{" "}
-                            35
-                        </div>
-                    </div>
-                    <Button
-                        variant="primary"
-                        rounded
-                        type="button"
-                        className="block px-4 py-3 mx-auto mt-8"
-                    >
-                        PURCHASE NOW
-                    </Button>
-                </div>
-                <div className="flex-1 p-5 py-16 border-t border-b intro-y lg:border-b-0 lg:border-t-0 lg:border-l lg:border-r border-slate-200/60 dark:border-darkmode-400">
-                    <Lucide
-                        icon="Briefcase"
-                        className="block w-12 h-12 mx-auto text-primary"
-                    />
-                    <div className="mt-10 text-xl font-medium text-center">
-                        Business
-                    </div>
-                    <div className="mt-5 text-center text-slate-600 dark:text-slate-500">
-                        1 Domain <span className="mx-1">•</span> 10 Users{" "}
-                        <span className="mx-1">•</span> 20 Copies
-                    </div>
-                    <div className="px-10 mx-auto mt-2 text-center text-slate-500">
-                        Lorem Ipsum is simply dummy text of the printing and
-                        typesetting industry.
-                    </div>
-                    <div className="flex justify-center">
-                        <div className="relative mx-auto mt-8 text-5xl font-semibold">
-                            <span className="absolute top-0 left-0 -ml-4 text-2xl">
-                                $
-                            </span>{" "}
-                            60
-                        </div>
-                    </div>
-                    <Button
-                        variant="primary"
-                        rounded
-                        type="button"
-                        className="block px-4 py-3 mx-auto mt-8"
-                    >
-                        PURCHASE NOW
-                    </Button>
-                </div>
-                <div className="flex-1 px-5 py-16 intro-y">
-                    <Lucide
-                        icon="ShoppingBag"
-                        className="block w-12 h-12 mx-auto text-primary"
-                    />
-                    <div className="mt-10 text-xl font-medium text-center">
-                        Enterprise
-                    </div>
-                    <div className="mt-5 text-center text-slate-600 dark:text-slate-500">
-                        1 Domain <span className="mx-1">•</span> 10 Users{" "}
-                        <span className="mx-1">•</span> 20 Copies
-                    </div>
-                    <div className="px-10 mx-auto mt-2 text-center text-slate-500">
-                        Lorem Ipsum is simply dummy text of the printing and
-                        typesetting industry.
-                    </div>
-                    <div className="flex justify-center">
-                        <div className="relative mx-auto mt-8 text-5xl font-semibold">
-                            <span className="absolute top-0 left-0 -ml-4 text-2xl">
-                                $
-                            </span>{" "}
-                            120
-                        </div>
-                    </div>
-                    <Button
-                        variant="primary"
-                        rounded
-                        type="button"
-                        className="block px-4 py-3 mx-auto mt-8"
-                    >
-                        PURCHASE NOW
-                    </Button>
-                </div>
-            </div>
-            {/* END: Pricing Layout */}
-            {/* BEGIN: Pricing Layout */}
-            <div className="flex flex-col mt-5 intro-y box lg:flex-row">
-                <div className="flex-1 px-5 py-16 intro-y">
-                    <Lucide
-                        icon="Activity"
-                        className="block w-12 h-12 mx-auto text-primary"
-                    />
-                    <div className="mt-10 text-xl font-medium text-center">
-                        Basic Plan
-                    </div>
-                    <div className="mt-5 text-center text-slate-600 dark:text-slate-500">
-                        1 Domain <span className="mx-1">•</span> 10 Users{" "}
-                        <span className="mx-1">•</span> 20 Copies
-                    </div>
-                    <div className="px-10 mx-auto mt-2 text-center text-slate-500">
-                        Lorem Ipsum is simply dummy text of the printing and
-                        typesetting industry.
-                    </div>
-                    <div className="flex justify-center">
-                        <div className="relative mx-auto mt-8 text-5xl font-semibold">
-                            <span className="absolute top-0 left-0 -ml-4 text-2xl">
-                                $
-                            </span>{" "}
-                            35
-                        </div>
-                    </div>
-                    <Button
-                        variant="primary"
-                        rounded
-                        type="button"
-                        className="block px-4 py-3 mx-auto mt-8"
-                    >
-                        PURCHASE NOW
-                    </Button>
-                </div>
-                <div className="flex-1 px-5 py-16 border-t border-b intro-y lg:border-b-0 lg:border-t-0 lg:border-l lg:border-r border-slate-200/60 dark:border-darkmode-400">
-                    <Lucide
-                        icon="Box"
-                        className="block w-12 h-12 mx-auto text-primary"
-                    />
-                    <div className="mt-10 text-xl font-medium text-center">
-                        Business
-                    </div>
-                    <div className="mt-5 text-center text-slate-600 dark:text-slate-500">
-                        1 Domain <span className="mx-1">•</span> 10 Users{" "}
-                        <span className="mx-1">•</span> 20 Copies
-                    </div>
-                    <div className="px-10 mx-auto mt-2 text-center text-slate-500">
-                        Lorem Ipsum is simply dummy text of the printing and
-                        typesetting industry.
-                    </div>
-                    <div className="flex justify-center">
-                        <div className="relative mx-auto mt-8 text-5xl font-semibold">
-                            <span className="absolute top-0 left-0 -ml-4 text-2xl">
-                                $
-                            </span>{" "}
-                            60
-                        </div>
-                    </div>
-                    <Button
-                        variant="primary"
-                        rounded
-                        type="button"
-                        className="block px-4 py-3 mx-auto mt-8"
-                    >
-                        PURCHASE NOW
-                    </Button>
-                </div>
-                <div className="flex-1 px-5 py-16 intro-y">
-                    <Lucide
-                        icon="Send"
-                        className="block w-12 h-12 mx-auto text-primary"
-                    />
-                    <div className="mt-10 text-xl font-medium text-center">
-                        Enterprise
-                    </div>
-                    <div className="mt-5 text-center text-slate-600 dark:text-slate-500">
-                        1 Domain <span className="mx-1">•</span> 10 Users{" "}
-                        <span className="mx-1">•</span> 20 Copies
-                    </div>
-                    <div className="px-10 mx-auto mt-2 text-center text-slate-500">
-                        Lorem Ipsum is simply dummy text of the printing and
-                        typesetting industry.
-                    </div>
-                    <div className="flex justify-center">
-                        <div className="relative mx-auto mt-8 text-5xl font-semibold">
-                            <span className="absolute top-0 left-0 -ml-4 text-2xl">
-                                $
-                            </span>{" "}
-                            120
-                        </div>
-                    </div>
-                    <Button
-                        variant="primary"
-                        rounded
-                        type="button"
-                        className="block px-4 py-3 mx-auto mt-8"
-                    >
-                        PURCHASE NOW
-                    </Button>
-                </div>
-            </div>
             {/* END: Pricing Layout */}
             {/* BEGIN: Modal Content */}
             <Dialog
@@ -383,7 +211,6 @@ function Main() {
                     </a>
                     <TariffForm
                         isCreate={isCreatePopup}
-                        currentTariffId={tariffId!}
                         onCreate={onCreate}
                         onUpdate={onUpdate}
                         icons={iconsToChoose}
@@ -398,7 +225,18 @@ function Main() {
             >
                 <Lucide icon="CheckCircle" className="text-success" />
                 <div className="ml-4 mr-4">
-                    <div className="font-medium">Тариф успешно добавлено</div>
+                    <div className="font-medium">Тариф успешно добавлен</div>
+                </div>
+            </Notification>
+            {/* END: Success Notification Content */}
+            {/* BEGIN: Success Notification Content */}
+            <Notification
+                id="success-update-notification-content"
+                className="flex hidden"
+            >
+                <Lucide icon="CheckCircle" className="text-success" />
+                <div className="ml-4 mr-4">
+                    <div className="font-medium">Тариф успешно обновлён</div>
                 </div>
             </Notification>
             {/* END: Success Notification Content */}

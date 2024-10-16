@@ -11,6 +11,7 @@ import convenienceReducer from "./reducers/conveniences/slice";
 import objectReducer from "./reducers/objects/slice";
 import clientReducer from "./reducers/clients/slice";
 import tariffReducer from "./reducers/tariffs/slice";
+import reservationReducer from "./reducers/reservations/slice";
 
 export const store = configureStore({
     reducer: {
@@ -26,6 +27,7 @@ export const store = configureStore({
         object: objectReducer,
         client: clientReducer,
         tariff: tariffReducer,
+        reservation: reservationReducer,
     },
 });
 

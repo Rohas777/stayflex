@@ -142,37 +142,20 @@ function Main() {
                             const a = stringToHTML(
                                 `<div class="min-w-32 flex lg:justify-center items-center"></div>`
                             );
-
+                            const grades = [0, 1, 2, 3, 4, 5];
+                            const options = grades.map((grade) => {
+                                return `<option class="cursor-pointer" ${
+                                    grade === response.grade ? "selected" : ""
+                                } value="${grade}">${
+                                    grade === 0
+                                        ? "Без оценки"
+                                        : "★".repeat(grade)
+                                }</option>`;
+                            });
                             const selector =
                                 stringToHTML(`<select class="cursor-pointer bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                                    <option class="cursor-pointer" value="0" ${
-                                        !response.grade ? "selected" : ""
-                                    }>Без оценки</option>
-                                                <option class="cursor-pointer text-lg" value="1" ${
-                                                    response.grade === 1
-                                                        ? "selected"
-                                                        : ""
-                                                }>★</option>
-                                                <option class="cursor-pointer text-lg" value="2" ${
-                                                    response.grade === 2
-                                                        ? "selected"
-                                                        : ""
-                                                }>★★</option>
-                                                <option class="cursor-pointer text-lg" value="3" ${
-                                                    response.grade === 3
-                                                        ? "selected"
-                                                        : ""
-                                                }>★★★</option>
-                                                <option class="cursor-pointer text-lg" value="4" ${
-                                                    response.grade === 4
-                                                        ? "selected"
-                                                        : ""
-                                                }>★★★★</option>
-                                                <option class="cursor-pointer text-lg" value="5" ${
-                                                    response.grade === 5
-                                                        ? "selected"
-                                                        : ""
-                                                }>★★★★★</option></select>`);
+                                    ${options.map((option) => option).join("")}
+                                        </select>`);
 
                             a.append(selector);
                             a.addEventListener("hover", function () {});

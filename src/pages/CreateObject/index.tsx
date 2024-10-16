@@ -96,9 +96,6 @@ function Main() {
     const addDangerBorder = (ref?: HTMLDivElement | null) => {
         ref?.classList.add("border-danger-important");
     };
-    const removeDangerBorder = (ref?: HTMLDivElement | null) => {
-        ref?.classList.remove("border-danger-important");
-    };
     const vaildateWithoutYup = (photos: DropzoneFile[]) => {
         const errors: CustomErrors = {
             isValid: true,

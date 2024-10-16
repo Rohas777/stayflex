@@ -43,7 +43,7 @@ function Main() {
                 <nav className="side-nav hidden w-[80px] overflow-x-hidden pb-16 pr-5 md:block xl:w-[230px]">
                     <Link
                         to="/"
-                        className="flex items-center pt-4 pl-5 intro-x"
+                        className="flex items-center pt-4 justify-center intro-x"
                     >
                         <img alt="Stayflex" className="w-32" src={logoUrl} />
                     </Link>
