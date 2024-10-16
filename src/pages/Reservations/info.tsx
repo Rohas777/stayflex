@@ -4,8 +4,7 @@ import LoadingIcon from "@/components/Base/LoadingIcon";
 import { useAppSelector } from "@/stores/hooks";
 import { convertDateString } from "@/utils/customUtils";
 
-interface TariffFormProps {}
-function Modal({}: TariffFormProps) {
+function InfoModal() {
     const { reservationById, statusByID, error } = useAppSelector(
         (state) => state.reservation
     );
@@ -66,4 +65,4 @@ function Modal({}: TariffFormProps) {
     );
 }
 
-export default Modal;
+export default InfoModal;

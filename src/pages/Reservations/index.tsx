@@ -14,15 +14,20 @@ import tippy from "tippy.js";
 import { Link } from "react-router-dom";
 import { reservationSlice } from "@/stores/reducers/reservations/slice";
 import {
+    createReservation,
     fetchReservationById,
     fetchReservations,
 } from "@/stores/reducers/reservations/actions";
 import { Status } from "@/stores/reducers/types";
 import LoadingIcon from "@/components/Base/LoadingIcon";
 import { ListPlus } from "lucide-react";
-import TomSelect from "tom-select/src/tom-select";
-import Modal from "./modal";
-import { convertDateString } from "@/utils/customUtils";
+import InfoModal from "./info";
+import { convertDateString, stopLoader } from "@/utils/customUtils";
+import ReservationForm from "./form";
+import { ReservationCreateType } from "@/stores/reducers/reservations/types";
+import Toastify from "toastify-js";
+import Notification from "@/components/Base/Notification";
+import { fetchObjects } from "@/stores/reducers/objects/actions";
 
 window.DateTime = DateTime;
 interface Response {
@@ -36,7 +41,8 @@ interface Response {
 }
 
 function Main() {
-    const [buttonModalPreview, setButtonModalPreview] = useState(false);
+    const [buttonModalInfo, setButtonModalInfo] = useState(false);
+    const [buttonModalCreate, setButtonModalCreate] = useState(false);
     const [rowAcionFocus, setRowAcionFocus] = useState<Response | null>(null);
     const [isLoaderOpen, setIsLoaderOpen] = useState(false);
 
@@ -215,7 +221,7 @@ function Main() {
                                 );
                                 dispatch(fetchReservationById(response.id!));
                                 setRowAcionFocus(row ? row : null);
-                                setButtonModalPreview(true);
+                                setButtonModalInfo(true);
                             });
                             return a;
                         },
@@ -339,10 +345,15 @@ function Main() {
         }
     };
 
-    const { reservations, reservationById, statusAll, error } = useAppSelector(
-        (state) => state.reservation
-    );
-    const {} = reservationSlice.actions;
+    const {
+        reservations,
+        reservationById,
+        statusByID,
+        statusAll,
+        isCreated,
+        error,
+    } = useAppSelector((state) => state.reservation);
+    const { resetIsCreated } = reservationSlice.actions;
     const dispatch = useAppDispatch();
 
     useEffect(() => {
@@ -372,17 +383,54 @@ function Main() {
         }
     }, [reservations]);
 
+    const onCreate = async (reservationData: ReservationCreateType) => {
+        await dispatch(createReservation(reservationData));
+    };
+    useEffect(() => {
+        if (statusByID === Status.ERROR) {
+            stopLoader(setIsLoaderOpen);
+            console.log(error);
+        }
+        if (isCreated) {
+            dispatch(fetchReservations());
+            setButtonModalCreate(false);
+            const successEl = document
+                .querySelectorAll("#success-notification-content")[0]
+                .cloneNode(true) as HTMLElement;
+            successEl.classList.remove("hidden");
+            Toastify({
+                node: successEl,
+                duration: 3000,
+                newWindow: true,
+                close: true,
+                gravity: "top",
+                position: "right",
+                stopOnFocus: true,
+            }).showToast();
+            stopLoader(setIsLoaderOpen);
+            dispatch(resetIsCreated());
+        }
+    }, [isCreated, statusByID]);
+
     return (
         <>
             <div className="flex flex-col items-center mt-8 intro-y sm:flex-row">
                 <h2 className="mr-auto text-lg font-medium">Брони</h2>
                 <div className="flex w-full mt-4 sm:w-auto sm:mt-0">
-                    <Link to="create">
-                        <Button variant="primary" className="mr-2 shadow-md">
-                            <ListPlus className="size-5 mr-2" />
-                            Добавить
-                        </Button>
-                    </Link>
+                    <Button
+                        as="a"
+                        href="#"
+                        variant="primary"
+                        className="mr-2 shadow-md"
+                        onClick={(event: React.MouseEvent) => {
+                            event.preventDefault();
+                            setButtonModalCreate(true);
+                            dispatch(fetchObjects());
+                        }}
+                    >
+                        <ListPlus className="size-5 mr-2" />
+                        Добавить
+                    </Button>
                 </div>
             </div>
             {/* BEGIN: HTML Table Data */}
@@ -543,26 +591,60 @@ function Main() {
 
             {/* BEGIN: Delete Confirmation Modal */}
             <Dialog
-                open={buttonModalPreview}
+                open={buttonModalInfo}
                 onClose={() => {
-                    setButtonModalPreview(false);
+                    setButtonModalInfo(false);
                 }}
             >
                 <Dialog.Panel>
                     <a
                         onClick={(event: React.MouseEvent) => {
                             event.preventDefault();
-                            setButtonModalPreview(false);
+                            setButtonModalInfo(false);
                         }}
                         className="absolute top-0 right-0 mt-3 mr-3"
                         href="#"
                     >
                         <Lucide icon="X" className="w-8 h-8 text-slate-400" />
                     </a>
-                    <Modal />
+                    <InfoModal />
                 </Dialog.Panel>
             </Dialog>
             {/* END: Delete Confirmation Modal */}
+            {/* BEGIN: Delete Confirmation Modal */}
+            <Dialog
+                size="lg"
+                open={buttonModalCreate}
+                onClose={() => {
+                    setButtonModalCreate(false);
+                }}
+            >
+                <Dialog.Panel>
+                    <a
+                        onClick={(event: React.MouseEvent) => {
+                            event.preventDefault();
+                            setButtonModalCreate(false);
+                        }}
+                        className="absolute top-0 right-0 mt-3 mr-3"
+                        href="#"
+                    >
+                        <Lucide icon="X" className="w-8 h-8 text-slate-400" />
+                    </a>
+                    <ReservationForm onCreate={onCreate} />
+                </Dialog.Panel>
+            </Dialog>
+            {/* END: Delete Confirmation Modal */}
+            {/* BEGIN: Success Notification Content */}
+            <Notification
+                id="success-notification-content"
+                className="flex hidden"
+            >
+                <Lucide icon="CheckCircle" className="text-success" />
+                <div className="ml-4 mr-4">
+                    <div className="font-medium">Бронь успешно добавлена</div>
+                </div>
+            </Notification>
+            {/* END: Success Notification Content */}
         </>
     );
 }

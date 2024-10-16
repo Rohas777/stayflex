@@ -50,3 +50,7 @@
         var(--color-danger) / var(--tw-border-opacity)
     ) !important;
 }
+.litepicker .container__days .day-item.is-in-range {
+    background-color: var(--litepicker-is-in-range-color) !important;
+    border-radius: 0;
+}
