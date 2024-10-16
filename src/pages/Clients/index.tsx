@@ -13,14 +13,9 @@ import { useAppDispatch, useAppSelector } from "@/stores/hooks";
 import { userSlice } from "@/stores/reducers/users/slice";
 import { deleteUser, fetchUsers } from "@/stores/reducers/users/actions";
 import tippy from "tippy.js";
-import {
-    Link,
-    useHref,
-    useLinkClickHandler,
-    useNavigate,
-} from "react-router-dom";
-import { propertyTypeSlice } from "@/stores/reducers/property-types/slice";
-import { fetchPropertyTypes } from "@/stores/reducers/property-types/actions";
+import { Link, useNavigate } from "react-router-dom";
+import { clientSlice } from "@/stores/reducers/clients/slice";
+import { fetchClients } from "@/stores/reducers/clients/actions";
 import { Status } from "@/stores/reducers/types";
 import LoadingIcon from "@/components/Base/LoadingIcon";
 import { ListPlus } from "lucide-react";
@@ -49,35 +44,7 @@ function Main() {
         value: "",
     });
 
-    const [tableData, setTableData] = useState<Response[]>([
-        {
-            id: 1,
-            name: "Иванов И.И.",
-            phone: "+7 (777) 777-77-77",
-            email: "email@gmail.com",
-            grade: 5,
-        },
-        {
-            id: 2,
-            name: "Иванов И.И.",
-            phone: "+7 (777) 777-77-77",
-            email: "email@gmail.com",
-        },
-        {
-            id: 3,
-            name: "Иванов И.И.",
-            phone: "+7 (777) 777-77-77",
-            email: "email@gmail.com",
-            grade: 1,
-        },
-        {
-            id: 4,
-            name: "Иванов И.И.",
-            phone: "+7 (777) 777-77-77",
-            email: "email@gmail.com",
-            grade: 5,
-        },
-    ]);
+    const [tableData, setTableData] = useState<Response[]>([]);
 
     const navigate = useNavigate();
 
@@ -378,43 +345,35 @@ function Main() {
         }
     };
 
-    const { propertyTypes, status, error } = useAppSelector(
-        (state) => state.propertyType
-    );
-    const {} = propertyTypeSlice.actions;
+    const { clients, status, error } = useAppSelector((state) => state.client);
+    const {} = clientSlice.actions;
     const dispatch = useAppDispatch();
 
     useEffect(() => {
         initTabulator();
         reInitOnResizeWindow();
 
-        dispatch(fetchPropertyTypes());
+        dispatch(fetchClients());
     }, []);
     useEffect(() => {
-        if (propertyTypes.length) {
-            const formattedData = propertyTypes.map((propertyType) => ({
-                id: propertyType.id,
-                name: propertyType.name,
-                objects: Math.floor(Math.random() * 101),
+        if (clients.length) {
+            const formattedData = clients.map((client) => ({
+                id: client.id,
+                name: client.fullname,
+                phone: client.phone,
+                email: client.email,
+                grade: client.reiting,
             }));
             tabulator.current?.setData(formattedData).then(function () {
                 reInitTabulator();
             });
         }
-    }, [propertyTypes]);
+    }, [clients]);
 
     return (
         <>
             <div className="flex flex-col items-center mt-8 intro-y sm:flex-row">
                 <h2 className="mr-auto text-lg font-medium">Клиенты</h2>
-                <div className="flex w-full mt-4 sm:w-auto sm:mt-0">
-                    <Link to="create">
-                        <Button variant="primary" className="mr-2 shadow-md">
-                            <ListPlus className="size-5 mr-2" />
-                            Добавить
-                        </Button>
-                    </Link>
-                </div>
             </div>
             {/* BEGIN: HTML Table Data */}
             <div className="p-5 mt-5 intro-y box">

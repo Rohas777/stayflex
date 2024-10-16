@@ -11,24 +11,11 @@ import TomSelect from "@/components/Base/CustomTomSelect";
 import { RegionCreateType } from "@/stores/reducers/regions/types";
 
 interface RegionFormProps {
-    isCreate: boolean;
     onCreate: (name: RegionCreateType) => void;
-    onUpdate: (name: RegionCreateType) => void;
-    regionData?: {
-        name: string;
-        server: number;
-    };
 }
 
-function RegionForm({
-    isCreate,
-    onCreate,
-    onUpdate,
-    regionData,
-}: RegionFormProps) {
-    const [select, setSelect] = useState(
-        !isCreate ? String(regionData?.server) : "1"
-    );
+function RegionForm({ onCreate }: RegionFormProps) {
+    const [select, setSelect] = useState("1");
     const [serversData, setServersData] = useState([
         {
             id: 1,
@@ -84,21 +71,15 @@ function RegionForm({
             const region: RegionCreateType = {
                 name: String(formData.get("name")),
             };
-            if (isCreate) {
-                onCreate(region);
-            } else {
-                onUpdate(region);
-            }
+            onCreate(region);
         }
     };
-
-    console.log(regionData);
 
     return (
         <>
             <div className="p-5">
                 <div className="mt-5 text-lg font-bold text-center">
-                    {isCreate ? "Добваить" : "Редактировать"} регион
+                    Добваить регион
                 </div>
                 <form className="validate-form mt-5" onSubmit={onSubmit}>
                     <div className="input-form mt-3">
@@ -119,9 +100,6 @@ function RegionForm({
                             className={clsx({
                                 "border-danger": errors.name,
                             })}
-                            defaultValue={
-                                !isCreate ? regionData?.name : undefined
-                            }
                             placeholder="Название"
                         />
                         {errors.name && (
@@ -166,7 +144,7 @@ function RegionForm({
                         variant="primary"
                         className="w-full mt-5"
                     >
-                        {isCreate ? "Добавить" : "Обновить"}
+                        Добавить
                     </Button>
                 </form>
             </div>

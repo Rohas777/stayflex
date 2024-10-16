@@ -44,7 +44,7 @@ export interface TomSelectProps<T extends string | string[] = string | string[]>
     getRef?: (el: TomSelectElement) => void;
 }
 
-function TomSelect<T extends string | string[]>({
+function CustomTomSelect<T extends string | string[]>({
     className = "",
     options = {},
     value,
@@ -173,4 +173,4 @@ function TomSelect<T extends string | string[]>({
     );
 }
 
-export default TomSelect;
+export default CustomTomSelect;

@@ -13,8 +13,8 @@ export const fetchConveniences = createAsyncThunk(
 export const createConvenience = createAsyncThunk(
     "/convenience/create",
     async (convenienceData: ConvenienceCreateType) => {
-        const response = await axios.post(
-            `https://8831-88-135-114-202.ngrok-free.app/convenience/create`,
+        const response = await instance.post(
+            `/convenience/create`,
             {
                 convenience_name: convenienceData.convenience_name,
                 file: convenienceData.file,

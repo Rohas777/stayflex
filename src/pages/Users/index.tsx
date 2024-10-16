@@ -317,7 +317,7 @@ function Main() {
         dispatch(fetchUsers());
     }, []);
     useEffect(() => {
-        if (users.length) {
+        if (users && users.length) {
             const formattedData = users.map((user) => ({
                 id: user.id,
                 name: user.fullname,

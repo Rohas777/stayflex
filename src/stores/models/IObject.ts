@@ -4,7 +4,8 @@ export interface IObject {
     price: number;
     area: string;
     room_count: number;
-    bed_count: string;
+    child_places: number;
+    adult_places: number;
     floor: string;
     min_ded: number;
     prepayment_percentage: number;

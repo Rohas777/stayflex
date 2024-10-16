@@ -142,52 +142,6 @@ function Main() {
                             <div className="border-b border-dashed"></div>
                             <div className="px-8 pt-6 pb-8">
                                 <div className="text-base font-medium">
-                                    Layouts
-                                </div>
-                                <div className="text-slate-500 mt-0.5">
-                                    Choose your layout
-                                </div>
-                                <div className="mt-5 grid grid-cols-3 gap-x-5 gap-y-3.5">
-                                    {layouts.map((layout, layoutKey) => (
-                                        <div key={layoutKey}>
-                                            <div
-                                                onClick={() =>
-                                                    switchLayout(layout)
-                                                }
-                                                className={clsx([
-                                                    "h-24 cursor-pointer bg-slate-50 box p-1",
-                                                    activeTheme.layout ==
-                                                        layout &&
-                                                        "border-2 border-theme-1/60",
-                                                ])}
-                                            >
-                                                <div className="w-full h-full overflow-hidden rounded-md">
-                                                    {layoutImages[
-                                                        `/src/assets/images/layouts/${layout}.png`
-                                                    ] !== undefined && (
-                                                        <img
-                                                            className="w-full h-full"
-                                                            src={
-                                                                layoutImages[
-                                                                    "/src/assets/images/layouts/" +
-                                                                        layout +
-                                                                        ".png"
-                                                                ].default
-                                                            }
-                                                        />
-                                                    )}
-                                                </div>
-                                            </div>
-                                            <div className="mt-2.5 capitalize text-center text-xs">
-                                                {layout.replace("-", " ")}
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                            <div className="border-b border-dashed"></div>
-                            <div className="px-8 pt-6 pb-8">
-                                <div className="text-base font-medium">
                                     Color Schemes
                                 </div>
                                 <div className="text-slate-500 mt-0.5">

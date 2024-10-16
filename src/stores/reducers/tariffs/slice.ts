@@ -1,34 +1,26 @@
 import { AnyAction, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Status } from "../types";
-import { ObjectState } from "./types";
-import { createObject, fetchObjects } from "./actions";
+import { TariffState } from "./types";
+import { fetchTariffById, fetchTariffs } from "./actions";
 
-const initialState: ObjectState = {
-    objects: [],
+const initialState: TariffState = {
+    tariffs: [],
+    tariffById: null,
     status: Status.LOADING,
     error: null,
-    isCreated: false,
 };
 
-export const objectSlice = createSlice({
-    name: "object",
+export const tariffSlice = createSlice({
+    name: "tariff",
     initialState,
-    reducers: {
-        resetIsCreated: (state) => {
-            state.isCreated = false;
-        },
-    },
+    reducers: {},
     extraReducers(builder) {
-        builder.addCase(fetchObjects.fulfilled, (state, action) => {
-            state.objects = action.payload;
+        builder.addCase(fetchTariffs.fulfilled, (state, action) => {
+            state.tariffs = action.payload;
         });
-        builder
-            .addCase(createObject.fulfilled, (state) => {
-                state.isCreated = true;
-            })
-            .addCase(createObject.rejected, (state) => {
-                state.isCreated = false;
-            });
+        builder.addCase(fetchTariffById.fulfilled, (state, action) => {
+            state.tariffById = action.payload;
+        });
         // .addCase(deletUser.fulfilled, (state, action) => {
         //     state.users = state.users.filter(
         //         (user) => user.id !== Number(action.payload)
@@ -36,7 +28,8 @@ export const objectSlice = createSlice({
         // });
         builder
             .addMatcher(isPending, (state) => {
-                state.objects = [];
+                state.tariffs = [];
+                state.tariffById = null;
                 state.status = Status.LOADING;
                 state.error = null;
             })
@@ -45,14 +38,15 @@ export const objectSlice = createSlice({
                 state.error = null;
             })
             .addMatcher(isRejected, (state, action: PayloadAction<string>) => {
-                state.objects = [];
+                state.tariffs = [];
+                state.tariffById = null;
                 state.error = action.payload;
                 state.status = Status.ERROR;
             });
     },
 });
 
-export default objectSlice.reducer;
+export default tariffSlice.reducer;
 
 const isRejected = (action: AnyAction) => {
     return action.type.endsWith("rejected");

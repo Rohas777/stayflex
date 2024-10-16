@@ -6,36 +6,22 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import Toastify from "toastify-js";
 import { FormLabel, FormInput } from "@/components/Base/Form";
-import { useState } from "react";
-import TomSelect from "@/components/Base/CustomTomSelect";
+import { useEffect, useState } from "react";
+import TomSelect from "@/components/Base/TomSelect";
 import { CityCreateType } from "@/stores/reducers/cities/types";
 import { IRegion } from "@/stores/models/IRegion";
+import { useAppDispatch, useAppSelector } from "@/stores/hooks";
+import { fetchRegions } from "@/stores/reducers/regions/actions";
+import { Status } from "@/stores/reducers/types";
+import LoadingIcon from "@/components/Base/LoadingIcon";
 
 interface CityFormProps {
-    isCreate: boolean;
     onCreate: (data: CityCreateType) => void;
-    onUpdate: (data: CityCreateType) => void;
-    regions: IRegion[];
-    cityData?: {
-        name: string;
-        region: number;
-        server: number;
-    };
 }
 
-function CityForm({
-    isCreate,
-    onCreate,
-    onUpdate,
-    cityData,
-    regions,
-}: CityFormProps) {
-    const [selectServer, setSelectServer] = useState(
-        !isCreate ? String(cityData?.server) : "1"
-    );
-    const [selectRegion, setSelectRegion] = useState(
-        !isCreate ? String(cityData?.region) : String(regions[0]?.id)
-    );
+function CityForm({ onCreate }: CityFormProps) {
+    const [selectServer, setSelectServer] = useState("1");
+    const [selectRegion, setSelectRegion] = useState("-1");
     const [serversData, setServersData] = useState([
         {
             id: 1,
@@ -54,6 +40,10 @@ function CityForm({
             name: "Server-4",
         },
     ]);
+
+    const { regions, status, error } = useAppSelector((state) => state.region);
+    const dispatch = useAppDispatch();
+
     const schema = yup
         .object({
             name: yup.string().required("'Название' это обязательное поле"),
@@ -91,20 +81,33 @@ function CityForm({
                 name: String(formData.get("name")),
                 region_id: Number(selectRegion),
             };
-
-            if (isCreate) {
-                onCreate(city);
-            } else {
-                onUpdate(city);
-            }
+            onCreate(city);
         }
     };
+
+    useEffect(() => {
+        dispatch(fetchRegions());
+    }, []);
+
+    if (status === Status.LOADING) {
+        return (
+            <>
+                <div className="w-full h-60 relative rounded-sm">
+                    <div className="absolute inset-0 z-[70] bg-slate-50 bg-opacity-70 flex justify-center items-center w-full h-full">
+                        <div className="w-10 h-10">
+                            <LoadingIcon icon="ball-triangle" />
+                        </div>
+                    </div>
+                </div>
+            </>
+        );
+    }
 
     return (
         <>
             <div className="p-5">
                 <div className="mt-5 text-lg font-bold text-center">
-                    {isCreate ? "Добваить" : "Редактировать"} город
+                    Добавить город
                 </div>
                 <form className="validate-form mt-5" onSubmit={onSubmit}>
                     <div className="input-form mt-3">
@@ -125,9 +128,6 @@ function CityForm({
                             className={clsx({
                                 "border-danger": errors.name,
                             })}
-                            defaultValue={
-                                !isCreate ? cityData?.name : undefined
-                            }
                             placeholder="Название"
                         />
                         {errors.name && (
@@ -155,8 +155,7 @@ function CityForm({
                                 setSelectRegion(e.target.value);
                             }}
                             options={{
-                                controlInput: undefined,
-                                searchField: undefined,
+                                placeholder: "Выберите регион",
                             }}
                             className="w-full"
                         >
@@ -202,7 +201,7 @@ function CityForm({
                         variant="primary"
                         className="w-full mt-5"
                     >
-                        {isCreate ? "Добавить" : "Обновить"}
+                        Добавить
                     </Button>
                 </form>
             </div>

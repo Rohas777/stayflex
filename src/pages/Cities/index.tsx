@@ -37,7 +37,6 @@ interface Response {
 
 function Main() {
     const [buttonModalPreview, setButtonModalPreview] = useState(false);
-    const [isCreatePopup, setIsCreatePopup] = useState(true);
     const [cityData, setCityData] = useState<{
         name: string;
         region: {
@@ -157,25 +156,16 @@ function Main() {
                             const a = stringToHTML(
                                 `<div class="flex lg:justify-center items-center"></div>`
                             );
-                            const editA =
-                                stringToHTML(`<a class="flex items-center mr-3 w-7 h-7 p-1 border border-black rounded-md hover:opacity-70" href="javascript:;">
-                                <i data-lucide="pencil"></i>
-                              </a>`);
                             const deleteA =
                                 stringToHTML(`<a class="flex items-center text-danger w-7 h-7 p-1 border border-danger rounded-md hover:opacity-70" href="javascript:;">
                                 <i data-lucide="trash-2"></i>
                               </a>`);
-                            tippy(editA, {
-                                content: "Редактировать",
-                                placement: "bottom",
-                                animation: "shift-away",
-                            });
                             tippy(deleteA, {
                                 content: "Удалить",
                                 placement: "bottom",
                                 animation: "shift-away",
                             });
-                            a.append(editA, deleteA);
+                            a.append(deleteA);
                             deleteA.addEventListener("click", function () {
                                 setDeleteConfirmationModal(true);
                                 const rowId = cell.getRow().getData().id;
@@ -188,23 +178,6 @@ function Main() {
                                     server: 3,
                                 });
                                 setcolumnAcionFocusId(rowId);
-                            });
-                            editA.addEventListener("click", function (event) {
-                                event.preventDefault();
-                                const rowId = cell.getRow().getData().id;
-                                const row = tableData.find(
-                                    (row) => row.id === response.id
-                                );
-                                setCityData({
-                                    name: response.name!,
-                                    region: {
-                                        name: response.region!.name,
-                                        id: response.region!.id,
-                                    },
-                                    server: 3,
-                                });
-                                setIsCreatePopup(false);
-                                setButtonModalPreview(true);
                             });
                             return a;
                         },
@@ -334,15 +307,8 @@ function Main() {
         dispatch(fetchCities());
         setButtonModalPreview(false);
     };
-    const onUpdate = (city: CityCreateType) => {
-        // dispatch(createRegion(city));
-        // dispatch(fetchRegions());
-        // setButtonModalPreview(false);
-    };
 
     const { cities, status, error } = useAppSelector((state) => state.city);
-    const regionsSelector = useAppSelector((state) => state.region);
-    const regions = regionsSelector.regions;
     const dispatch = useAppDispatch();
 
     useEffect(() => {
@@ -383,7 +349,6 @@ function Main() {
                         className="mr-2 shadow-md"
                         onClick={(event: React.MouseEvent) => {
                             event.preventDefault();
-                            setIsCreatePopup(true);
                             setButtonModalPreview(true);
                         }}
                     >
@@ -568,17 +533,7 @@ function Main() {
                     >
                         <Lucide icon="X" className="w-8 h-8 text-slate-400" />
                     </a>
-                    <CityForm
-                        isCreate={isCreatePopup}
-                        regions={regions}
-                        cityData={{
-                            name: cityData ? cityData.name! : "",
-                            server: cityData ? cityData.server : 1,
-                            region: cityData?.region.id || 0,
-                        }}
-                        onCreate={onCreate}
-                        onUpdate={onUpdate}
-                    />
+                    <CityForm onCreate={onCreate} />
                 </Dialog.Panel>
             </Dialog>
             {/* END: Modal Content */}

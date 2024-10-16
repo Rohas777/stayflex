@@ -10,16 +10,14 @@ import { TabulatorFull as Tabulator } from "tabulator-tables";
 import { stringToHTML } from "@/utils/helper";
 import { DateTime } from "luxon";
 import { useAppDispatch, useAppSelector } from "@/stores/hooks";
-import { userSlice } from "@/stores/reducers/users/slice";
-import { deleteUser, fetchUsers } from "@/stores/reducers/users/actions";
+import { deleteUser } from "@/stores/reducers/users/actions";
 import tippy from "tippy.js";
 import { Link } from "react-router-dom";
-import { propertyTypeSlice } from "@/stores/reducers/property-types/slice";
-import { fetchPropertyTypes } from "@/stores/reducers/property-types/actions";
 import { Status } from "@/stores/reducers/types";
 import LoadingIcon from "@/components/Base/LoadingIcon";
 import { ListPlus } from "lucide-react";
 import { fetchObjects } from "@/stores/reducers/objects/actions";
+import { objectSlice } from "@/stores/reducers/objects/slice";
 
 window.DateTime = DateTime;
 interface Response {
@@ -288,7 +286,9 @@ function Main() {
         }
     };
 
-    const { objects, status, error } = useAppSelector((state) => state.object);
+    const { objects, status, error, isCreated } = useAppSelector(
+        (state) => state.object
+    );
     const dispatch = useAppDispatch();
 
     useEffect(() => {
@@ -297,6 +297,7 @@ function Main() {
 
         dispatch(fetchObjects());
     }, []);
+
     useEffect(() => {
         if (objects.length) {
             const formattedData = objects.map((object) => ({
@@ -317,7 +318,7 @@ function Main() {
             <div className="flex flex-col items-center mt-8 intro-y sm:flex-row">
                 <h2 className="mr-auto text-lg font-medium">Объекты</h2>
                 <div className="flex w-full mt-4 sm:w-auto sm:mt-0">
-                    <Link to="create">
+                    <Link to="/objects/create">
                         <Button variant="primary" className="mr-2 shadow-md">
                             <ListPlus className="size-5 mr-2" />
                             Добавить

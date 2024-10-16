@@ -1,6 +1,7 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { instance } from "@/vars";
-import { ObjectCreateType } from "./types";
+import { ObjectCreateBodyType } from "./types";
+import axios from "axios";
 
 export const fetchObjects = createAsyncThunk(
     "object/fetchAll",
@@ -11,13 +12,16 @@ export const fetchObjects = createAsyncThunk(
 );
 export const createObject = createAsyncThunk(
     "/object/create",
-    async (params: ObjectCreateType) => {
-        const response = await instance.post(`/object/create`, params, {
-            headers: {
-                "Content-Type": "application/json",
-            },
-        });
-        return response.data;
+    async (objectData: FormData) => {
+        try {
+            const response = await instance.post(`/object/create`, objectData, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            });
+        } catch (error) {
+            return error;
+        }
     }
 );
 

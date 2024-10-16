@@ -48,11 +48,21 @@ const menu: Array<Menu | "divider"> = [
         title: "Клиенты",
     },
     {
+        icon: "Gem",
+        pathname: "/tariffs-admin",
+        title: "Тарифы",
+    },
+    {
         icon: "Calendar",
         pathname: "/admin-reservations",
         title: "Брони",
     },
     "divider",
+    {
+        icon: "Gem",
+        pathname: "/tariffs",
+        title: "Тарифы",
+    },
     {
         icon: "Home",
         pathname: "/objects",

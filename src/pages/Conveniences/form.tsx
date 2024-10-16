@@ -164,19 +164,21 @@ function ConvenienceForm({
                             }}
                             options={{
                                 url: "https://httpbin.org/post",
+                                createImageThumbnails: false,
                                 thumbnailWidth: 120,
                                 maxFilesize: 10,
                                 maxFiles: 1,
                                 resizeHeight: 40,
                                 resizeWidth: 40,
-                                acceptedFiles: "image/*",
+                                acceptedFiles: ".svg",
                                 clickable: true,
                                 addRemoveLinks: true,
                             }}
                             className="dropzone"
                         >
                             <p className="text-lg font-medium">
-                                Перетащите файл сюда или кликните для выбора.
+                                Перетащите файл в формате SVG сюда или кликните
+                                для выбора.
                             </p>
                             {!isCreate && (
                                 <p className="text-gray-600 text-base">

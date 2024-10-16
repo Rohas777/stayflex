@@ -82,6 +82,8 @@ import Reservations from "../pages/Reservations";
 import ReservationsClient from "../pages/ReservationsClient";
 import Channels from "../pages/Channels";
 import Widget from "../pages/Widget";
+import Tariffs from "../pages/Tariffs";
+import TariffsClient from "../pages/TariffsClient";
 
 function Router() {
     const routes = [
@@ -132,6 +134,14 @@ function Router() {
                 {
                     path: "objects/create",
                     element: <CreateObject />,
+                },
+                {
+                    path: "tariffs",
+                    element: <TariffsClient />,
+                },
+                {
+                    path: "tariffs-admin",
+                    element: <Tariffs />,
                 },
                 {
                     path: "admin-clients",
