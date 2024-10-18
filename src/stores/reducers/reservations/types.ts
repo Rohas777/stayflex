@@ -11,10 +11,10 @@ export interface ReservationState {
 }
 
 export interface ReservationCreateType {
-    icon: string;
-    name: string;
-    daily_price: number;
-    object_count: number;
+    start_date: string;
+    end_date: string;
+    object_id: number;
+    client_id: number;
     description: string;
 }
 export interface ReservationUpdateType extends ReservationCreateType {

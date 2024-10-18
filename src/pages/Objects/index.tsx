@@ -317,14 +317,6 @@ function Main() {
         <>
             <div className="flex flex-col items-center mt-8 intro-y sm:flex-row">
                 <h2 className="mr-auto text-lg font-medium">Объекты</h2>
-                <div className="flex w-full mt-4 sm:w-auto sm:mt-0">
-                    <Link to="/objects/create">
-                        <Button variant="primary" className="mr-2 shadow-md">
-                            <ListPlus className="size-5 mr-2" />
-                            Добавить
-                        </Button>
-                    </Link>
-                </div>
             </div>
             {/* BEGIN: HTML Table Data */}
             <div className="p-5 mt-5 intro-y box">

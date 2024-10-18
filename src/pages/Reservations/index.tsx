@@ -28,6 +28,9 @@ import { ReservationCreateType } from "@/stores/reducers/reservations/types";
 import Toastify from "toastify-js";
 import Notification from "@/components/Base/Notification";
 import { fetchObjects } from "@/stores/reducers/objects/actions";
+import { clientSlice } from "@/stores/reducers/clients/slice";
+import OpacityLoader from "@/components/Custom/OpacityLoader/Loader";
+import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
 
 window.DateTime = DateTime;
 interface Response {
@@ -153,20 +156,20 @@ function Main() {
                             );
                             const statuses = [
                                 {
-                                    value: "0",
-                                    label: "Без статуса",
-                                },
-                                {
                                     value: "new",
                                     label: "Новая",
                                 },
                                 {
-                                    value: "active",
+                                    value: "approved",
                                     label: "Одобрена",
                                 },
                                 {
-                                    value: "declined",
+                                    value: "rejected",
                                     label: "Отклонена",
+                                },
+                                {
+                                    value: "completed",
+                                    label: "Пройдена",
                                 },
                             ];
 
@@ -354,6 +357,9 @@ function Main() {
         error,
     } = useAppSelector((state) => state.reservation);
     const { resetIsCreated } = reservationSlice.actions;
+
+    const { resetClientByPhone } = clientSlice.actions;
+
     const dispatch = useAppDispatch();
 
     useEffect(() => {
@@ -414,6 +420,7 @@ function Main() {
 
     return (
         <>
+            {isLoaderOpen && <OverlayLoader />}
             <div className="flex flex-col items-center mt-8 intro-y sm:flex-row">
                 <h2 className="mr-auto text-lg font-medium">Брони</h2>
                 <div className="flex w-full mt-4 sm:w-auto sm:mt-0">
@@ -617,6 +624,7 @@ function Main() {
                 open={buttonModalCreate}
                 onClose={() => {
                     setButtonModalCreate(false);
+                    dispatch(resetClientByPhone());
                 }}
             >
                 <Dialog.Panel>
@@ -630,7 +638,10 @@ function Main() {
                     >
                         <Lucide icon="X" className="w-8 h-8 text-slate-400" />
                     </a>
-                    <ReservationForm onCreate={onCreate} />
+                    <ReservationForm
+                        onCreate={onCreate}
+                        setIsLoaderOpen={setIsLoaderOpen}
+                    />
                 </Dialog.Panel>
             </Dialog>
             {/* END: Delete Confirmation Modal */}

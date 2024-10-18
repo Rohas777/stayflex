@@ -6,8 +6,12 @@ import axios from "axios";
 export const fetchObjects = createAsyncThunk(
     "object/fetchAll",
     async (_, thunkAPI) => {
-        const response = await instance.get("/object/all");
-        return response.data;
+        try {
+            const response = await instance.get("/object/all");
+            return response.data;
+        } catch (error: any) {
+            throw error;
+        }
     }
 );
 export const createObject = createAsyncThunk(

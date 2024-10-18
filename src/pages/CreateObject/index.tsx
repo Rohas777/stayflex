@@ -28,6 +28,7 @@ import LoadingIcon from "@/components/Base/LoadingIcon";
 import { startLoader, stopLoader } from "@/utils/customUtils";
 import { DropzoneFile } from "dropzone";
 import { objectSlice } from "@/stores/reducers/objects/slice";
+import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
 
 window.DateTime = DateTime;
 
@@ -296,13 +297,7 @@ function Main() {
 
     return (
         <>
-            {isLoaderOpen && (
-                <div className="fixed inset-0 z-[70] bg-slate-50 bg-opacity-70 flex justify-center items-center w-full h-full">
-                    <div className="w-10 h-10">
-                        <LoadingIcon icon="ball-triangle" />
-                    </div>
-                </div>
-            )}
+            {isLoaderOpen && <OverlayLoader />}
             <div className="w-full h-fit relative">
                 <div className="flex flex-col items-center mt-8 intro-y sm:flex-row">
                     <h2 className="mr-auto text-xl font-medium">
