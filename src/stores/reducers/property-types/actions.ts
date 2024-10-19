@@ -20,11 +20,12 @@ export const createPropertyType = createAsyncThunk(
         return response.data;
     }
 );
-
-// export const deleteUser = createAsyncThunk<string, string>(
-//     "/user/deleteUser",
-//     async (id) => {
-//         const response = await instance.delete(`/user/delete/${id}`);
-//         return response.data.id;
-//     }
-// );
+export const deletePropertyType = createAsyncThunk<string, string>(
+    "/propertyType/delete",
+    async (id) => {
+        const response = await instance.delete(
+            `/property-type/delete?id=${id}`
+        );
+        return response.data.id;
+    }
+);

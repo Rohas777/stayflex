@@ -27,11 +27,3 @@ export const deleteCity = createAsyncThunk<string, string>(
         return response.data.id;
     }
 );
-
-// export const deleteUser = createAsyncThunk<string, string>(
-//     "/user/deleteUser",
-//     async (id) => {
-//         const response = await instance.delete(`/user/delete/${id}`);
-//         return response.data.id;
-//     }
-// );

@@ -10,15 +10,19 @@ import { useState } from "react";
 import TomSelect from "@/components/Base/CustomTomSelect";
 import { RegionCreateType } from "@/stores/reducers/regions/types";
 import { PropertyTypeCreateType } from "@/stores/reducers/property-types/types";
+import { startLoader, stopLoader } from "@/utils/customUtils";
+import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
 
 interface PropertyTypeFormProps {
+    setIsLoaderOpened: React.Dispatch<React.SetStateAction<boolean>>;
+    isLoaderOpened: boolean;
     onCreate: (name: PropertyTypeCreateType) => void;
-    propertyTypeName: string;
 }
 
 function PropertyTypeForm({
     onCreate,
-    propertyTypeName,
+    setIsLoaderOpened,
+    isLoaderOpened,
 }: PropertyTypeFormProps) {
     const schema = yup
         .object({
@@ -36,33 +40,23 @@ function PropertyTypeForm({
     });
     const onSubmit = async (event: React.ChangeEvent<HTMLFormElement>) => {
         event.preventDefault();
+        startLoader(setIsLoaderOpened);
         const result = await trigger();
         if (!result) {
+            stopLoader(setIsLoaderOpened);
             return;
-        } else {
-            const successEl = document
-                .querySelectorAll("#success-notification-content")[0]
-                .cloneNode(true) as HTMLElement;
-            successEl.classList.remove("hidden");
-            Toastify({
-                node: successEl,
-                duration: 3000,
-                newWindow: true,
-                close: true,
-                gravity: "top",
-                position: "right",
-                stopOnFocus: true,
-            }).showToast();
-            const formData = new FormData(event.target);
-            const propertyType: PropertyTypeCreateType = {
-                name: String(formData.get("name")),
-            };
-            onCreate(propertyType);
         }
+
+        const formData = new FormData(event.target);
+        const propertyType: PropertyTypeCreateType = {
+            name: String(formData.get("name")),
+        };
+        onCreate(propertyType);
     };
 
     return (
         <>
+            {isLoaderOpened && <OverlayLoader />}
             <div className="p-5">
                 <div className="mt-5 text-lg font-bold text-center">
                     Добавить тип недвижимости

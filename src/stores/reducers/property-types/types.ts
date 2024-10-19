@@ -5,6 +5,8 @@ export interface PropertyTypeState {
     propertyTypes: IPropertyType[];
     status: Status;
     error: string | null;
+    isCreated: boolean;
+    isDeleted: boolean;
 }
 
 export interface PropertyTypeCreateType {

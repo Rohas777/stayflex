@@ -1,27 +1,43 @@
 import { AnyAction, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Status } from "../types";
 import { PropertyTypeState } from "./types";
-import { fetchPropertyTypes } from "./actions";
+import {
+    createPropertyType,
+    deletePropertyType,
+    fetchPropertyTypes,
+} from "./actions";
 
 const initialState: PropertyTypeState = {
     propertyTypes: [],
     status: Status.LOADING,
     error: null,
+    isCreated: false,
+    isDeleted: false,
 };
 
 export const propertyTypeSlice = createSlice({
     name: "propertyType",
     initialState,
-    reducers: {},
+    reducers: {
+        resetIsCreated: (state) => {
+            state.isCreated = false;
+        },
+        resetIsDeleted: (state) => {
+            state.isDeleted = false;
+        },
+    },
     extraReducers(builder) {
         builder.addCase(fetchPropertyTypes.fulfilled, (state, action) => {
             state.propertyTypes = action.payload.apartments;
         });
-        // .addCase(deletUser.fulfilled, (state, action) => {
-        //     state.users = state.users.filter(
-        //         (user) => user.id !== Number(action.payload)
-        //     );
-        // });
+
+        builder
+            .addCase(createPropertyType.fulfilled, (state) => {
+                state.isCreated = true;
+            })
+            .addCase(deletePropertyType.fulfilled, (state) => {
+                state.isDeleted = true;
+            });
         builder
             .addMatcher(isPending, (state) => {
                 state.propertyTypes = [];
