@@ -73,7 +73,7 @@ import Servers from "../pages/Servers";
 import Regions from "../pages/Regions";
 import Cities from "../pages/Cities";
 import PropertyTypes from "../pages/PropertyTypes";
-import Conveniences from "../pages/Conveniences";
+import Amenities from "../pages/Amenities";
 import Objects from "../pages/Objects";
 import ObjectsClient from "../pages/ObjectsClient";
 import CreateObject from "../pages/CreateObject";
@@ -120,8 +120,8 @@ function Router() {
                     element: <PropertyTypes />,
                 },
                 {
-                    path: "conveniences",
-                    element: <Conveniences />,
+                    path: "amenities",
+                    element: <Amenities />,
                 },
                 {
                     path: "admin-objects",

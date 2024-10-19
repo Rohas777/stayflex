@@ -17,15 +17,11 @@ import {
 } from "@/stores/reducers/tariffs/types";
 import { Status } from "@/stores/reducers/types";
 import LoadingIcon from "@/components/Base/LoadingIcon";
-import { useAppDispatch, useAppSelector } from "@/stores/hooks";
-import * as lucideIcons from "lucide-react";
+import { useAppSelector } from "@/stores/hooks";
 import TomSelect from "@/components/Base/TomSelect";
 import Lucide from "@/components/Base/Lucide";
 import { startLoader, stopLoader } from "@/utils/customUtils";
-import { useNavigate } from "react-router-dom";
-import { tariffSlice } from "@/stores/reducers/tariffs/slice";
-
-type IconType = keyof typeof lucideIcons.icons;
+import { IconType } from "@/vars";
 
 interface TariffFormProps {
     isCreate: boolean;
@@ -169,7 +165,7 @@ function TariffForm({ isCreate, onCreate, onUpdate, icons }: TariffFormProps) {
             )}
             <div className="p-5">
                 <div className="mt-5 text-lg font-bold text-center">
-                    {isCreate ? "Добваить" : "Редактировать"} тариф
+                    {isCreate ? "Добавить" : "Редактировать"} тариф
                 </div>
                 <form className="validate-form mt-5" onSubmit={onSubmit}>
                     <div className="input-form mt-3">

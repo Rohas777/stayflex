@@ -63,7 +63,6 @@ function Main() {
         "theme-1",
         "theme-2",
         "theme-3",
-        "theme-4",
     ];
 
     const themeImages = import.meta.glob<{
@@ -97,49 +96,6 @@ function Main() {
                     </a>
                     <Slideover.Description className="p-0">
                         <div className="flex flex-col">
-                            <div className="px-8 pt-6 pb-8">
-                                <div className="text-base font-medium">
-                                    Templates
-                                </div>
-                                <div className="text-slate-500 mt-0.5">
-                                    Choose your templates
-                                </div>
-                                <div className="grid grid-cols-2 mt-5 gap-y-3.5 gap-x-5">
-                                    {themes.map((theme, themeKey) => (
-                                        <div key={themeKey}>
-                                            <div
-                                                onClick={() =>
-                                                    switchTheme(theme)
-                                                }
-                                                className={clsx([
-                                                    "h-28 cursor-pointer bg-slate-50 box p-1",
-                                                    activeTheme.name == theme &&
-                                                        "border-2 border-theme-1/60",
-                                                ])}
-                                            >
-                                                <div className="w-full h-full overflow-hidden rounded-md">
-                                                    {themeImages[
-                                                        `/src/assets/images/themes/${theme}.png`
-                                                    ] !== undefined && (
-                                                        <img
-                                                            className="w-full h-full"
-                                                            src={
-                                                                themeImages[
-                                                                    `/src/assets/images/themes/${theme}.png`
-                                                                ].default
-                                                            }
-                                                        />
-                                                    )}
-                                                </div>
-                                            </div>
-                                            <div className="mt-2.5 capitalize text-center text-xs">
-                                                {theme}
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                            <div className="border-b border-dashed"></div>
                             <div className="px-8 pt-6 pb-8">
                                 <div className="text-base font-medium">
                                     Color Schemes

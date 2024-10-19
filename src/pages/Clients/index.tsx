@@ -78,7 +78,7 @@ function Main() {
 
                     // For HTML table
                     {
-                        title: "ИМЯ",
+                        title: "Имя",
                         minWidth: 200,
                         responsive: 0,
                         field: "name",
@@ -94,7 +94,7 @@ function Main() {
                         },
                     },
                     {
-                        title: "ТЕЛЕФОН",
+                        title: "Телефон",
                         minWidth: 200,
                         field: "phone",
                         hozAlign: "center",
@@ -111,7 +111,7 @@ function Main() {
                         },
                     },
                     {
-                        title: "EMAIL",
+                        title: "Email",
                         minWidth: 200,
                         field: "email",
                         hozAlign: "center",
@@ -128,7 +128,7 @@ function Main() {
                         },
                     },
                     {
-                        title: "ОЦЕНКА",
+                        title: "Оценка",
                         minWidth: 200,
                         field: "grade",
                         responsive: 1,
@@ -170,13 +170,13 @@ function Main() {
                         },
                     },
                     {
-                        title: "",
                         minWidth: 50,
                         maxWidth: 100,
-                        field: "",
+                        title: "Действия",
+                        field: "id",
                         responsive: 1,
                         hozAlign: "right",
-                        vertAlign: "middle",
+                        headerHozAlign: "right",
                         resizable: false,
                         headerSort: false,
                         formatter(cell) {

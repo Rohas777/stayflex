@@ -46,7 +46,7 @@ function Main() {
             <div className="h-[67px] z-[51] flex items-center relative border-b border-slate-200">
                 {/* BEGIN: Notifications */}
                 <Popover className="mr-auto intro-x sm:mr-6 ml-auto">
-                    <Popover.Button
+                    {/* <Popover.Button
                         className="
               relative text-slate-600 outline-none block
               before:content-[''] before:w-[8px] before:h-[8px] before:rounded-full before:absolute before:top-[-2px] before:right-0 before:bg-danger
@@ -56,7 +56,7 @@ function Main() {
                             icon="Bell"
                             className="w-5 h-5 dark:text-slate-500"
                         />
-                    </Popover.Button>
+                    </Popover.Button> */}
                     <Popover.Panel className="w-[280px] sm:w-[350px] p-5 mt-2">
                         <div className="mb-5 font-medium">Notifications</div>
                         {_.take(fakerData, 5).map((faker, fakerKey) => (

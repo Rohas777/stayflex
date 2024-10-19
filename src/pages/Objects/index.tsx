@@ -79,7 +79,7 @@ function Main() {
 
                     // For HTML table
                     {
-                        title: "НАЗВАНИЕ",
+                        title: "Название",
                         minWidth: 200,
                         responsive: 0,
                         field: "name",
@@ -95,7 +95,7 @@ function Main() {
                         },
                     },
                     {
-                        title: "ВЛАДЕЛЕЦ",
+                        title: "Владелец",
                         minWidth: 200,
                         field: "owner",
                         hozAlign: "center",
@@ -112,13 +112,14 @@ function Main() {
                         },
                     },
                     {
-                        title: "",
-                        field: "",
-                        responsive: 1,
+                        title: "Действия",
                         minWidth: 30,
+                        field: "id",
+                        responsive: 1,
+                        hozAlign: "right",
+                        headerHozAlign: "right",
                         resizable: false,
                         headerSort: false,
-                        hozAlign: "right",
                         vertAlign: "middle",
                         formatter(cell) {
                             const a = stringToHTML(

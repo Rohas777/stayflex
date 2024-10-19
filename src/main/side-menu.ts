@@ -27,7 +27,7 @@ const menu: Array<Menu | "divider"> = [
             },
             {
                 icon: "Coffee",
-                pathname: "/conveniences",
+                pathname: "/amenities",
                 title: "Удобства",
             },
             {
@@ -56,6 +56,11 @@ const menu: Array<Menu | "divider"> = [
         icon: "Calendar",
         pathname: "/admin-reservations",
         title: "Брони",
+    },
+    {
+        icon: "Activity",
+        pathname: "/icon",
+        title: "Иконки",
     },
     "divider",
     {
@@ -483,11 +488,6 @@ const menu: Array<Menu | "divider"> = [
                 icon: "Activity",
                 pathname: "/typography",
                 title: "Typography",
-            },
-            {
-                icon: "Activity",
-                pathname: "/icon",
-                title: "Icon",
             },
             {
                 icon: "Activity",

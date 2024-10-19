@@ -14,7 +14,7 @@ import TomSelect from "@/components/Base/TomSelect";
 import { fetchRegions } from "@/stores/reducers/regions/actions";
 import { schema } from "./schema";
 import { ClassicEditor } from "@/components/Base/Ckeditor";
-import { fetchConveniences } from "@/stores/reducers/conveniences/actions";
+import { fetchAmenities } from "@/stores/reducers/amenities/actions";
 import { fetchPropertyTypes } from "@/stores/reducers/property-types/actions";
 import Notification from "@/components/Base/Notification";
 import Lucide from "@/components/Base/Lucide";
@@ -42,7 +42,7 @@ type CustomErrors = {
     region: string | null;
     city: string | null;
     propertyType: string | null;
-    conveniences: string | null;
+    amenities: string | null;
     prepayment: string | null;
     channels: string | null;
     description: string | null;
@@ -51,7 +51,7 @@ type CustomErrors = {
 
 function Main() {
     const regionsSelector = useAppSelector((state) => state.region);
-    const conveniencesSelector = useAppSelector((state) => state.convenience);
+    const amenitiesSelector = useAppSelector((state) => state.amenity);
     const propertyTypesSelector = useAppSelector((state) => state.propertyType);
     const { isCreated, status, error } = useAppSelector(
         (state) => state.object
@@ -64,7 +64,7 @@ function Main() {
     const [citiesByRegion, setCitiesByRegion] = useState<City[]>([]);
     const [selectedCity, setSelectedCity] = useState("-1");
     const [editorData, setEditorData] = useState("");
-    const [selectedConveniences, setSelectedConveniences] = useState([]);
+    const [selectedAmenities, setSelectedAmenities] = useState([]);
     const [selectedPropertyType, setSelectedPropertyType] = useState("-1");
     const [selectedPrepayment, setSelectedPrepayment] = useState("-1");
 
@@ -76,7 +76,7 @@ function Main() {
         region: null,
         city: null,
         propertyType: null,
-        conveniences: null,
+        amenities: null,
         prepayment: null,
         channels: null,
         description: null,
@@ -103,7 +103,7 @@ function Main() {
             region: null,
             city: null,
             propertyType: null,
-            conveniences: null,
+            amenities: null,
             prepayment: null,
             channels: null,
             description: null,
@@ -125,9 +125,9 @@ function Main() {
             addDangerBorder(propertyTypesValidationRef.current);
             errors.propertyType = "Обязательно выберите тип недвижимости";
         }
-        if (!selectedConveniences.length) {
+        if (!selectedAmenities.length) {
             addDangerBorder(convnveniencesValidationRef.current);
-            errors.conveniences = "Обязательно выберите хотя бы одно удобство";
+            errors.amenities = "Обязательно выберите хотя бы одно удобство";
         }
         if (selectedPrepayment == "-1") {
             addDangerBorder(prepaymentValidationRef.current);
@@ -177,7 +177,7 @@ function Main() {
             floor: String(formData.get("floor")),
             apartment_id: Number(selectedPropertyType),
             description: editorData,
-            convenience: selectedConveniences.map(Number),
+            amenity: selectedAmenities.map(Number),
             price: Number(formData.get("price")),
             prepayment_percentage: Number(selectedPrepayment),
             min_ded: Number(formData.get("min_ded")),
@@ -207,7 +207,7 @@ function Main() {
             setIsCreate(false);
         }
         dispatch(fetchRegions());
-        dispatch(fetchConveniences());
+        dispatch(fetchAmenities());
         dispatch(fetchPropertyTypes());
     }, []);
 
@@ -721,18 +721,18 @@ function Main() {
                                 "mt-3 border rounded-md border-transparent",
                                 {
                                     "border-danger-important":
-                                        customErrors.conveniences,
+                                        customErrors.amenities,
                                 }
                             )}
                         >
                             <TomSelect
-                                value={selectedConveniences}
+                                value={selectedAmenities}
                                 onChange={(e) => {
-                                    setSelectedConveniences(e.target.value);
+                                    setSelectedAmenities(e.target.value);
 
                                     setCustomErrors((prev) => ({
                                         ...prev,
-                                        conveniences: null,
+                                        amenities: null,
                                     }));
                                 }}
                                 options={{
@@ -749,22 +749,17 @@ function Main() {
                                 className="w-full"
                                 multiple
                             >
-                                {conveniencesSelector.conveniences.map(
-                                    (convenience) => (
-                                        <option
-                                            key={convenience.id}
-                                            value={convenience.id}
-                                        >
-                                            {convenience.name}
-                                        </option>
-                                    )
-                                )}
+                                {amenitiesSelector.amenities.map((amenity) => (
+                                    <option key={amenity.id} value={amenity.id}>
+                                        {amenity.name}
+                                    </option>
+                                ))}
                             </TomSelect>
                         </div>
-                        {customErrors.conveniences && (
+                        {customErrors.amenities && (
                             <div className="mt-2 text-danger">
-                                {typeof customErrors.conveniences ===
-                                    "string" && customErrors.conveniences}
+                                {typeof customErrors.amenities === "string" &&
+                                    customErrors.amenities}
                             </div>
                         )}
                     </div>

@@ -27,7 +27,7 @@ export interface IObject {
         phone: string;
         mail: string;
     };
-    conveniences: {
+    amenities: {
         name: string;
         photo: string;
     }[];

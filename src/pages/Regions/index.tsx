@@ -88,7 +88,7 @@ function Main() {
 
                     // For HTML table
                     {
-                        title: "НАЗВАНИЕ",
+                        title: "Название",
                         minWidth: 200,
                         responsive: 0,
                         field: "name",
@@ -104,7 +104,7 @@ function Main() {
                         },
                     },
                     {
-                        title: "ОБЪЕКТЫ",
+                        title: "Объекты",
                         minWidth: 200,
                         field: "objects",
                         hozAlign: "center",
@@ -121,12 +121,12 @@ function Main() {
                         },
                     },
                     {
-                        title: "",
+                        title: "Действия",
                         minWidth: 200,
-                        field: "",
+                        field: "id",
                         responsive: 1,
                         hozAlign: "right",
-                        headerHozAlign: "center",
+                        headerHozAlign: "right",
                         vertAlign: "middle",
                         resizable: false,
                         headerSort: false,

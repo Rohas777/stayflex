@@ -84,7 +84,7 @@ function Main() {
 
                     // For HTML table
                     {
-                        title: "ИМЯ",
+                        title: "Имя",
                         minWidth: 200,
                         responsive: 0,
                         field: "name",
@@ -100,7 +100,7 @@ function Main() {
                         },
                     },
                     {
-                        title: "ОБЪЕКТЫ",
+                        title: "Объекты",
                         minWidth: 200,
                         field: "objects",
                         hozAlign: "center",
@@ -117,7 +117,7 @@ function Main() {
                         },
                     },
                     {
-                        title: "ПОДПИСАН ДО",
+                        title: "Активен до",
                         minWidth: 200,
                         field: "subscription",
                         hozAlign: "center",
@@ -137,14 +137,14 @@ function Main() {
                         },
                     },
                     {
-                        title: "",
+                        title: "Действия",
                         minWidth: 200,
-                        field: "",
+                        field: "id",
                         responsive: 1,
                         hozAlign: "right",
                         headerHozAlign: "center",
                         vertAlign: "middle",
-                        resizable: false,
+                        // resizable: false,
                         headerSort: false,
                         formatter(cell) {
                             const response: Response = cell.getData();

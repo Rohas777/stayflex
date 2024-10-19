@@ -47,7 +47,7 @@ function Main() {
 
     return (
         <>
-            <div className="flex items-center mt-8 intro-y">
+            <div className="flex flex-wrap items-center mt-8 intro-y">
                 <h2 className="mr-auto text-lg font-medium">Каналы продаж</h2>
                 <div className="flex w-full mt-4 sm:w-auto sm:mt-0">
                     <Link to="create">

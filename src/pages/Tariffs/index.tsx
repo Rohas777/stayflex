@@ -22,11 +22,10 @@ import {
 } from "@/stores/reducers/tariffs/types";
 import Toastify from "toastify-js";
 import Notification from "@/components/Base/Notification";
-import * as lucideIcons from "lucide-react";
 import { stopLoader } from "@/utils/customUtils";
 import { tariffSlice } from "@/stores/reducers/tariffs/slice";
+import { IconType } from "@/vars";
 
-type IconType = keyof typeof lucideIcons.icons;
 function Main() {
     const [buttonModalPreview, setButtonModalPreview] = useState(false);
     const [isCreatePopup, setIsCreatePopup] = useState(true);
@@ -107,7 +106,7 @@ function Main() {
 
     return (
         <>
-            <div className="flex items-center mt-8 intro-y">
+            <div className="flex flex-wrap items-center mt-8 intro-y">
                 <h2 className="mr-auto text-lg font-medium">Тарифы</h2>
                 <div className="flex w-full mt-4 sm:w-auto sm:mt-0">
                     <Button

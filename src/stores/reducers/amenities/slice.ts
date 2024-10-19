@@ -1,22 +1,18 @@
 import { AnyAction, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Status } from "../types";
-import { ConvenienceState } from "./types";
-import {
-    createConvenience,
-    deleteConvenience,
-    fetchConveniences,
-} from "./actions";
+import { AmenityState } from "./types";
+import { createAmenity, deleteAmenity, fetchAmenities } from "./actions";
 
-const initialState: ConvenienceState = {
-    conveniences: [],
+const initialState: AmenityState = {
+    amenities: [],
     status: Status.LOADING,
     error: null,
     isCreated: false,
     isDeleted: false,
 };
 
-export const convenienceSlice = createSlice({
-    name: "convenience",
+export const amenitySlice = createSlice({
+    name: "amenity",
     initialState,
     reducers: {
         resetIsCreated: (state) => {
@@ -27,19 +23,19 @@ export const convenienceSlice = createSlice({
         },
     },
     extraReducers(builder) {
-        builder.addCase(fetchConveniences.fulfilled, (state, action) => {
-            state.conveniences = action.payload.convenience;
+        builder.addCase(fetchAmenities.fulfilled, (state, action) => {
+            state.amenities = action.payload.convenience;
         });
         builder
-            .addCase(createConvenience.fulfilled, (state) => {
+            .addCase(createAmenity.fulfilled, (state) => {
                 state.isCreated = true;
             })
-            .addCase(deleteConvenience.fulfilled, (state) => {
+            .addCase(deleteAmenity.fulfilled, (state) => {
                 state.isDeleted = true;
             });
         builder
             .addMatcher(isPending, (state) => {
-                state.conveniences = [];
+                state.amenities = [];
                 state.status = Status.LOADING;
                 state.error = null;
             })
@@ -48,14 +44,14 @@ export const convenienceSlice = createSlice({
                 state.error = null;
             })
             .addMatcher(isRejected, (state, action: PayloadAction<string>) => {
-                state.conveniences = [];
+                state.amenities = [];
                 state.error = action.payload;
                 state.status = Status.ERROR;
             });
     },
 });
 
-export default convenienceSlice.reducer;
+export default amenitySlice.reducer;
 
 const isRejected = (action: AnyAction) => {
     return action.type.endsWith("rejected");

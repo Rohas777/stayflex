@@ -7,26 +7,60 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { FormLabel, FormInput } from "@/components/Base/Form";
 import { useEffect, useRef, useState } from "react";
 import Dropzone, { DropzoneElement } from "@/components/Base/Dropzone";
-import { ConvenienceCreateType } from "@/stores/reducers/conveniences/types";
+import { AmenityCreateType } from "@/stores/reducers/amenities/types";
 import { Status } from "@/stores/reducers/types";
 import LoadingIcon from "@/components/Base/LoadingIcon";
 import { startLoader, stopLoader } from "@/utils/customUtils";
 import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
+import * as lucideIcons from "lucide-react";
+import { IconType } from "@/vars";
+import Lucide from "@/components/Base/Lucide";
 
-interface ConvenienceFormProps {
-    onCreate: (convenienceData: ConvenienceCreateType) => void;
+interface AmenityFormProps {
+    onCreate: (amenityData: AmenityCreateType) => void;
     setIsLoaderOpened: React.Dispatch<React.SetStateAction<boolean>>;
     isLoaderOpened: boolean;
 }
 
-function ConvenienceForm({
+interface CustomErrors {
+    isValid: boolean;
+    icon: string | null;
+}
+
+function AmenityForm({
     onCreate,
     setIsLoaderOpened,
     isLoaderOpened,
-}: ConvenienceFormProps) {
-    const dropzoneValidationRef = useRef<DropzoneElement>();
-    const [uploadedIcon, setUploadedIcon] = useState<File | null>(null);
-    const [dropzoneError, setDropzoneError] = useState<string | null>(null);
+}: AmenityFormProps) {
+    const [iconValue, setIconValue] = useState<string | null>(null);
+    const [customErrors, setCustomErrors] = useState<CustomErrors>({
+        isValid: true,
+        icon: null,
+    });
+
+    const icons = lucideIcons.icons;
+
+    const vaildateWithoutYup = (formData: FormData) => {
+        const errors: CustomErrors = {
+            isValid: true,
+            icon: null,
+        };
+        if (!(String(formData.get("icon")) in icons)) {
+            errors.icon = "Такой иконки не существует";
+        }
+        if (!formData.get("icon")) {
+            errors.icon = "Обязательно укажите код иконки";
+        }
+
+        Object.keys(errors).forEach((key) => {
+            if (errors[key as keyof CustomErrors] && key != "isValid") {
+                errors.isValid = false;
+                return;
+            }
+        });
+        setCustomErrors(errors);
+        return errors;
+    };
 
     const schema = yup
         .object({
@@ -45,49 +79,20 @@ function ConvenienceForm({
     const onSubmit = async (event: React.ChangeEvent<HTMLFormElement>) => {
         event.preventDefault();
         startLoader(setIsLoaderOpened);
-        const result = await trigger();
-        if ((!uploadedIcon && !result) || !uploadedIcon) {
-            dropzoneValidationRef.current?.classList.add(
-                "border-danger-important"
-            );
-            setDropzoneError("Обязательно загрузите иконку");
-            stopLoader(setIsLoaderOpened);
-
-            return;
-        }
-        if (!result) {
-            stopLoader(setIsLoaderOpened);
-            return;
-        }
         const formData = new FormData(event.target);
-        const convenienceData: ConvenienceCreateType = {
-            convenience_name: JSON.stringify({
-                name: String(formData.get("name")),
-            }),
-            file: uploadedIcon,
+        const result = await trigger();
+        const customResult = vaildateWithoutYup(formData);
+        if (!result || !customResult) {
+            stopLoader(setIsLoaderOpened);
+            return;
+        }
+        const amenityData: AmenityCreateType = {
+            name: String(formData.get("name")),
+            icon: String(formData.get("icon")) as IconType,
         };
 
-        onCreate(convenienceData);
+        onCreate(amenityData);
     };
-
-    useEffect(() => {
-        const elDropzoneValidationRef = dropzoneValidationRef.current;
-        if (elDropzoneValidationRef) {
-            elDropzoneValidationRef.dropzone.on("success", (file) => {
-                setUploadedIcon(file);
-                setDropzoneError(null);
-                dropzoneValidationRef.current?.classList.remove(
-                    "border-danger-important"
-                );
-            });
-            elDropzoneValidationRef.dropzone.on("removedfile", () => {
-                setUploadedIcon(null);
-            });
-            elDropzoneValidationRef.dropzone.on("error", (file) => {
-                elDropzoneValidationRef.dropzone.removeFile(file);
-            });
-        }
-    }, []);
 
     return (
         <>
@@ -126,7 +131,7 @@ function ConvenienceForm({
                     </div>
                     <div className="mt-3">
                         <FormLabel
-                            htmlFor="validation-form-name"
+                            htmlFor="validation-form-icon"
                             className="flex flex-col w-full sm:flex-row"
                         >
                             Иконка
@@ -134,33 +139,34 @@ function ConvenienceForm({
                                 Обязательное
                             </span>
                         </FormLabel>
-                        <Dropzone
-                            getRef={(el) => {
-                                dropzoneValidationRef.current = el;
-                            }}
-                            options={{
-                                url: "https://httpbin.org/post",
-                                createImageThumbnails: false,
-                                thumbnailWidth: 120,
-                                maxFilesize: 10,
-                                maxFiles: 1,
-                                resizeHeight: 40,
-                                resizeWidth: 40,
-                                acceptedFiles: ".svg",
-                                clickable: true,
-                                addRemoveLinks: true,
-                            }}
-                            className="dropzone"
+
+                        <div
+                            className={clsx("flex items-center gap-2", {
+                                "rounded-md border border-danger":
+                                    customErrors.icon,
+                            })}
                         >
-                            <p className="text-lg font-medium">
-                                Перетащите файл в формате SVG сюда или кликните
-                                для выбора.
-                            </p>
-                        </Dropzone>
-                        {dropzoneError && (
+                            {iconValue && iconValue in icons && (
+                                <Lucide icon={iconValue as IconType} />
+                            )}
+                            <FormInput
+                                id="validation-form-icon"
+                                type="text"
+                                name="icon"
+                                onChange={(e) => {
+                                    setIconValue(e.target.value);
+                                    setCustomErrors((prev) => ({
+                                        ...prev,
+                                        icon: null,
+                                    }));
+                                }}
+                                placeholder="Tv"
+                            />
+                        </div>
+                        {customErrors.icon && (
                             <div className="mt-2 text-danger">
-                                {typeof dropzoneError === "string" &&
-                                    dropzoneError}
+                                {typeof customErrors.icon === "string" &&
+                                    customErrors.icon}
                             </div>
                         )}
                     </div>
@@ -177,4 +183,4 @@ function ConvenienceForm({
     );
 }
 
-export default ConvenienceForm;
+export default AmenityForm;

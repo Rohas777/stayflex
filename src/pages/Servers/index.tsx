@@ -42,7 +42,7 @@ function Main() {
 
     return (
         <>
-            <div className="flex items-center mt-8 intro-y">
+            <div className="flex flex-wrap items-center mt-8 intro-y">
                 <h2 className="mr-auto text-lg font-medium">Серверы</h2>
                 <div className="flex w-full mt-4 sm:w-auto sm:mt-0">
                     <Link to="create">
@@ -66,7 +66,7 @@ function Main() {
             <div className="mt-5 intro-y box p-5">
                 {/* BEGIN: Basic Select */}
                 <div className="grid grid-cols-12 gap-5">
-                    <div className="col-span-4">
+                    <div className="col-span-7">
                         <TomSelect
                             value={select}
                             onChange={(e) => {
@@ -85,7 +85,7 @@ function Main() {
                     </div>
                     <Button
                         variant="primary"
-                        className="col-span-2 flex items-center justify-center shadow-md"
+                        className="col-span-5 flex items-center justify-center shadow-md"
                     >
                         <Lucide
                             icon="Save"

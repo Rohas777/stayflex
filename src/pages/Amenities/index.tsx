@@ -10,20 +10,19 @@ import { TabulatorFull as Tabulator } from "tabulator-tables";
 import { stringToHTML } from "@/utils/helper";
 import { DateTime } from "luxon";
 import { useAppDispatch, useAppSelector } from "@/stores/hooks";
-import { deleteUser, fetchUsers } from "@/stores/reducers/users/actions";
 import tippy from "tippy.js";
-import { convenienceSlice } from "@/stores/reducers/conveniences/slice";
+import { amenitySlice } from "@/stores/reducers/amenities/slice";
 import {
-    createConvenience,
-    deleteConvenience,
-    fetchConveniences,
-} from "@/stores/reducers/conveniences/actions";
+    createAmenity,
+    deleteAmenity,
+    fetchAmenities,
+} from "@/stores/reducers/amenities/actions";
 import { Status } from "@/stores/reducers/types";
 import LoadingIcon from "@/components/Base/LoadingIcon";
 import { ListPlus } from "lucide-react";
-import ConvenienceForm from "./form";
+import AmenityForm from "./form";
 import Notification from "@/components/Base/Notification";
-import { ConvenienceCreateType } from "@/stores/reducers/conveniences/types";
+import { AmenityCreateType } from "@/stores/reducers/amenities/types";
 import Toastify from "toastify-js";
 import { startLoader, stopLoader } from "@/utils/customUtils";
 import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
@@ -32,14 +31,13 @@ window.DateTime = DateTime;
 interface Response {
     id?: number;
     name?: string;
-    objects?: number;
     icon?: string;
 }
 
 function Main() {
     const [buttonModalPreview, setButtonModalPreview] = useState(false);
     const [isLoaderOpened, setIsLoaderOpened] = useState(false);
-    const [convenienceData, setConvenienceData] = useState<{
+    const [amenityData, setAmenityData] = useState<{
         name: string;
         icon: string;
         id: number;
@@ -88,7 +86,7 @@ function Main() {
 
                     // For HTML table
                     {
-                        title: "НАЗВАНИЕ",
+                        title: "Название",
                         minWidth: 200,
                         responsive: 0,
                         field: "name",
@@ -99,35 +97,23 @@ function Main() {
                         formatter(cell) {
                             const response: Response = cell.getData();
                             return `<div class="flex items-center justify-center">
-                                        <img src="${response.icon}" alt="" class="w-10 h-10 mr-2"/>
-                                        <div class="font-medium whitespace-nowrap">${response.name}</div>
+                                ${
+                                    response.icon &&
+                                    `<i data-lucide="${response.icon}" class="size-7 mr-2"></i>`
+                                }
+                                        <div class="font-medium whitespace-nowrap">${
+                                            response.name
+                                        }</div>
                                     </div>`;
                         },
                     },
                     {
-                        title: "ОБЪЕКТЫ",
+                        title: "Действия",
                         minWidth: 200,
-                        field: "objects",
-                        hozAlign: "center",
-                        headerHozAlign: "center",
-                        vertAlign: "middle",
-                        print: false,
-                        download: false,
-                        sorter: "number",
-                        formatter(cell) {
-                            const response: Response = cell.getData();
-                            return `<div class="flex lg:justify-center">
-                                        <div class="font-medium whitespace-nowrap">${response.objects}</div>
-                                    </div>`;
-                        },
-                    },
-                    {
-                        title: "",
-                        minWidth: 200,
-                        field: "",
+                        field: "id",
                         responsive: 1,
                         hozAlign: "right",
-                        headerHozAlign: "center",
+                        headerHozAlign: "right",
                         vertAlign: "middle",
                         resizable: false,
                         headerSort: false,
@@ -148,7 +134,7 @@ function Main() {
                             a.append(deleteA);
                             deleteA.addEventListener("click", function () {
                                 setDeleteConfirmationModal(true);
-                                setConvenienceData({
+                                setAmenityData({
                                     name: response.name!,
                                     icon: response.icon!,
                                     id: response.id!,
@@ -162,13 +148,6 @@ function Main() {
                     {
                         title: "NAME",
                         field: "name",
-                        visible: false,
-                        print: true,
-                        download: true,
-                    },
-                    {
-                        title: "OBJECTS",
-                        field: "objects",
                         visible: false,
                         print: true,
                         download: true,
@@ -262,16 +241,17 @@ function Main() {
         }
     };
 
-    const { conveniences, status, error, isCreated, isDeleted } =
-        useAppSelector((state) => state.convenience);
-    const convenienceActions = convenienceSlice.actions;
+    const { amenities, status, error, isCreated, isDeleted } = useAppSelector(
+        (state) => state.amenity
+    );
+    const amenityActions = amenitySlice.actions;
     const dispatch = useAppDispatch();
 
     const onDelete = () => {
-        dispatch(deleteConvenience(String(convenienceData?.id)));
+        dispatch(deleteAmenity(String(amenityData?.id)));
     };
-    const onCreate = async (convenienceData: ConvenienceCreateType) => {
-        await dispatch(createConvenience(convenienceData));
+    const onCreate = async (amenityData: AmenityCreateType) => {
+        await dispatch(createAmenity(amenityData));
     };
 
     useEffect(() => {
@@ -286,7 +266,7 @@ function Main() {
         }
 
         if (isCreated || isDeleted) {
-            dispatch(fetchConveniences());
+            dispatch(fetchAmenities());
 
             const successEl = document
                 .querySelectorAll("#success-notification-content")[0]
@@ -305,8 +285,8 @@ function Main() {
                 stopOnFocus: true,
             }).showToast();
 
-            dispatch(convenienceActions.resetIsCreated());
-            dispatch(convenienceActions.resetIsDeleted());
+            dispatch(amenityActions.resetIsCreated());
+            dispatch(amenityActions.resetIsDeleted());
             stopLoader(setIsLoaderOpened);
         }
     }, [isCreated, isDeleted]);
@@ -314,15 +294,15 @@ function Main() {
         initTabulator();
         reInitOnResizeWindow();
 
-        dispatch(fetchConveniences());
+        dispatch(fetchAmenities());
     }, []);
     useEffect(() => {
-        if (conveniences.length) {
-            const formattedData = conveniences.map((convenience) => ({
-                id: convenience.id,
-                name: convenience.name,
-                objects: Math.floor(Math.random() * 101),
-                icon: "/src/assets/images/conveniences/1.png",
+        if (amenities && amenities.length) {
+            console.log(amenities);
+            const formattedData = amenities.map((amenity) => ({
+                id: amenity.id,
+                name: amenity.name,
+                icon: amenity.icon,
             }));
             tabulator.current
                 ?.setData(formattedData.reverse())
@@ -330,7 +310,7 @@ function Main() {
                     reInitTabulator();
                 });
         }
-    }, [conveniences]);
+    }, [amenities]);
 
     return (
         <>
@@ -386,7 +366,6 @@ function Main() {
                                 className="w-full mt-2 2xl:w-full sm:mt-0 sm:w-auto"
                             >
                                 <option value="name">Название</option>
-                                <option value="objects">Объекты</option>
                             </FormSelect>
                         </div>
                         <div className="items-center mt-2 sm:flex sm:mr-4 xl:mt-0">
@@ -524,7 +503,7 @@ function Main() {
                         <div className="mt-5 text-3xl">Вы уверены?</div>
                         <div className="mt-2 text-slate-500">
                             Вы уверены, что хотите удалить удобство "
-                            {convenienceData?.name}"? <br />
+                            {amenityData?.name}"? <br />
                             Это действие нельзя будет отменить.
                         </div>
                     </div>
@@ -572,7 +551,7 @@ function Main() {
                     >
                         <Lucide icon="X" className="w-8 h-8 text-slate-400" />
                     </a>
-                    <ConvenienceForm
+                    <AmenityForm
                         onCreate={onCreate}
                         isLoaderOpened={isLoaderOpened}
                         setIsLoaderOpened={setIsLoaderOpened}

@@ -7,7 +7,7 @@ import userReducer from "./reducers/users/slice";
 import regionReducer from "./reducers/regions/slice";
 import cityReducer from "./reducers/cities/slice";
 import propertyTypeReducer from "./reducers/property-types/slice";
-import convenienceReducer from "./reducers/conveniences/slice";
+import amenityReducer from "./reducers/amenities/slice";
 import objectReducer from "./reducers/objects/slice";
 import clientReducer from "./reducers/clients/slice";
 import tariffReducer from "./reducers/tariffs/slice";
@@ -23,7 +23,7 @@ export const store = configureStore({
         region: regionReducer,
         city: cityReducer,
         propertyType: propertyTypeReducer,
-        convenience: convenienceReducer,
+        amenity: amenityReducer,
         object: objectReducer,
         client: clientReducer,
         tariff: tariffReducer,

@@ -63,7 +63,7 @@ function Main() {
             <div className="mt-5 intro-y box p-5">
                 {/* BEGIN: Basic Select */}
                 <div className="grid grid-cols-12 gap-5">
-                    <div className="col-span-4">
+                    <div className="col-span-7">
                         <TomSelect
                             value={select}
                             onChange={(e) => {
@@ -82,7 +82,7 @@ function Main() {
                     </div>
                     <Button
                         variant="primary"
-                        className="col-span-2 flex items-center justify-center shadow-md"
+                        className="col-span-5 flex items-center justify-center shadow-md"
                     >
                         <Lucide
                             icon="Download"

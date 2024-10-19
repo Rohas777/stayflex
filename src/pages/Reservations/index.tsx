@@ -87,7 +87,7 @@ function Main() {
 
                     // For HTML table
                     {
-                        title: "ОБЪЕКТ",
+                        title: "Объект",
                         minWidth: 200,
                         responsive: 0,
                         field: "object",
@@ -104,9 +104,8 @@ function Main() {
                         },
                     },
                     {
-                        title: "ДАТА",
+                        title: "Дата",
                         minWidth: 200,
-                        responsive: 0,
                         field: "date",
                         hozAlign: "center",
                         headerHozAlign: "center",
@@ -122,9 +121,8 @@ function Main() {
                         },
                     },
                     {
-                        title: "ИМЯ",
+                        title: "Имя",
                         minWidth: 200,
-                        responsive: 0,
                         field: "name",
                         hozAlign: "center",
                         headerHozAlign: "center",
@@ -140,7 +138,7 @@ function Main() {
                         },
                     },
                     {
-                        title: "СТАТУС",
+                        title: "Статус",
                         minWidth: 200,
                         field: "status",
                         hozAlign: "center",
@@ -198,13 +196,13 @@ function Main() {
                         },
                     },
                     {
-                        title: "",
                         minWidth: 50,
                         maxWidth: 100,
-                        field: "",
+                        title: "Действия",
+                        field: "id",
                         responsive: 1,
                         hozAlign: "right",
-                        vertAlign: "middle",
+                        headerHozAlign: "right",
                         resizable: false,
                         headerSort: false,
                         formatter(cell) {
