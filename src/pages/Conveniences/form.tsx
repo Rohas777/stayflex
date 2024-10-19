@@ -10,13 +10,20 @@ import Dropzone, { DropzoneElement } from "@/components/Base/Dropzone";
 import { ConvenienceCreateType } from "@/stores/reducers/conveniences/types";
 import { Status } from "@/stores/reducers/types";
 import LoadingIcon from "@/components/Base/LoadingIcon";
+import { startLoader, stopLoader } from "@/utils/customUtils";
+import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
 
 interface ConvenienceFormProps {
     onCreate: (convenienceData: ConvenienceCreateType) => void;
-    status: Status;
+    setIsLoaderOpened: React.Dispatch<React.SetStateAction<boolean>>;
+    isLoaderOpened: boolean;
 }
 
-function ConvenienceForm({ onCreate, status }: ConvenienceFormProps) {
+function ConvenienceForm({
+    onCreate,
+    setIsLoaderOpened,
+    isLoaderOpened,
+}: ConvenienceFormProps) {
     const dropzoneValidationRef = useRef<DropzoneElement>();
     const [uploadedIcon, setUploadedIcon] = useState<File | null>(null);
     const [dropzoneError, setDropzoneError] = useState<string | null>(null);
@@ -37,15 +44,19 @@ function ConvenienceForm({ onCreate, status }: ConvenienceFormProps) {
     });
     const onSubmit = async (event: React.ChangeEvent<HTMLFormElement>) => {
         event.preventDefault();
+        startLoader(setIsLoaderOpened);
         const result = await trigger();
         if ((!uploadedIcon && !result) || !uploadedIcon) {
             dropzoneValidationRef.current?.classList.add(
                 "border-danger-important"
             );
             setDropzoneError("Обязательно загрузите иконку");
+            stopLoader(setIsLoaderOpened);
+
             return;
         }
         if (!result) {
+            stopLoader(setIsLoaderOpened);
             return;
         }
         const formData = new FormData(event.target);
@@ -80,13 +91,7 @@ function ConvenienceForm({ onCreate, status }: ConvenienceFormProps) {
 
     return (
         <>
-            {status === Status.LOADING && (
-                <div className="fixed inset-0 z-[70] bg-slate-50 bg-opacity-70 flex justify-center items-center w-full h-full">
-                    <div className="w-10 h-10">
-                        <LoadingIcon icon="ball-triangle" />
-                    </div>
-                </div>
-            )}
+            {isLoaderOpened && <OverlayLoader />}
             <div className="p-5">
                 <div className="mt-5 text-lg font-bold text-center">
                     Добавить удобство

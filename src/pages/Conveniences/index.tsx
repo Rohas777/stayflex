@@ -15,6 +15,7 @@ import tippy from "tippy.js";
 import { convenienceSlice } from "@/stores/reducers/conveniences/slice";
 import {
     createConvenience,
+    deleteConvenience,
     fetchConveniences,
 } from "@/stores/reducers/conveniences/actions";
 import { Status } from "@/stores/reducers/types";
@@ -24,6 +25,8 @@ import ConvenienceForm from "./form";
 import Notification from "@/components/Base/Notification";
 import { ConvenienceCreateType } from "@/stores/reducers/conveniences/types";
 import Toastify from "toastify-js";
+import { startLoader, stopLoader } from "@/utils/customUtils";
+import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
 
 window.DateTime = DateTime;
 interface Response {
@@ -35,16 +38,15 @@ interface Response {
 
 function Main() {
     const [buttonModalPreview, setButtonModalPreview] = useState(false);
+    const [isLoaderOpened, setIsLoaderOpened] = useState(false);
     const [convenienceData, setConvenienceData] = useState<{
         name: string;
         icon: string;
+        id: number;
     } | null>(null);
 
     const [deleteConfirmationModal, setDeleteConfirmationModal] =
         useState(false);
-    const [columnAcionFocusId, setcolumnAcionFocusId] = useState<number | null>(
-        null
-    );
 
     const tableRef = createRef<HTMLDivElement>();
     const tabulator = useRef<Tabulator>();
@@ -146,12 +148,11 @@ function Main() {
                             a.append(deleteA);
                             deleteA.addEventListener("click", function () {
                                 setDeleteConfirmationModal(true);
-                                const rowId = cell.getRow().getData().id;
                                 setConvenienceData({
                                     name: response.name!,
                                     icon: response.icon!,
+                                    id: response.id!,
                                 });
-                                setcolumnAcionFocusId(rowId);
                             });
                             return a;
                         },
@@ -260,44 +261,55 @@ function Main() {
             });
         }
     };
-    const onDelete = () => {
-        if (columnAcionFocusId) {
-            dispatch(deleteUser(String(columnAcionFocusId)));
-            reInitTabulator();
-            setDeleteConfirmationModal(false);
-        }
-    };
 
-    const onCreate = async (convenienceData: ConvenienceCreateType) => {
-        await dispatch(createConvenience(convenienceData));
-        await dispatch(fetchConveniences());
-        await setButtonModalPreview(false);
-
-        const successEl = document
-            .querySelectorAll("#success-notification-content")[0]
-            .cloneNode(true) as HTMLElement;
-        successEl.classList.remove("hidden");
-        await Toastify({
-            node: successEl,
-            duration: 3000,
-            newWindow: true,
-            close: true,
-            gravity: "top",
-            position: "right",
-            stopOnFocus: true,
-        }).showToast();
-    };
-    const onUpdate = (convenience: ConvenienceCreateType) => {
-        // dispatch(createPropertyType(convenience));
-        // dispatch(fetchPropertyTypes());
-        // setButtonModalPreview(false);
-    };
-    const { conveniences, status, error } = useAppSelector(
-        (state) => state.convenience
-    );
-    const {} = convenienceSlice.actions;
+    const { conveniences, status, error, isCreated, isDeleted } =
+        useAppSelector((state) => state.convenience);
+    const convenienceActions = convenienceSlice.actions;
     const dispatch = useAppDispatch();
 
+    const onDelete = () => {
+        dispatch(deleteConvenience(String(convenienceData?.id)));
+    };
+    const onCreate = async (convenienceData: ConvenienceCreateType) => {
+        await dispatch(createConvenience(convenienceData));
+    };
+
+    useEffect(() => {
+        let notificationText = "";
+        if (isDeleted) {
+            setDeleteConfirmationModal(false);
+            notificationText = "Удобство успешно удалено";
+        }
+        if (isCreated) {
+            setButtonModalPreview(false);
+            notificationText = "Удобство успешно добавлено";
+        }
+
+        if (isCreated || isDeleted) {
+            dispatch(fetchConveniences());
+
+            const successEl = document
+                .querySelectorAll("#success-notification-content")[0]
+                .cloneNode(true) as HTMLElement;
+            successEl.classList.remove("hidden");
+
+            successEl.querySelector(".text-content")!.textContent =
+                notificationText;
+            Toastify({
+                node: successEl,
+                duration: 3000,
+                newWindow: true,
+                close: true,
+                gravity: "top",
+                position: "right",
+                stopOnFocus: true,
+            }).showToast();
+
+            dispatch(convenienceActions.resetIsCreated());
+            dispatch(convenienceActions.resetIsDeleted());
+            stopLoader(setIsLoaderOpened);
+        }
+    }, [isCreated, isDeleted]);
     useEffect(() => {
         initTabulator();
         reInitOnResizeWindow();
@@ -342,7 +354,7 @@ function Main() {
             </div>
             {/* BEGIN: HTML Table Data */}
             <div className="p-5 mt-5 intro-y box">
-                {status === Status.LOADING && (
+                {status === Status.LOADING && !isLoaderOpened && (
                     <div className="absolute z-[70] bg-slate-50 bg-opacity-70 flex justify-center items-center w-full h-full">
                         <div className="w-10 h-10">
                             <LoadingIcon icon="ball-triangle" />
@@ -503,6 +515,7 @@ function Main() {
                 }}
             >
                 <Dialog.Panel>
+                    {isLoaderOpened && <OverlayLoader />}
                     <div className="p-5 text-center">
                         <Lucide
                             icon="XCircle"
@@ -510,7 +523,7 @@ function Main() {
                         />
                         <div className="mt-5 text-3xl">Вы уверены?</div>
                         <div className="mt-2 text-slate-500">
-                            Вы уверены, что хотите удалить тип недвижимости "
+                            Вы уверены, что хотите удалить удобство "
                             {convenienceData?.name}"? <br />
                             Это действие нельзя будет отменить.
                         </div>
@@ -531,6 +544,7 @@ function Main() {
                             type="button"
                             className="w-24"
                             onClick={() => {
+                                startLoader(setIsLoaderOpened);
                                 onDelete();
                             }}
                         >
@@ -558,7 +572,11 @@ function Main() {
                     >
                         <Lucide icon="X" className="w-8 h-8 text-slate-400" />
                     </a>
-                    <ConvenienceForm onCreate={onCreate} status={status} />
+                    <ConvenienceForm
+                        onCreate={onCreate}
+                        isLoaderOpened={isLoaderOpened}
+                        setIsLoaderOpened={setIsLoaderOpened}
+                    />
                 </Dialog.Panel>
             </Dialog>
             {/* END: Modal Content */}
@@ -569,7 +587,7 @@ function Main() {
             >
                 <Lucide icon="CheckCircle" className="text-success" />
                 <div className="ml-4 mr-4">
-                    <div className="font-medium">
+                    <div className="font-medium text-content">
                         Удобство успешно добавлено
                     </div>
                 </div>

@@ -1,27 +1,42 @@
 import { AnyAction, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Status } from "../types";
 import { ConvenienceState } from "./types";
-import { fetchConveniences } from "./actions";
+import {
+    createConvenience,
+    deleteConvenience,
+    fetchConveniences,
+} from "./actions";
 
 const initialState: ConvenienceState = {
     conveniences: [],
     status: Status.LOADING,
     error: null,
+    isCreated: false,
+    isDeleted: false,
 };
 
 export const convenienceSlice = createSlice({
     name: "convenience",
     initialState,
-    reducers: {},
+    reducers: {
+        resetIsCreated: (state) => {
+            state.isCreated = false;
+        },
+        resetIsDeleted: (state) => {
+            state.isDeleted = false;
+        },
+    },
     extraReducers(builder) {
         builder.addCase(fetchConveniences.fulfilled, (state, action) => {
             state.conveniences = action.payload.convenience;
         });
-        // .addCase(deletUser.fulfilled, (state, action) => {
-        //     state.users = state.users.filter(
-        //         (user) => user.id !== Number(action.payload)
-        //     );
-        // });
+        builder
+            .addCase(createConvenience.fulfilled, (state) => {
+                state.isCreated = true;
+            })
+            .addCase(deleteConvenience.fulfilled, (state) => {
+                state.isDeleted = true;
+            });
         builder
             .addMatcher(isPending, (state) => {
                 state.conveniences = [];
