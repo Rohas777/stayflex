@@ -11,6 +11,7 @@ const initialState: ClientState = {
     error: null,
     errorByPhone: null,
     isCreated: false,
+    createdClient: null,
 };
 
 export const clientSlice = createSlice({
@@ -24,6 +25,7 @@ export const clientSlice = createSlice({
         },
         resetIsCreated: (state) => {
             state.isCreated = false;
+            state.createdClient = null;
         },
     },
     extraReducers(builder) {
@@ -65,14 +67,17 @@ export const clientSlice = createSlice({
             );
 
         builder
-            .addCase(createClient.fulfilled, (state) => {
+            .addCase(createClient.fulfilled, (state, action) => {
                 state.isCreated = true;
+                state.createdClient = action.payload;
             })
             .addCase(createClient.pending, (state) => {
                 state.isCreated = false;
+                state.createdClient = null;
             })
             .addCase(createClient.rejected, (state) => {
                 state.isCreated = false;
+                state.createdClient = null;
             });
     },
 });

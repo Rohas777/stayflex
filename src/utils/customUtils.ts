@@ -1,16 +1,18 @@
 import { lock, unlock } from "tua-body-scroll-lock";
 
 export const startLoader = (
-    setIsLoaderOpen: React.Dispatch<React.SetStateAction<boolean>>
+    setIsLoaderOpen: React.Dispatch<React.SetStateAction<boolean>>,
+    targetElement?: HTMLElement
 ) => {
     setIsLoaderOpen(true);
-    lock();
+    lock(targetElement);
 };
 export const stopLoader = (
-    setIsLoaderOpen: React.Dispatch<React.SetStateAction<boolean>>
+    setIsLoaderOpen: React.Dispatch<React.SetStateAction<boolean>>,
+    targetElement?: HTMLElement
 ) => {
     setIsLoaderOpen(false);
-    unlock();
+    unlock(targetElement);
 };
 
 export const convertDateString = (str: string) => {

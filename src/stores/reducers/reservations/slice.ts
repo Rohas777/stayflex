@@ -6,6 +6,7 @@ import {
     fetchReservationById,
     fetchReservations,
     updateReservation,
+    updateReservationStatus,
 } from "./actions";
 
 const initialState: ReservationState = {
@@ -15,6 +16,7 @@ const initialState: ReservationState = {
     statusByID: Status.LOADING,
     error: null,
     isCreated: false,
+    isUpdated: false,
 };
 
 export const reservationSlice = createSlice({
@@ -23,6 +25,9 @@ export const reservationSlice = createSlice({
     reducers: {
         resetIsCreated: (state) => {
             state.isCreated = false;
+        },
+        resetIsUpdated: (state) => {
+            state.isUpdated = false;
         },
     },
     extraReducers(builder) {
@@ -57,7 +62,10 @@ export const reservationSlice = createSlice({
                 state.isCreated = true;
             })
             .addCase(updateReservation.fulfilled, (state) => {
-                state.isCreated = true;
+                state.isUpdated = true;
+            })
+            .addCase(updateReservationStatus.fulfilled, (state) => {
+                state.isUpdated = true;
             });
         // .addCase(deletUser.fulfilled, (state, action) => {
         //     state.users = state.users.filter(

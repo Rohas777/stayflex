@@ -9,6 +9,7 @@ export interface ClientState {
     error: string | null;
     errorByPhone: string | null;
     isCreated: boolean;
+    createdClient: IClient | null;
 }
 
 export interface ClientCreateType {

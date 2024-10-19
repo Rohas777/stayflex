@@ -8,6 +8,7 @@ export interface ReservationState {
     statusByID: Status;
     error: string | null;
     isCreated: boolean;
+    isUpdated: boolean;
 }
 
 export interface ReservationCreateType {

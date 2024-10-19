@@ -29,10 +29,12 @@ import Loader from "@/components/Custom/Loader/Loader";
 import OpacityLoader from "@/components/Custom/OpacityLoader/Loader";
 import { DateTime } from "luxon";
 import { formatDate, startLoader, stopLoader } from "@/utils/customUtils";
+import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
 
 interface ReservationFormProps {
     onCreate: (name: ReservationCreateType) => void;
     setIsLoaderOpen: React.Dispatch<React.SetStateAction<boolean>>;
+    isLoaderOpen: boolean;
 }
 type CustomErrors = {
     isValid: boolean;
@@ -43,7 +45,11 @@ type CustomErrors = {
     name: string | null;
 };
 
-function ReservationForm({ onCreate, setIsLoaderOpen }: ReservationFormProps) {
+function ReservationForm({
+    onCreate,
+    setIsLoaderOpen,
+    isLoaderOpen,
+}: ReservationFormProps) {
     const [selectedObject, setSelectedObject] = useState("-1");
     const [daterange, setDaterange] = useState("");
     const [tel, setTel] = useState<string>();
@@ -231,19 +237,16 @@ function ReservationForm({ onCreate, setIsLoaderOpen }: ReservationFormProps) {
 
     useEffect(() => {
         if (isSubmitting && clientsState.isCreated) {
-            dispatch(clientActions.resetIsCreated());
-            dispatch(fetchClientByPhone(tel!));
-        }
-        if (clientsState.statusByPhone === Status.SUCCESS && isSubmitting) {
             const [startDate, endDate] = daterange.split(" - ");
             const reservationData: ReservationCreateType = {
                 start_date: formatDate(new Date(startDate)),
                 end_date: formatDate(new Date(endDate)),
                 object_id: Number(selectedObject),
-                client_id: clientsState.clientByPhone?.id!,
+                client_id: clientsState.createdClient?.id!,
                 description: String(formData?.get("description")),
             };
             onCreate(reservationData);
+            dispatch(clientActions.resetIsCreated());
             setIsSubmitting(false);
         }
     }, [
@@ -267,6 +270,8 @@ function ReservationForm({ onCreate, setIsLoaderOpen }: ReservationFormProps) {
     }
     return (
         <>
+            {isLoaderOpen && <OverlayLoader />}
+
             <div className="p-5">
                 <div className="mt-5 text-lg font-bold text-center">
                     Добавить бронь

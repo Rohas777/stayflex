@@ -33,6 +33,22 @@ export const createReservation = createAsyncThunk(
     }
 );
 
+export const updateReservationStatus = createAsyncThunk(
+    "/reservation/updateStatus",
+    async (reservationData: { id: number; status: string }) => {
+        const response = await instance.put(
+            `/reservation/status`,
+            reservationData,
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            }
+        );
+        return response.data;
+    }
+);
+
 export const updateReservation = createAsyncThunk(
     "/reservation/update",
     async (reservationData: ReservationUpdateType) => {

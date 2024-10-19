@@ -17,6 +17,7 @@ import {
     createReservation,
     fetchReservationById,
     fetchReservations,
+    updateReservationStatus,
 } from "@/stores/reducers/reservations/actions";
 import { Status } from "@/stores/reducers/types";
 import LoadingIcon from "@/components/Base/LoadingIcon";
@@ -29,8 +30,6 @@ import Toastify from "toastify-js";
 import Notification from "@/components/Base/Notification";
 import { fetchObjects } from "@/stores/reducers/objects/actions";
 import { clientSlice } from "@/stores/reducers/clients/slice";
-import OpacityLoader from "@/components/Custom/OpacityLoader/Loader";
-import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
 
 window.DateTime = DateTime;
 interface Response {
@@ -187,7 +186,13 @@ function Main() {
                                     </select>`);
                             a.append(selector);
                             a.addEventListener("hover", function () {});
-                            selector.addEventListener("click", function () {});
+                            selector.addEventListener("change", function () {
+                                const value = (this as HTMLSelectElement).value;
+                                onUpdateStatus({
+                                    id: response.id!,
+                                    status: value,
+                                });
+                            });
                             return a;
                         },
                     },
@@ -354,9 +359,10 @@ function Main() {
         statusByID,
         statusAll,
         isCreated,
+        isUpdated,
         error,
     } = useAppSelector((state) => state.reservation);
-    const { resetIsCreated } = reservationSlice.actions;
+    const { resetIsCreated, resetIsUpdated } = reservationSlice.actions;
 
     const { resetClientByPhone } = clientSlice.actions;
 
@@ -392,17 +398,25 @@ function Main() {
     const onCreate = async (reservationData: ReservationCreateType) => {
         await dispatch(createReservation(reservationData));
     };
+    const onUpdateStatus = async (reservationData: {
+        id: number;
+        status: string;
+    }) => {
+        await dispatch(updateReservationStatus(reservationData));
+    };
     useEffect(() => {
         if (statusByID === Status.ERROR) {
             stopLoader(setIsLoaderOpen);
             console.log(error);
         }
-        if (isCreated) {
+        if (isCreated || isUpdated) {
             dispatch(fetchReservations());
             setButtonModalCreate(false);
             const successEl = document
                 .querySelectorAll("#success-notification-content")[0]
                 .cloneNode(true) as HTMLElement;
+            successEl.querySelector(".text-content")!.textContent =
+                "Бронь успешно обновлена";
             successEl.classList.remove("hidden");
             Toastify({
                 node: successEl,
@@ -415,12 +429,12 @@ function Main() {
             }).showToast();
             stopLoader(setIsLoaderOpen);
             dispatch(resetIsCreated());
+            dispatch(resetIsUpdated());
         }
-    }, [isCreated, statusByID]);
+    }, [isCreated, statusByID, isUpdated]);
 
     return (
         <>
-            {isLoaderOpen && <OverlayLoader />}
             <div className="flex flex-col items-center mt-8 intro-y sm:flex-row">
                 <h2 className="mr-auto text-lg font-medium">Брони</h2>
                 <div className="flex w-full mt-4 sm:w-auto sm:mt-0">
@@ -618,9 +632,10 @@ function Main() {
                 </Dialog.Panel>
             </Dialog>
             {/* END: Delete Confirmation Modal */}
-            {/* BEGIN: Delete Confirmation Modal */}
+            {/* BEGIN: Form Modal */}
             <Dialog
                 size="lg"
+                id="reservation-form-modal"
                 open={buttonModalCreate}
                 onClose={() => {
                     setButtonModalCreate(false);
@@ -642,10 +657,11 @@ function Main() {
                     <ReservationForm
                         onCreate={onCreate}
                         setIsLoaderOpen={setIsLoaderOpen}
+                        isLoaderOpen={isLoaderOpen}
                     />
                 </Dialog.Panel>
             </Dialog>
-            {/* END: Delete Confirmation Modal */}
+            {/* END: Form Modal */}
             {/* BEGIN: Success Notification Content */}
             <Notification
                 id="success-notification-content"
@@ -653,7 +669,9 @@ function Main() {
             >
                 <Lucide icon="CheckCircle" className="text-success" />
                 <div className="ml-4 mr-4">
-                    <div className="font-medium">Бронь успешно добавлена</div>
+                    <div className="font-medium text-content">
+                        Бронь успешно добавлена
+                    </div>
                 </div>
             </Notification>
             {/* END: Success Notification Content */}
