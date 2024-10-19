@@ -11,12 +11,21 @@ import { stringToHTML } from "@/utils/helper";
 import { DateTime } from "luxon";
 import { useAppDispatch, useAppSelector } from "@/stores/hooks";
 import { userSlice } from "@/stores/reducers/users/slice";
-import { deleteUser, fetchUsers } from "@/stores/reducers/users/actions";
+import {
+    createUser,
+    deleteUser,
+    fetchUsers,
+} from "@/stores/reducers/users/actions";
 import tippy from "tippy.js";
 import { Link } from "react-router-dom";
 import LoadingIcon from "@/components/Base/LoadingIcon";
 import { Status } from "@/stores/reducers/types";
 import { ListPlus } from "lucide-react";
+import { startLoader, stopLoader } from "@/utils/customUtils";
+import Toastify from "toastify-js";
+import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
+import { UserCreateType } from "@/stores/reducers/users/types";
+import Notification from "@/components/Base/Notification";
 
 window.DateTime = DateTime;
 interface Response {
@@ -29,7 +38,11 @@ interface Response {
 function Main() {
     const [deleteConfirmationModal, setDeleteConfirmationModal] =
         useState(false);
-    const [rowAcionFocusId, setRowAcionFocusId] = useState<number | null>(null);
+    const [userData, setUserData] = useState<{
+        name: string;
+        id: number;
+    } | null>(null);
+    const [isLoaderOpened, setIsLoaderOpened] = useState(false);
 
     const tableRef = createRef<HTMLDivElement>();
     const tabulator = useRef<Tabulator>();
@@ -134,6 +147,7 @@ function Main() {
                         resizable: false,
                         headerSort: false,
                         formatter(cell) {
+                            const response: Response = cell.getData();
                             const a = stringToHTML(
                                 `<div class="flex lg:justify-center items-center"></div>`
                             );
@@ -179,9 +193,10 @@ function Main() {
                             a.addEventListener("hover", function () {});
                             deleteA.addEventListener("click", function () {
                                 setDeleteConfirmationModal(true);
-                                const rowId = cell.getRow().getData().id;
-                                console.log(rowId);
-                                setRowAcionFocusId(rowId);
+                                setUserData({
+                                    name: response.name!,
+                                    id: response.id!,
+                                });
                             });
                             return a;
                         },
@@ -298,17 +313,56 @@ function Main() {
         }
     };
 
+    const { users, status, error, isCreated, isDeleted } = useAppSelector(
+        (state) => state.user
+    );
+    const userActions = userSlice.actions;
+    const dispatch = useAppDispatch();
+
     const onDelete = () => {
-        if (rowAcionFocusId) {
-            dispatch(deleteUser(String(rowAcionFocusId)));
-            reInitTabulator();
-            setDeleteConfirmationModal(false);
-        }
+        dispatch(deleteUser(String(userData?.id)));
     };
 
-    const { users, status, error } = useAppSelector((state) => state.user);
-    const {} = userSlice.actions;
-    const dispatch = useAppDispatch();
+    const onCreate = (user: UserCreateType) => {
+        dispatch(createUser(user));
+    };
+
+    useEffect(() => {
+        let notificationText = "";
+        if (isDeleted) {
+            setDeleteConfirmationModal(false);
+            notificationText = "Пользователь успешно удалён";
+        }
+        if (isCreated) {
+            // setButtonModalPreview(false);
+            notificationText = "Пользователь успешно добавлен";
+        }
+
+        if (isCreated || isDeleted) {
+            dispatch(fetchUsers());
+
+            const successEl = document
+                .querySelectorAll("#success-notification-content")[0]
+                .cloneNode(true) as HTMLElement;
+            successEl.classList.remove("hidden");
+
+            successEl.querySelector(".text-content")!.textContent =
+                notificationText;
+            Toastify({
+                node: successEl,
+                duration: 3000,
+                newWindow: true,
+                close: true,
+                gravity: "top",
+                position: "right",
+                stopOnFocus: true,
+            }).showToast();
+
+            dispatch(userActions.resetIsCreated());
+            dispatch(userActions.resetIsDeleted());
+            stopLoader(setIsLoaderOpened);
+        }
+    }, [isCreated, isDeleted]);
 
     useEffect(() => {
         initTabulator();
@@ -345,7 +399,7 @@ function Main() {
             </div>
             {/* BEGIN: HTML Table Data */}
             <div className="p-5 mt-5 intro-y box">
-                {status === Status.LOADING && (
+                {status === Status.LOADING && !isLoaderOpened && (
                     <div className="absolute z-50 bg-slate-50 bg-opacity-70 flex justify-center items-center w-full h-full">
                         <div className="w-10 h-10">
                             <LoadingIcon icon="ball-triangle" />
@@ -507,15 +561,17 @@ function Main() {
                 }}
             >
                 <Dialog.Panel>
+                    {isLoaderOpened && <OverlayLoader />}
                     <div className="p-5 text-center">
                         <Lucide
                             icon="XCircle"
                             className="w-16 h-16 mx-auto mt-3 text-danger"
                         />
-                        <div className="mt-5 text-3xl">Are you sure?</div>
+                        <div className="mt-5 text-3xl">Вы уверены?</div>
                         <div className="mt-2 text-slate-500">
-                            Do you really want to delete these records? <br />
-                            This process cannot be undone.
+                            Вы уверены, что хотите удалить пользователя "
+                            {userData?.name}"? <br />
+                            Это действие нельзя будет отменить.
                         </div>
                     </div>
                     <div className="px-5 pb-8 text-center">
@@ -527,22 +583,36 @@ function Main() {
                             }}
                             className="w-24 mr-1"
                         >
-                            Cancel
+                            Отмена
                         </Button>
                         <Button
                             variant="danger"
                             type="button"
                             className="w-24"
                             onClick={() => {
+                                startLoader(setIsLoaderOpened);
                                 onDelete();
                             }}
                         >
-                            Delete
+                            Удалить
                         </Button>
                     </div>
                 </Dialog.Panel>
             </Dialog>
             {/* END: Delete Confirmation Modal */}
+            {/* BEGIN: Success Notification Content */}
+            <Notification
+                id="success-notification-content"
+                className="flex hidden"
+            >
+                <Lucide icon="CheckCircle" className="text-success" />
+                <div className="ml-4 mr-4">
+                    <div className="font-medium text-content">
+                        Пользователь успешно добавлен
+                    </div>
+                </div>
+            </Notification>
+            {/* END: Success Notification Content */}
         </>
     );
 }

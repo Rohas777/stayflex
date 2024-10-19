@@ -1,27 +1,42 @@
 import { UserState } from "@/stores/reducers/users/types";
 import { AnyAction, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { deleteUser, fetchUsers } from "./actions";
+import { createUser, deleteUser, fetchUsers } from "./actions";
 import { Status } from "../types";
 
 const initialState: UserState = {
     users: [],
     status: Status.LOADING,
     error: null,
+    isCreated: false,
+    isDeleted: false,
 };
 
 export const userSlice = createSlice({
     name: "user",
     initialState,
-    reducers: {},
+    reducers: {
+        resetIsCreated: (state) => {
+            state.isCreated = false;
+        },
+        resetIsDeleted: (state) => {
+            state.isDeleted = false;
+        },
+    },
     extraReducers(builder) {
+        builder.addCase(fetchUsers.fulfilled, (state, action) => {
+            state.users = action.payload.users;
+        });
+        // .addCase(deleteUser.fulfilled, (state, action) => {
+        //     state.users = state.users.filter(
+        //         (user) => user.id !== Number(action.payload)
+        //     );
+        // });
         builder
-            .addCase(fetchUsers.fulfilled, (state, action) => {
-                state.users = action.payload.users;
+            .addCase(createUser.fulfilled, (state) => {
+                state.isCreated = true;
             })
-            .addCase(deleteUser.fulfilled, (state, action) => {
-                state.users = state.users.filter(
-                    (user) => user.id !== Number(action.payload)
-                );
+            .addCase(deleteUser.fulfilled, (state) => {
+                state.isDeleted = true;
             });
         builder
             .addMatcher(isPending, (state) => {
