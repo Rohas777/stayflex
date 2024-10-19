@@ -1,27 +1,39 @@
 import { AnyAction, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Status } from "../types";
 import { CityState } from "./types";
-import { fetchCities } from "./actions";
+import { createCity, deleteCity, fetchCities } from "./actions";
 
 const initialState: CityState = {
     cities: [],
     status: Status.LOADING,
     error: null,
+    isCreated: false,
+    isDeleted: false,
 };
 
 export const citySlice = createSlice({
     name: "city",
     initialState,
-    reducers: {},
+    reducers: {
+        resetIsCreated: (state) => {
+            state.isCreated = false;
+        },
+        resetIsDeleted: (state) => {
+            state.isDeleted = false;
+        },
+    },
     extraReducers(builder) {
         builder.addCase(fetchCities.fulfilled, (state, action) => {
             state.cities = action.payload.cities;
         });
-        // .addCase(deletUser.fulfilled, (state, action) => {
-        //     state.users = state.users.filter(
-        //         (user) => user.id !== Number(action.payload)
-        //     );
-        // });
+
+        builder
+            .addCase(createCity.fulfilled, (state) => {
+                state.isCreated = true;
+            })
+            .addCase(deleteCity.fulfilled, (state) => {
+                state.isDeleted = true;
+            });
         builder
             .addMatcher(isPending, (state) => {
                 state.cities = [];

@@ -21,10 +21,11 @@ export const createRegion = createAsyncThunk(
         return response.data;
     }
 );
-// export const deleteUser = createAsyncThunk<string, string>(
-//     "/user/deleteUser",
-//     async (id) => {
-//         const response = await instance.delete(`/user/delete/${id}`);
-//         return response.data.id;
-//     }
-// );
+
+export const deleteRegion = createAsyncThunk<string, string>(
+    "/region/delete",
+    async (id) => {
+        const response = await instance.delete(`/region/delete?id=${id}`);
+        return response.data.id;
+    }
+);

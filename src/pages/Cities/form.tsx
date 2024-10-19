@@ -14,12 +14,20 @@ import { useAppDispatch, useAppSelector } from "@/stores/hooks";
 import { fetchRegions } from "@/stores/reducers/regions/actions";
 import { Status } from "@/stores/reducers/types";
 import LoadingIcon from "@/components/Base/LoadingIcon";
+import { startLoader, stopLoader } from "@/utils/customUtils";
+import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
 
 interface CityFormProps {
     onCreate: (data: CityCreateType) => void;
+    setIsLoaderOpened: React.Dispatch<React.SetStateAction<boolean>>;
+    isLoaderOpened: boolean;
 }
 
-function CityForm({ onCreate }: CityFormProps) {
+function CityForm({
+    onCreate,
+    setIsLoaderOpened,
+    isLoaderOpened,
+}: CityFormProps) {
     const [selectServer, setSelectServer] = useState("1");
     const [selectRegion, setSelectRegion] = useState("-1");
     const [serversData, setServersData] = useState([
@@ -60,36 +68,25 @@ function CityForm({ onCreate }: CityFormProps) {
     const onSubmit = async (event: React.ChangeEvent<HTMLFormElement>) => {
         event.preventDefault();
         const result = await trigger();
+        startLoader(setIsLoaderOpened);
         if (!result) {
+            stopLoader(setIsLoaderOpened);
             return;
-        } else {
-            const successEl = document
-                .querySelectorAll("#success-notification-content")[0]
-                .cloneNode(true) as HTMLElement;
-            successEl.classList.remove("hidden");
-            Toastify({
-                node: successEl,
-                duration: 3000,
-                newWindow: true,
-                close: true,
-                gravity: "top",
-                position: "right",
-                stopOnFocus: true,
-            }).showToast();
-            const formData = new FormData(event.target);
-            const city: CityCreateType = {
-                name: String(formData.get("name")),
-                region_id: Number(selectRegion),
-            };
-            onCreate(city);
         }
+
+        const formData = new FormData(event.target);
+        const city: CityCreateType = {
+            name: String(formData.get("name")),
+            region_id: Number(selectRegion),
+        };
+        onCreate(city);
     };
 
     useEffect(() => {
         dispatch(fetchRegions());
     }, []);
 
-    if (status === Status.LOADING) {
+    if (status === Status.LOADING && !isLoaderOpened) {
         return (
             <>
                 <div className="w-full h-60 relative rounded-sm">
@@ -105,6 +102,7 @@ function CityForm({ onCreate }: CityFormProps) {
 
     return (
         <>
+            {isLoaderOpened && <OverlayLoader />}
             <div className="p-5">
                 <div className="mt-5 text-lg font-bold text-center">
                     Добавить город

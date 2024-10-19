@@ -30,6 +30,7 @@ import Toastify from "toastify-js";
 import Notification from "@/components/Base/Notification";
 import { fetchObjects } from "@/stores/reducers/objects/actions";
 import { clientSlice } from "@/stores/reducers/clients/slice";
+import { di } from "@fullcalendar/core/internal-common";
 
 window.DateTime = DateTime;
 interface Response {
@@ -415,8 +416,9 @@ function Main() {
             const successEl = document
                 .querySelectorAll("#success-notification-content")[0]
                 .cloneNode(true) as HTMLElement;
-            successEl.querySelector(".text-content")!.textContent =
-                "Бронь успешно обновлена";
+            successEl.querySelector(".text-content")!.textContent = isCreated
+                ? "Бронь успешно добавлена"
+                : "Бронь успешно обновлена";
             successEl.classList.remove("hidden");
             Toastify({
                 node: successEl,
@@ -430,6 +432,7 @@ function Main() {
             stopLoader(setIsLoaderOpen);
             dispatch(resetIsCreated());
             dispatch(resetIsUpdated());
+            dispatch(resetClientByPhone());
         }
     }, [isCreated, statusByID, isUpdated]);
 

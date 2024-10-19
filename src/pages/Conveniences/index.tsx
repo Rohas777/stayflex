@@ -35,7 +35,6 @@ interface Response {
 
 function Main() {
     const [buttonModalPreview, setButtonModalPreview] = useState(false);
-    const [isCreatePopup, setIsCreatePopup] = useState(true);
     const [convenienceData, setConvenienceData] = useState<{
         name: string;
         icon: string;
@@ -135,25 +134,16 @@ function Main() {
                             const a = stringToHTML(
                                 `<div class="flex lg:justify-center items-center"></div>`
                             );
-                            const editA =
-                                stringToHTML(`<a class="flex items-center mr-3 w-7 h-7 p-1 border border-black rounded-md hover:opacity-70" href="javascript:;">
-                                <i data-lucide="pencil"></i>
-                              </a>`);
                             const deleteA =
                                 stringToHTML(`<a class="flex items-center text-danger w-7 h-7 p-1 border border-danger rounded-md hover:opacity-70" href="javascript:;">
                                 <i data-lucide="trash-2"></i>
                               </a>`);
-                            tippy(editA, {
-                                content: "Редактировать",
-                                placement: "bottom",
-                                animation: "shift-away",
-                            });
                             tippy(deleteA, {
                                 content: "Удалить",
                                 placement: "bottom",
                                 animation: "shift-away",
                             });
-                            a.append(editA, deleteA);
+                            a.append(deleteA);
                             deleteA.addEventListener("click", function () {
                                 setDeleteConfirmationModal(true);
                                 const rowId = cell.getRow().getData().id;
@@ -162,15 +152,6 @@ function Main() {
                                     icon: response.icon!,
                                 });
                                 setcolumnAcionFocusId(rowId);
-                            });
-                            editA.addEventListener("click", function (event) {
-                                event.preventDefault();
-                                setConvenienceData({
-                                    name: response.name!,
-                                    icon: response.icon!,
-                                });
-                                setIsCreatePopup(false);
-                                setButtonModalPreview(true);
                             });
                             return a;
                         },
@@ -351,7 +332,6 @@ function Main() {
                         className="mr-2 shadow-md"
                         onClick={(event: React.MouseEvent) => {
                             event.preventDefault();
-                            setIsCreatePopup(true);
                             setButtonModalPreview(true);
                         }}
                     >
@@ -565,7 +545,6 @@ function Main() {
                 open={buttonModalPreview}
                 onClose={() => {
                     setButtonModalPreview(false);
-                    setConvenienceData(isCreatePopup ? null : convenienceData);
                 }}
             >
                 <Dialog.Panel>
@@ -579,13 +558,7 @@ function Main() {
                     >
                         <Lucide icon="X" className="w-8 h-8 text-slate-400" />
                     </a>
-                    <ConvenienceForm
-                        isCreate={isCreatePopup}
-                        currentConvenience={convenienceData!}
-                        onCreate={onCreate}
-                        onUpdate={onUpdate}
-                        status={status}
-                    />
+                    <ConvenienceForm onCreate={onCreate} status={status} />
                 </Dialog.Panel>
             </Dialog>
             {/* END: Modal Content */}

@@ -16,6 +16,15 @@ export const fetchReservationById = createAsyncThunk(
         return response.data;
     }
 );
+export const fetchReservationsByClient = createAsyncThunk(
+    "reservation/fetchByClient",
+    async (client_id: number) => {
+        const response = await instance.get(
+            `/reservation/clientid/${client_id}`
+        );
+        return response.data;
+    }
+);
 
 export const createReservation = createAsyncThunk(
     "/reservation/create",

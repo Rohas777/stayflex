@@ -5,6 +5,8 @@ export interface CityState {
     cities: ICity[];
     status: Status;
     error: string | null;
+    isCreated: boolean;
+    isDeleted: boolean;
 }
 
 export interface CityCreateType {

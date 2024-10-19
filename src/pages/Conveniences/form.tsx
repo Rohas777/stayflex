@@ -12,23 +12,11 @@ import { Status } from "@/stores/reducers/types";
 import LoadingIcon from "@/components/Base/LoadingIcon";
 
 interface ConvenienceFormProps {
-    isCreate: boolean;
     onCreate: (convenienceData: ConvenienceCreateType) => void;
-    onUpdate: (convenienceData: ConvenienceCreateType) => void;
-    currentConvenience: {
-        name: string;
-        icon: string;
-    };
     status: Status;
 }
 
-function ConvenienceForm({
-    isCreate,
-    onCreate,
-    onUpdate,
-    currentConvenience,
-    status,
-}: ConvenienceFormProps) {
+function ConvenienceForm({ onCreate, status }: ConvenienceFormProps) {
     const dropzoneValidationRef = useRef<DropzoneElement>();
     const [uploadedIcon, setUploadedIcon] = useState<File | null>(null);
     const [dropzoneError, setDropzoneError] = useState<string | null>(null);
@@ -68,11 +56,7 @@ function ConvenienceForm({
             file: uploadedIcon,
         };
 
-        if (isCreate) {
-            onCreate(convenienceData);
-        } else {
-            onUpdate(convenienceData);
-        }
+        onCreate(convenienceData);
     };
 
     useEffect(() => {
@@ -105,7 +89,7 @@ function ConvenienceForm({
             )}
             <div className="p-5">
                 <div className="mt-5 text-lg font-bold text-center">
-                    {isCreate ? "Добваить" : "Редактировать"} удобство
+                    Добавить удобство
                 </div>
                 <form className="validate-form mt-5" onSubmit={onSubmit}>
                     <div className="input-form mt-3">
@@ -126,9 +110,6 @@ function ConvenienceForm({
                             className={clsx({
                                 "border-danger": errors.name,
                             })}
-                            defaultValue={
-                                !isCreate ? currentConvenience?.name : undefined
-                            }
                             placeholder="Название"
                         />
                         {errors.name && (
@@ -148,16 +129,6 @@ function ConvenienceForm({
                                 Обязательное
                             </span>
                         </FormLabel>
-                        {!isCreate && (
-                            <div className="flex justify-end items-center gap-2">
-                                <p>Текущая иконка: </p>
-                                <img
-                                    className="size-12"
-                                    src={currentConvenience?.icon}
-                                    alt=""
-                                />
-                            </div>
-                        )}
                         <Dropzone
                             getRef={(el) => {
                                 dropzoneValidationRef.current = el;
@@ -180,15 +151,6 @@ function ConvenienceForm({
                                 Перетащите файл в формате SVG сюда или кликните
                                 для выбора.
                             </p>
-                            {!isCreate && (
-                                <p className="text-gray-600 text-base">
-                                    При добавлении нового файла текущая иконка{" "}
-                                    <span className="font-bold text-danger">
-                                        заменится
-                                    </span>
-                                    .
-                                </p>
-                            )}
                         </Dropzone>
                         {dropzoneError && (
                             <div className="mt-2 text-danger">
@@ -202,7 +164,7 @@ function ConvenienceForm({
                         variant="primary"
                         className="w-full mt-5"
                     >
-                        {isCreate ? "Добавить" : "Обновить"}
+                        Добавить
                     </Button>
                 </form>
             </div>

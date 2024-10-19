@@ -1,22 +1,38 @@
 import { AnyAction, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Status } from "../types";
 import { RegionState } from "./types";
-import { fetchRegions } from "./actions";
+import { createRegion, deleteRegion, fetchRegions } from "./actions";
 
 const initialState: RegionState = {
     regions: [],
     status: Status.LOADING,
     error: null,
+    isCreated: false,
+    isDeleted: false,
 };
 
 export const regionSlice = createSlice({
     name: "region",
     initialState,
-    reducers: {},
+    reducers: {
+        resetIsCreated: (state) => {
+            state.isCreated = false;
+        },
+        resetIsDeleted: (state) => {
+            state.isDeleted = false;
+        },
+    },
     extraReducers(builder) {
         builder.addCase(fetchRegions.fulfilled, (state, action) => {
             state.regions = action.payload.regions;
         });
+        builder
+            .addCase(createRegion.fulfilled, (state) => {
+                state.isCreated = true;
+            })
+            .addCase(deleteRegion.fulfilled, (state) => {
+                state.isDeleted = true;
+            });
         // .addCase(deletUser.fulfilled, (state, action) => {
         //     state.users = state.users.filter(
         //         (user) => user.id !== Number(action.payload)

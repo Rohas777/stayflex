@@ -35,7 +35,6 @@ interface Response {
 
 function Main() {
     const [buttonModalPreview, setButtonModalPreview] = useState(false);
-    const [isCreatePopup, setIsCreatePopup] = useState(true);
     const [deleteConfirmationModal, setDeleteConfirmationModal] =
         useState(false);
     const [columnAcionFocusId, setcolumnAcionFocusId] = useState<number | null>(
@@ -132,25 +131,16 @@ function Main() {
                             const a = stringToHTML(
                                 `<div class="flex lg:justify-center items-center"></div>`
                             );
-                            const editA =
-                                stringToHTML(`<a class="flex items-center mr-3 w-7 h-7 p-1 border border-black rounded-md hover:opacity-70" href="javascript:;">
-                                <i data-lucide="pencil"></i>
-                              </a>`);
                             const deleteA =
                                 stringToHTML(`<a class="flex items-center text-danger w-7 h-7 p-1 border border-danger rounded-md hover:opacity-70" href="javascript:;">
                                 <i data-lucide="trash-2"></i>
                               </a>`);
-                            tippy(editA, {
-                                content: "Редактировать",
-                                placement: "bottom",
-                                animation: "shift-away",
-                            });
                             tippy(deleteA, {
                                 content: "Удалить",
                                 placement: "bottom",
                                 animation: "shift-away",
                             });
-                            a.append(editA, deleteA);
+                            a.append(deleteA);
                             deleteA.addEventListener("click", function () {
                                 setDeleteConfirmationModal(true);
                                 const rowId = cell.getRow().getData().id;
@@ -158,17 +148,6 @@ function Main() {
                                     name: response.name!,
                                 });
                                 setcolumnAcionFocusId(rowId);
-                            });
-                            editA.addEventListener("click", function (event) {
-                                event.preventDefault();
-                                const row = tableData.find(
-                                    (row) => row.id === response.id
-                                );
-                                setPropertyType({
-                                    name: response.name!,
-                                });
-                                setIsCreatePopup(false);
-                                setButtonModalPreview(true);
                             });
                             return a;
                         },
@@ -290,12 +269,6 @@ function Main() {
         dispatch(fetchPropertyTypes());
         setButtonModalPreview(false);
     };
-    const onUpdate = (region: PropertyTypeCreateType) => {
-        // dispatch(createRegion(region));
-        // dispatch(fetchRegions());
-        // setButtonModalPreview(false);
-    };
-
     const { propertyTypes, status, error } = useAppSelector(
         (state) => state.propertyType
     );
@@ -336,7 +309,6 @@ function Main() {
                         className="mr-2 shadow-md"
                         onClick={(event: React.MouseEvent) => {
                             event.preventDefault();
-                            setIsCreatePopup(true);
                             setButtonModalPreview(true);
                         }}
                     >
@@ -566,10 +538,8 @@ function Main() {
                         <Lucide icon="X" className="w-8 h-8 text-slate-400" />
                     </a>
                     <PropertyTypeForm
-                        isCreate={isCreatePopup}
                         propertyTypeName={propertyType?.name!}
                         onCreate={onCreate}
-                        onUpdate={onUpdate}
                     />
                 </Dialog.Panel>
             </Dialog>

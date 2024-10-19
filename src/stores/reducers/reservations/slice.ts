@@ -3,6 +3,7 @@ import { Status } from "../types";
 import { ReservationState } from "./types";
 import {
     createReservation,
+    fetchReservationsByClient,
     fetchReservationById,
     fetchReservations,
     updateReservation,
@@ -41,6 +42,20 @@ export const reservationSlice = createSlice({
                 state.reservations = [];
             })
             .addCase(fetchReservations.rejected, (state) => {
+                state.statusByID = Status.ERROR;
+                state.reservations = [];
+            });
+
+        builder
+            .addCase(fetchReservationsByClient.fulfilled, (state, action) => {
+                state.statusAll = Status.SUCCESS;
+                state.reservations = action.payload;
+            })
+            .addCase(fetchReservationsByClient.pending, (state) => {
+                state.statusAll = Status.LOADING;
+                state.reservations = [];
+            })
+            .addCase(fetchReservationsByClient.rejected, (state) => {
                 state.statusByID = Status.ERROR;
                 state.reservations = [];
             });

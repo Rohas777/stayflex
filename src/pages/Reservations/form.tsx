@@ -249,6 +249,19 @@ function ReservationForm({
             dispatch(clientActions.resetIsCreated());
             setIsSubmitting(false);
         }
+        if (isSubmitting && clientsState.statusByPhone === Status.SUCCESS) {
+            const [startDate, endDate] = daterange.split(" - ");
+            const reservationData: ReservationCreateType = {
+                start_date: formatDate(new Date(startDate)),
+                end_date: formatDate(new Date(endDate)),
+                object_id: Number(selectedObject),
+                client_id: clientsState.clientByPhone?.id!,
+                description: String(formData?.get("description")),
+            };
+            onCreate(reservationData);
+            dispatch(clientActions.resetIsCreated());
+            setIsSubmitting(false);
+        }
     }, [
         clientsState.statusByPhone,
         clientsState.isCreated,

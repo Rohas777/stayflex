@@ -13,11 +13,15 @@ import { useAppDispatch, useAppSelector } from "@/stores/hooks";
 import { userSlice } from "@/stores/reducers/users/slice";
 import { deleteUser, fetchUsers } from "@/stores/reducers/users/actions";
 import tippy from "tippy.js";
-import { Link } from "react-router-dom";
-import { propertyTypeSlice } from "@/stores/reducers/property-types/slice";
-import { fetchPropertyTypes } from "@/stores/reducers/property-types/actions";
+import { Link, useLocation, useParams } from "react-router-dom";
+import { reservationSlice } from "@/stores/reducers/reservations/slice";
+import {
+    fetchReservations,
+    fetchReservationsByClient,
+} from "@/stores/reducers/reservations/actions";
 import { Status } from "@/stores/reducers/types";
 import LoadingIcon from "@/components/Base/LoadingIcon";
+import { convertDateString } from "@/utils/customUtils";
 
 window.DateTime = DateTime;
 interface Response {
@@ -42,26 +46,7 @@ function Main() {
         phone: "+7 (777) 777-77-77",
         email: "email@gmail.com",
     });
-    const [tableData, setTableData] = useState<Response[]>([
-        {
-            id: 1,
-            object: "Квартира на набережной",
-            date: "07.09.2023 - 09.09.2024",
-            status: "Одобрено",
-        },
-        {
-            id: 1,
-            object: "Квартира на набережной",
-            date: "07.09.2024 - 09.09.2025",
-            status: "В обработке",
-        },
-        {
-            id: 1,
-            object: "Квартира на набережной",
-            date: "07.09.2024 - 09.09.2024",
-            status: "В обработке",
-        },
-    ]);
+    const [tableData, setTableData] = useState<Response[]>([]);
 
     const initTabulator = () => {
         if (tableRef.current) {
@@ -137,8 +122,30 @@ function Main() {
                         sorter: "string",
                         formatter(cell) {
                             const response: Response = cell.getData();
+
+                            const statuses = [
+                                {
+                                    value: "new",
+                                    label: "Новая",
+                                },
+                                {
+                                    value: "approved",
+                                    label: "Одобрена",
+                                },
+                                {
+                                    value: "rejected",
+                                    label: "Отклонена",
+                                },
+                                {
+                                    value: "completed",
+                                    label: "Пройдена",
+                                },
+                            ];
+                            const currentStatus = statuses.find(
+                                (status) => status.value === response.status
+                            );
                             return `<div>
-                                        <div class="font-medium whitespace-nowrap">${response.status}</div>
+                                        <div class="font-medium whitespace-nowrap">${currentStatus?.label}</div>
                                     </div>`;
                         },
                     },
@@ -291,30 +298,38 @@ function Main() {
         }
     };
 
-    const { propertyTypes, status, error } = useAppSelector(
-        (state) => state.propertyType
+    const { reservations, statusAll, error } = useAppSelector(
+        (state) => state.reservation
     );
-    const {} = propertyTypeSlice.actions;
+    const {} = reservationSlice.actions;
     const dispatch = useAppDispatch();
+
+    const params = useParams();
 
     useEffect(() => {
         initTabulator();
         reInitOnResizeWindow();
-
-        dispatch(fetchPropertyTypes());
+        dispatch(fetchReservationsByClient(Number(params.id!)));
     }, []);
     useEffect(() => {
-        if (propertyTypes.length) {
-            const formattedData = propertyTypes.map((propertyType) => ({
-                id: propertyType.id,
-                name: propertyType.name,
-                objects: Math.floor(Math.random() * 101),
+        if (reservations.length) {
+            const formattedData = reservations.map((reservation) => ({
+                id: reservation.id,
+                object: reservation.object.name,
+                date:
+                    convertDateString(reservation.start_date) +
+                    " - " +
+                    convertDateString(reservation.end_date),
+                name: reservation.client.fullname,
+                status: reservation.status,
             }));
-            tabulator.current?.setData(formattedData).then(function () {
-                reInitTabulator();
-            });
+            tabulator.current
+                ?.setData(formattedData.reverse())
+                .then(function () {
+                    reInitTabulator();
+                });
         }
-    }, [propertyTypes]);
+    }, [reservations]);
 
     return (
         <>

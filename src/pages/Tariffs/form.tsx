@@ -144,7 +144,7 @@ function TariffForm({ isCreate, onCreate, onUpdate, icons }: TariffFormProps) {
         }
     }, [isCreated, statusByID]);
 
-    if (statusByID === Status.LOADING) {
+    if (statusByID === Status.LOADING && !isCreate) {
         return (
             <>
                 <div className="w-full h-screen relative">

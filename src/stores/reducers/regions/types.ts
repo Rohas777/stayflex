@@ -5,6 +5,8 @@ export interface RegionState {
     regions: IRegion[];
     status: Status;
     error: string | null;
+    isCreated: boolean;
+    isDeleted: boolean;
 }
 
 export interface RegionCreateType {

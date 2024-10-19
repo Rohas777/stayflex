@@ -9,12 +9,20 @@ import { FormLabel, FormInput } from "@/components/Base/Form";
 import { useState } from "react";
 import TomSelect from "@/components/Base/CustomTomSelect";
 import { RegionCreateType } from "@/stores/reducers/regions/types";
+import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
+import { startLoader, stopLoader } from "@/utils/customUtils";
 
 interface RegionFormProps {
     onCreate: (name: RegionCreateType) => void;
+    setIsLoaderOpened: React.Dispatch<React.SetStateAction<boolean>>;
+    isLoaderOpened: boolean;
 }
 
-function RegionForm({ onCreate }: RegionFormProps) {
+function RegionForm({
+    onCreate,
+    setIsLoaderOpened,
+    isLoaderOpened,
+}: RegionFormProps) {
     const [select, setSelect] = useState("1");
     const [serversData, setServersData] = useState([
         {
@@ -51,32 +59,22 @@ function RegionForm({ onCreate }: RegionFormProps) {
     const onSubmit = async (event: React.ChangeEvent<HTMLFormElement>) => {
         event.preventDefault();
         const result = await trigger();
+        startLoader(setIsLoaderOpened);
         if (!result) {
+            stopLoader(setIsLoaderOpened);
             return;
-        } else {
-            const successEl = document
-                .querySelectorAll("#success-notification-content")[0]
-                .cloneNode(true) as HTMLElement;
-            successEl.classList.remove("hidden");
-            Toastify({
-                node: successEl,
-                duration: 3000,
-                newWindow: true,
-                close: true,
-                gravity: "top",
-                position: "right",
-                stopOnFocus: true,
-            }).showToast();
-            const formData = new FormData(event.target);
-            const region: RegionCreateType = {
-                name: String(formData.get("name")),
-            };
-            onCreate(region);
         }
+
+        const formData = new FormData(event.target);
+        const region: RegionCreateType = {
+            name: String(formData.get("name")),
+        };
+        onCreate(region);
     };
 
     return (
         <>
+            {isLoaderOpened && <OverlayLoader />}
             <div className="p-5">
                 <div className="mt-5 text-lg font-bold text-center">
                     Добваить регион

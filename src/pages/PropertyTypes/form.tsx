@@ -12,16 +12,12 @@ import { RegionCreateType } from "@/stores/reducers/regions/types";
 import { PropertyTypeCreateType } from "@/stores/reducers/property-types/types";
 
 interface PropertyTypeFormProps {
-    isCreate: boolean;
     onCreate: (name: PropertyTypeCreateType) => void;
-    onUpdate: (name: PropertyTypeCreateType) => void;
     propertyTypeName: string;
 }
 
 function PropertyTypeForm({
-    isCreate,
     onCreate,
-    onUpdate,
     propertyTypeName,
 }: PropertyTypeFormProps) {
     const schema = yup
@@ -61,11 +57,7 @@ function PropertyTypeForm({
             const propertyType: PropertyTypeCreateType = {
                 name: String(formData.get("name")),
             };
-            if (isCreate) {
-                onCreate(propertyType);
-            } else {
-                onUpdate(propertyType);
-            }
+            onCreate(propertyType);
         }
     };
 
@@ -73,7 +65,7 @@ function PropertyTypeForm({
         <>
             <div className="p-5">
                 <div className="mt-5 text-lg font-bold text-center">
-                    {isCreate ? "Добваить" : "Редактировать"} тип недвижимости
+                    Добавить тип недвижимости
                 </div>
                 <form className="validate-form mt-5" onSubmit={onSubmit}>
                     <div className="input-form mt-3">
@@ -94,9 +86,6 @@ function PropertyTypeForm({
                             className={clsx({
                                 "border-danger": errors.name,
                             })}
-                            defaultValue={
-                                !isCreate ? propertyTypeName : undefined
-                            }
                             placeholder="Название"
                         />
                         {errors.name && (
@@ -111,7 +100,7 @@ function PropertyTypeForm({
                         variant="primary"
                         className="w-full mt-5"
                     >
-                        {isCreate ? "Добавить" : "Обновить"}
+                        Добавить
                     </Button>
                 </form>
             </div>

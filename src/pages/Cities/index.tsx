@@ -15,7 +15,11 @@ import { deleteUser, fetchUsers } from "@/stores/reducers/users/actions";
 import tippy from "tippy.js";
 import { Link } from "react-router-dom";
 import { citySlice } from "@/stores/reducers/cities/slice";
-import { createCity, fetchCities } from "@/stores/reducers/cities/actions";
+import {
+    createCity,
+    deleteCity,
+    fetchCities,
+} from "@/stores/reducers/cities/actions";
 import { Status } from "@/stores/reducers/types";
 import LoadingIcon from "@/components/Base/LoadingIcon";
 import { ListPlus } from "lucide-react";
@@ -23,6 +27,9 @@ import Notification from "@/components/Base/Notification";
 import CityForm from "./form";
 import { CityCreateType } from "@/stores/reducers/cities/types";
 import { fetchRegions } from "@/stores/reducers/regions/actions";
+import Toastify from "toastify-js";
+import { startLoader, stopLoader } from "@/utils/customUtils";
+import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
 
 window.DateTime = DateTime;
 interface Response {
@@ -37,8 +44,10 @@ interface Response {
 
 function Main() {
     const [buttonModalPreview, setButtonModalPreview] = useState(false);
+    const [isLoaderOpened, setIsLoaderOpened] = useState(false);
     const [cityData, setCityData] = useState<{
         name: string;
+        id: number;
         region: {
             name: string;
             id: number;
@@ -47,9 +56,6 @@ function Main() {
     } | null>(null);
     const [deleteConfirmationModal, setDeleteConfirmationModal] =
         useState(false);
-    const [columnAcionFocusId, setcolumnAcionFocusId] = useState<number | null>(
-        null
-    );
 
     const tableRef = createRef<HTMLDivElement>();
     const tabulator = useRef<Tabulator>();
@@ -168,16 +174,15 @@ function Main() {
                             a.append(deleteA);
                             deleteA.addEventListener("click", function () {
                                 setDeleteConfirmationModal(true);
-                                const rowId = cell.getRow().getData().id;
                                 setCityData({
                                     name: response.name!,
+                                    id: response.id!,
                                     region: {
                                         name: response.region!.name,
                                         id: response.region!.id,
                                     },
                                     server: 3,
                                 });
-                                setcolumnAcionFocusId(rowId);
                             });
                             return a;
                         },
@@ -294,22 +299,55 @@ function Main() {
         }
     };
 
+    const { cities, status, error, isCreated, isDeleted } = useAppSelector(
+        (state) => state.city
+    );
+    const cityActions = citySlice.actions;
+    const dispatch = useAppDispatch();
+
     const onDelete = () => {
-        if (columnAcionFocusId) {
-            dispatch(deleteUser(String(columnAcionFocusId)));
-            reInitTabulator();
-            setDeleteConfirmationModal(false);
-        }
+        dispatch(deleteCity(String(cityData?.id)));
     };
     const onCreate = (city: CityCreateType) => {
-        console.log(city);
         dispatch(createCity(city));
-        dispatch(fetchCities());
-        setButtonModalPreview(false);
     };
 
-    const { cities, status, error } = useAppSelector((state) => state.city);
-    const dispatch = useAppDispatch();
+    useEffect(() => {
+        let notificationText = "";
+        if (isDeleted) {
+            setDeleteConfirmationModal(false);
+            notificationText = "Город успешно удалён";
+        }
+        if (isCreated) {
+            setButtonModalPreview(false);
+            notificationText = "Город успешно добавлен";
+        }
+
+        if (isCreated || isDeleted) {
+            dispatch(fetchCities());
+
+            const successEl = document
+                .querySelectorAll("#success-notification-content")[0]
+                .cloneNode(true) as HTMLElement;
+            successEl.classList.remove("hidden");
+
+            successEl.querySelector(".text-content")!.textContent =
+                notificationText;
+            Toastify({
+                node: successEl,
+                duration: 3000,
+                newWindow: true,
+                close: true,
+                gravity: "top",
+                position: "right",
+                stopOnFocus: true,
+            }).showToast();
+
+            dispatch(cityActions.resetIsCreated());
+            dispatch(cityActions.resetIsDeleted());
+            stopLoader(setIsLoaderOpened);
+        }
+    }, [isCreated, isDeleted]);
 
     useEffect(() => {
         initTabulator();
@@ -359,7 +397,7 @@ function Main() {
             </div>
             {/* BEGIN: HTML Table Data */}
             <div className="p-5 mt-5 intro-y box">
-                {status === Status.LOADING && (
+                {status === Status.LOADING && !isLoaderOpened && (
                     <div className="absolute z-50 bg-slate-50 bg-opacity-70 flex justify-center items-center w-full h-full">
                         <div className="w-10 h-10">
                             <LoadingIcon icon="ball-triangle" />
@@ -533,7 +571,11 @@ function Main() {
                     >
                         <Lucide icon="X" className="w-8 h-8 text-slate-400" />
                     </a>
-                    <CityForm onCreate={onCreate} />
+                    <CityForm
+                        onCreate={onCreate}
+                        isLoaderOpened={isLoaderOpened}
+                        setIsLoaderOpened={setIsLoaderOpened}
+                    />
                 </Dialog.Panel>
             </Dialog>
             {/* END: Modal Content */}
@@ -545,6 +587,7 @@ function Main() {
                 }}
             >
                 <Dialog.Panel>
+                    {isLoaderOpened && <OverlayLoader />}
                     <div className="p-5 text-center">
                         <Lucide
                             icon="XCircle"
@@ -573,6 +616,7 @@ function Main() {
                             type="button"
                             className="w-24"
                             onClick={() => {
+                                startLoader(setIsLoaderOpened);
                                 onDelete();
                             }}
                         >
@@ -589,7 +633,9 @@ function Main() {
             >
                 <Lucide icon="CheckCircle" className="text-success" />
                 <div className="ml-4 mr-4">
-                    <div className="font-medium">Город успешно добавлен</div>
+                    <div className="font-medium text-content">
+                        Город успешно добавлен
+                    </div>
                 </div>
             </Notification>
             {/* END: Success Notification Content */}
