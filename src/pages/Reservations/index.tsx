@@ -632,6 +632,7 @@ function Main() {
                         onClick={(event: React.MouseEvent) => {
                             event.preventDefault();
                             setButtonModalCreate(false);
+                            dispatch(resetClientByPhone());
                         }}
                         className="absolute top-0 right-0 mt-3 mr-3"
                         href="#"
