@@ -28,13 +28,13 @@ function AccordionWithSwitcher({
         <>
             <div className="border border-gray-200">
                 <div
-                    className="p-5 cursor-pointer flex justify-between items-center"
+                    className="py-5 px-2 sm:px-5 cursor-pointer flex justify-between items-center"
                     onClick={(event) => {
                         onOpen(event);
                     }}
                 >
-                    <div className="flex items-center text-lg">
-                        <div className="mr-5 rounded-full border-black border flex items-center justify-center size-7">
+                    <div className="flex items-center text-base sm:text-lg">
+                        <div className="mr-3 sm:mr-5 rounded-full border-black border flex items-center justify-center size-6 sm:size-7">
                             <Lucide
                                 icon="ChevronUp"
                                 className={twMerge(

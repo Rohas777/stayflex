@@ -72,8 +72,8 @@ function Channel({ title, data, checked = true }: ChannelProps) {
         <>
             <AccordionWithSwitcher title={title} checked>
                 <form className="validate-form" onSubmit={onSubmit}>
-                    <div className="grid grid-cols-12 gap-10">
-                        <div className="col-span-6 input-form">
+                    <div className="grid grid-cols-12 gap-3 sm:gap-10">
+                        <div className="col-span-12 sm:col-span-6 input-form">
                             <FormLabel
                                 htmlFor="validation-form-4"
                                 className="flex flex-col w-full sm:flex-row"
@@ -101,7 +101,7 @@ function Channel({ title, data, checked = true }: ChannelProps) {
                                 </div>
                             )}
                         </div>
-                        <div className="col-span-6 input-form">
+                        <div className="col-span-12 sm:col-span-6 input-form">
                             <FormLabel
                                 htmlFor={title + "validation-form-3"}
                                 className="flex flex-col w-full sm:flex-row"
@@ -130,35 +130,33 @@ function Channel({ title, data, checked = true }: ChannelProps) {
                             )}
                         </div>
                     </div>
-                    <div className="mt-3 grid grid-cols-12 gap-10">
-                        <div className="input-form col-span-12">
-                            <FormLabel
-                                htmlFor={title + "validation-form-1"}
-                                className="flex flex-col w-full sm:flex-row"
-                            >
-                                API Ключ
-                                <span className="mt-1 text-xs sm:ml-auto sm:mt-0 text-slate-500">
-                                    Обязательное
-                                </span>
-                            </FormLabel>
-                            <FormInput
-                                {...register("APIkey")}
-                                id="validation-form-1"
-                                type="text"
-                                name="APIkey"
-                                defaultValue={data.APIkey}
-                                className={clsx({
-                                    "border-danger": errors.APIkey,
-                                })}
-                                placeholder="Key"
-                            />
-                            {errors.APIkey && (
-                                <div className="mt-2 text-danger">
-                                    {typeof errors.APIkey.message ===
-                                        "string" && errors.APIkey.message}
-                                </div>
-                            )}
-                        </div>
+                    <div className="input-form w-full mt-3">
+                        <FormLabel
+                            htmlFor={title + "validation-form-1"}
+                            className="flex flex-col w-full sm:flex-row"
+                        >
+                            API Ключ
+                            <span className="mt-1 text-xs sm:ml-auto sm:mt-0 text-slate-500">
+                                Обязательное
+                            </span>
+                        </FormLabel>
+                        <FormInput
+                            {...register("APIkey")}
+                            id="validation-form-1"
+                            type="text"
+                            name="APIkey"
+                            defaultValue={data.APIkey}
+                            className={clsx({
+                                "border-danger": errors.APIkey,
+                            })}
+                            placeholder="Key"
+                        />
+                        {errors.APIkey && (
+                            <div className="mt-2 text-danger">
+                                {typeof errors.APIkey.message === "string" &&
+                                    errors.APIkey.message}
+                            </div>
+                        )}
                     </div>
                     <Button
                         variant="primary"
