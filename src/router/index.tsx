@@ -79,7 +79,7 @@ import ObjectsClient from "../pages/ObjectsClient";
 import CreateObject from "../pages/CreateObject";
 import Clients from "../pages/Clients";
 import Reservations from "../pages/Reservations";
-import ReservationsClient from "../pages/ReservationsClient";
+import ClientReservations from "../pages/ClientReservations";
 import Channels from "../pages/Channels";
 import Widget from "../pages/Widget";
 import Tariffs from "../pages/Tariffs";
@@ -161,7 +161,7 @@ function Router() {
                 },
                 {
                     path: "reservations/client/:id",
-                    element: <ReservationsClient />,
+                    element: <ClientReservations />,
                 },
                 {
                     path: "channels",
