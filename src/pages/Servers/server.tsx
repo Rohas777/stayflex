@@ -73,8 +73,8 @@ function Server({ data, checked = true }: ServerProps) {
         <>
             <AccordionWithSwitcher title={data.name} checked>
                 <form className="validate-form" onSubmit={onSubmit}>
-                    <div className="grid grid-cols-12 gap-10">
-                        <div className="input-form col-span-6">
+                    <div className="grid grid-cols-12 gap-3 sm:gap-10">
+                        <div className="input-form col-span-12 sm:col-span-6">
                             <FormLabel
                                 htmlFor="validation-form-1"
                                 className="flex flex-col w-full sm:flex-row"
@@ -102,7 +102,7 @@ function Server({ data, checked = true }: ServerProps) {
                                 </div>
                             )}
                         </div>
-                        <div className="input-form col-span-6">
+                        <div className="input-form col-span-12 sm:col-span-6">
                             <FormLabel
                                 htmlFor="validation-form-2"
                                 className="flex flex-col w-full sm:flex-row"
@@ -131,8 +131,8 @@ function Server({ data, checked = true }: ServerProps) {
                             )}
                         </div>
                     </div>
-                    <div className="mt-3 grid grid-cols-12 gap-10">
-                        <div className="col-span-6 input-form">
+                    <div className="mt-3 grid grid-cols-12 gap-3 sm:gap-10">
+                        <div className="col-span-12 sm:col-span-6 input-form">
                             <FormLabel
                                 htmlFor="validation-form-4"
                                 className="flex flex-col w-full sm:flex-row"
@@ -160,7 +160,7 @@ function Server({ data, checked = true }: ServerProps) {
                                 </div>
                             )}
                         </div>
-                        <div className="col-span-6 input-form">
+                        <div className="col-span-12 sm:col-span-6 input-form">
                             <FormLabel
                                 htmlFor="validation-form-3"
                                 className="flex flex-col w-full sm:flex-row"
