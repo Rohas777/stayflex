@@ -255,11 +255,7 @@ function Main() {
 
     const onFilter = () => {
         if (tabulator.current) {
-            tabulator.current.setFilter(
-                filter.field,
-                filter.type,
-                filter.value
-            );
+            tabulator.current.setFilter("name", "like", filter.value);
         }
     };
     const onResetFilter = () => {
@@ -269,7 +265,9 @@ function Main() {
             type: "like",
             value: "",
         });
-        onFilter();
+        if (tabulator.current) {
+            tabulator.current.setFilter("name", "like", "");
+        }
     };
 
     const onExportCsv = () => {
@@ -412,53 +410,9 @@ function Main() {
                             onFilter();
                         }}
                     >
-                        <div className="items-center sm:flex sm:mr-4">
-                            <label className="flex-none w-12 mr-2 xl:w-auto xl:flex-initial">
-                                Поле
-                            </label>
-                            <FormSelect
-                                id="tabulator-html-filter-field"
-                                value={filter.field}
-                                onChange={(e) => {
-                                    setFilter({
-                                        ...filter,
-                                        field: e.target.value,
-                                    });
-                                }}
-                                className="w-full mt-2 2xl:w-full sm:mt-0 sm:w-auto"
-                            >
-                                <option value="name">Название</option>
-                                <option value="region">Регион</option>
-                                <option value="objects">Объекты</option>
-                            </FormSelect>
-                        </div>
                         <div className="items-center mt-2 sm:flex sm:mr-4 xl:mt-0">
                             <label className="flex-none w-12 mr-2 xl:w-auto xl:flex-initial">
-                                Тип
-                            </label>
-                            <FormSelect
-                                id="tabulator-html-filter-type"
-                                value={filter.type}
-                                onChange={(e) => {
-                                    setFilter({
-                                        ...filter,
-                                        type: e.target.value,
-                                    });
-                                }}
-                                className="w-full mt-2 sm:mt-0 sm:w-auto"
-                            >
-                                <option value="like">like</option>
-                                <option value="=">=</option>
-                                <option value="<">&lt;</option>
-                                <option value="<=">&lt;=</option>
-                                <option value=">">&gt;</option>
-                                <option value=">=">&gt;=</option>
-                                <option value="!=">!=</option>
-                            </FormSelect>
-                        </div>
-                        <div className="items-center mt-2 sm:flex sm:mr-4 xl:mt-0">
-                            <label className="flex-none w-12 mr-2 xl:w-auto xl:flex-initial">
-                                Значение
+                                Поиск по названию
                             </label>
                             <FormInput
                                 id="tabulator-html-filter-value"
