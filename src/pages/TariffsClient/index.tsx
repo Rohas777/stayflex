@@ -16,14 +16,7 @@ function Main() {
     const [buttonModalPreview, setButtonModalPreview] = useState(false);
     const [isLoaderOpen, setIsLoaderOpen] = useState(false);
 
-    const iconsToChoose: IconType[] = [
-        "CreditCard",
-        "Briefcase",
-        "ShoppingBag",
-        "Activity",
-        "Box",
-        "Send",
-    ];
+    const icons = lucideIcons.icons;
 
     const location = useLocation();
     const { tariffs, statusAll, error } = useAppSelector(
@@ -65,9 +58,7 @@ function Main() {
                             key={tariff.id}
                             className="flex-1 px-5 py-16 intro-y"
                         >
-                            {iconsToChoose.includes(
-                                tariff.icon as IconType
-                            ) && (
+                            {tariff.icon && tariff.icon in icons && (
                                 <Lucide
                                     icon={tariff.icon as IconType}
                                     className="block w-12 h-12 mx-auto text-primary"
@@ -79,9 +70,15 @@ function Main() {
                             <div className="mt-5 text-center text-slate-600 dark:text-slate-500">
                                 Объектов: {tariff.object_count}
                             </div>
-                            <div className="px-10 mx-auto mt-2 text-center text-slate-500">
-                                {tariff.description}
-                            </div>
+                            <div
+                                className="px-10 mx-auto mt-2 text-center text-slate-500"
+                                dangerouslySetInnerHTML={{
+                                    __html: tariff.description.replace(
+                                        /\n/g,
+                                        "<br/>"
+                                    ),
+                                }}
+                            ></div>
                             <div className="flex justify-center">
                                 <div className="relative mx-auto mt-8 text-5xl font-semibold">
                                     {tariff.daily_price}
