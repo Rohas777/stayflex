@@ -31,6 +31,7 @@ import Notification from "@/components/Base/Notification";
 import { fetchObjects } from "@/stores/reducers/objects/actions";
 import { clientSlice } from "@/stores/reducers/clients/slice";
 import { di } from "@fullcalendar/core/internal-common";
+import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
 
 window.DateTime = DateTime;
 interface Response {

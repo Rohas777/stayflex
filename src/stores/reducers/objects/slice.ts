@@ -1,13 +1,15 @@
 import { AnyAction, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Status } from "../types";
 import { ObjectState } from "./types";
-import { createObject, fetchObjects } from "./actions";
+import { createObject, fetchObjects, updateObiectIsActive } from "./actions";
 
 const initialState: ObjectState = {
     objects: [],
     status: Status.LOADING,
     error: null,
     isCreated: false,
+    isUpdated: false,
+    isActiveStatusUpdated: false,
 };
 
 export const objectSlice = createSlice({
@@ -16,6 +18,12 @@ export const objectSlice = createSlice({
     reducers: {
         resetIsCreated: (state) => {
             state.isCreated = false;
+        },
+        resetIsUpdated: (state) => {
+            state.isUpdated = false;
+        },
+        resetIsActiveStatusUpdated: (state) => {
+            state.isActiveStatusUpdated = false;
         },
     },
     extraReducers(builder) {
@@ -38,6 +46,10 @@ export const objectSlice = createSlice({
                     state.status = Status.ERROR;
                 }
             );
+
+        builder.addCase(updateObiectIsActive.fulfilled, (state) => {
+            state.isActiveStatusUpdated = true;
+        });
         builder
             .addCase(createObject.fulfilled, (state) => {
                 state.isCreated = true;

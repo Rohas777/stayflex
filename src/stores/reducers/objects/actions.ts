@@ -28,11 +28,14 @@ export const createObject = createAsyncThunk(
         }
     }
 );
-
-// export const deleteUser = createAsyncThunk<string, string>(
-//     "/user/deleteUser",
-//     async (id) => {
-//         const response = await instance.delete(`/user/delete/${id}`);
-//         return response.data.id;
-//     }
-// );
+export const updateObiectIsActive = createAsyncThunk(
+    "/object/activate",
+    async (data: { id: number }) => {
+        const response = await instance.put(`/object/activate`, data, {
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+        return response.data;
+    }
+);

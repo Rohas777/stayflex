@@ -6,6 +6,8 @@ export interface ObjectState {
     status: Status;
     error: string | null;
     isCreated: boolean;
+    isUpdated: boolean;
+    isActiveStatusUpdated: boolean;
 }
 
 export interface ObjectCreateType {
@@ -23,6 +25,7 @@ export interface ObjectCreateType {
     prepayment_percentage: number;
     amenity: number[];
     description: string;
+    active: boolean;
 }
 
 export interface ObjectCreateBodyType {

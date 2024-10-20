@@ -12,6 +12,7 @@ export interface IObject {
     address: string;
     id: number;
     photos: string[];
+    active: boolean;
     city: {
         name: string;
         region: {
