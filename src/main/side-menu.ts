@@ -58,9 +58,15 @@ const menu: Array<Menu | "divider"> = [
         title: "Брони",
     },
     {
-        icon: "Activity",
-        pathname: "/icon",
-        title: "Иконки",
+        icon: "Wrench",
+        title: "Служебное",
+        subMenu: [
+            {
+                icon: "Activity",
+                pathname: "/icon",
+                title: "Иконки",
+            },
+        ],
     },
     "divider",
     {

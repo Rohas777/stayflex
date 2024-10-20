@@ -82,7 +82,7 @@ function AmenityForm({
         const formData = new FormData(event.target);
         const result = await trigger();
         const customResult = vaildateWithoutYup(formData);
-        if (!result || !customResult) {
+        if (!result || !customResult.isValid) {
             stopLoader(setIsLoaderOpened);
             return;
         }

@@ -25,20 +25,15 @@ import Notification from "@/components/Base/Notification";
 import { stopLoader } from "@/utils/customUtils";
 import { tariffSlice } from "@/stores/reducers/tariffs/slice";
 import { IconType } from "@/vars";
+import * as lucideIcons from "lucide-react";
 
 function Main() {
     const [buttonModalPreview, setButtonModalPreview] = useState(false);
     const [isCreatePopup, setIsCreatePopup] = useState(true);
     const [isLoaderOpen, setIsLoaderOpen] = useState(false);
     const [tariffId, setTariffId] = useState<number | null>(null);
-    const iconsToChoose: IconType[] = [
-        "CreditCard",
-        "Briefcase",
-        "ShoppingBag",
-        "Activity",
-        "Box",
-        "Send",
-    ];
+
+    const icons = lucideIcons.icons;
 
     const { tariffs, statusAll, isCreated, statusByID, error } = useAppSelector(
         (state) => state.tariff
@@ -136,9 +131,7 @@ function Main() {
                             key={tariff.id}
                             className="flex-1 px-5 py-16 intro-y"
                         >
-                            {iconsToChoose.includes(
-                                tariff.icon as IconType
-                            ) && (
+                            {tariff.icon && tariff.icon in icons && (
                                 <Lucide
                                     icon={tariff.icon as IconType}
                                     className="block w-12 h-12 mx-auto text-primary"
@@ -212,7 +205,6 @@ function Main() {
                         isCreate={isCreatePopup}
                         onCreate={onCreate}
                         onUpdate={onUpdate}
-                        icons={iconsToChoose}
                     />
                 </Dialog.Panel>
             </Dialog>

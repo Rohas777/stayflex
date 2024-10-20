@@ -22,39 +22,40 @@ import TomSelect from "@/components/Base/TomSelect";
 import Lucide from "@/components/Base/Lucide";
 import { startLoader, stopLoader } from "@/utils/customUtils";
 import { IconType } from "@/vars";
+import * as lucideIcons from "lucide-react";
 
 interface TariffFormProps {
     isCreate: boolean;
     onCreate: (tariffData: TariffCreateType) => void;
     onUpdate: (tariffData: TariffUpdateType) => void;
-    icons: IconType[];
 }
 type CustomErrors = {
     isValid: boolean;
     icon: string | null;
 };
-function TariffForm({ isCreate, onCreate, onUpdate, icons }: TariffFormProps) {
+function TariffForm({ isCreate, onCreate, onUpdate }: TariffFormProps) {
     const { tariffById, statusByID, isCreated, error } = useAppSelector(
         (state) => state.tariff
     );
-    const [selectedIcon, setSelectedIcon] = useState<string>("-1");
     const [isLoaderOpen, setIsLoaderOpen] = useState(false);
+    const [iconValue, setIconValue] = useState<string | null>(null);
 
     const [customErrors, setCustomErrors] = useState<CustomErrors>({
         isValid: true,
         icon: null,
     });
+    const icons = lucideIcons.icons;
 
-    const vaildateWithoutYup = () => {
+    const vaildateWithoutYup = (formData: FormData) => {
         const errors: CustomErrors = {
             isValid: true,
             icon: null,
         };
-        if (
-            selectedIcon === "-1" ||
-            !icons.includes(selectedIcon as IconType)
-        ) {
-            errors.icon = "Обязательно выберите иконку";
+        if (!(String(formData.get("icon")) in icons)) {
+            errors.icon = "Такой иконки не существует";
+        }
+        if (!formData.get("icon")) {
+            errors.icon = "Обязательно укажите код иконки";
         }
 
         Object.keys(errors).forEach((key) => {
@@ -101,19 +102,19 @@ function TariffForm({ isCreate, onCreate, onUpdate, icons }: TariffFormProps) {
     const onSubmit = async (event: React.ChangeEvent<HTMLFormElement>) => {
         event.preventDefault();
         startLoader(setIsLoaderOpen);
-        const customResult = vaildateWithoutYup();
+        const formData = new FormData(event.target);
+        const customResult = vaildateWithoutYup(formData);
         const result = await trigger();
         if (!result || !customResult.isValid) {
             stopLoader(setIsLoaderOpen);
             return;
         }
-        const formData = new FormData(event.target);
         const tariffData: TariffCreateType = {
             name: String(formData.get("name")),
             daily_price: Number(formData.get("daily_price")),
             object_count: Number(formData.get("object_count")),
             description: String(formData.get("description")),
-            icon: selectedIcon,
+            icon: String(formData.get("icon")),
         };
 
         if (isCreate) {
@@ -128,15 +129,12 @@ function TariffForm({ isCreate, onCreate, onUpdate, icons }: TariffFormProps) {
     };
 
     useEffect(() => {
-        if (statusByID === Status.SUCCESS && !isCreate) {
-            setSelectedIcon(tariffById?.icon ? tariffById?.icon : "-1");
-        }
-    }, [statusByID]);
-
-    useEffect(() => {
         if (statusByID === Status.ERROR) {
             stopLoader(setIsLoaderOpen);
             console.log(error);
+        }
+        if (statusByID === Status.SUCCESS && !isCreate) {
+            setIconValue(tariffById?.icon ? tariffById?.icon : "");
         }
     }, [isCreated, statusByID]);
 
@@ -184,38 +182,26 @@ function TariffForm({ isCreate, onCreate, onUpdate, icons }: TariffFormProps) {
                                     customErrors.icon,
                             })}
                         >
-                            {icons.includes(selectedIcon as IconType) && (
-                                <Lucide icon={selectedIcon as IconType} />
+                            {iconValue && iconValue in icons && (
+                                <Lucide icon={iconValue as IconType} />
                             )}
-                            <TomSelect
+                            <FormInput
                                 id="validation-form-icon"
-                                value={selectedIcon}
+                                type="text"
                                 name="icon"
                                 onChange={(e) => {
-                                    setSelectedIcon(e.target.value);
+                                    setIconValue(e.target.value);
                                     setCustomErrors((prev) => ({
                                         ...prev,
                                         icon: null,
                                     }));
                                 }}
-                                options={{
-                                    placeholder: "Выберите иконку",
-                                }}
-                                className="w-full"
                                 defaultValue={
-                                    !isCreate && tariffById?.icon
-                                        ? tariffById?.icon
-                                        : undefined
+                                    !isCreate ? tariffById?.icon : undefined
                                 }
-                            >
-                                {icons.map((icon) => (
-                                    <option key={icon} value={icon}>
-                                        {icon}
-                                    </option>
-                                ))}
-                            </TomSelect>
+                                placeholder="CreditCard"
+                            />
                         </div>
-
                         {customErrors.icon && (
                             <div className="mt-2 text-danger">
                                 {typeof customErrors.icon === "string" &&
