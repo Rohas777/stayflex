@@ -23,7 +23,7 @@ export interface ObjectCreateType {
     address: string;
     min_ded: number;
     prepayment_percentage: number;
-    amenity: number[];
+    convenience: number[];
     description: string;
     active: boolean;
 }

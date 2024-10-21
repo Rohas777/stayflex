@@ -29,6 +29,7 @@ import { startLoader, stopLoader } from "@/utils/customUtils";
 import { DropzoneFile } from "dropzone";
 import { objectSlice } from "@/stores/reducers/objects/slice";
 import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
+import Tippy from "@/components/Base/Tippy";
 
 window.DateTime = DateTime;
 
@@ -67,6 +68,7 @@ function Main() {
     const [selectedAmenities, setSelectedAmenities] = useState([]);
     const [selectedPropertyType, setSelectedPropertyType] = useState("-1");
     const [selectedPrepayment, setSelectedPrepayment] = useState("-1");
+    const [isActivated, setIsActivated] = useState(true);
 
     const [isCreate, setIsCreate] = useState(true);
     const [isLoaderOpen, setIsLoaderOpen] = useState(false);
@@ -177,10 +179,11 @@ function Main() {
             floor: String(formData.get("floor")),
             apartment_id: Number(selectedPropertyType),
             description: editorData,
-            amenity: selectedAmenities.map(Number),
+            convenience: selectedAmenities.map(Number),
             price: Number(formData.get("price")),
             prepayment_percentage: Number(selectedPrepayment),
             min_ded: Number(formData.get("min_ded")),
+            active: isActivated,
         };
         let formDataTest = new FormData();
 
@@ -194,6 +197,7 @@ function Main() {
         photos.forEach((file) => {
             objectData.append("files", file);
         });
+        console.log(objectData);
         if (isCreate) {
             dispatch(createObject(objectData));
         } else {
@@ -924,8 +928,8 @@ function Main() {
                                 Каналы продаж
                             </h2>
                         </div>
-                        <div className="grid grid-cols-12  mt-3">
-                            <FormCheck className="col-span-3">
+                        <div className="grid grid-cols-12 gap-3  mt-3">
+                            <FormCheck className="col-span-12 sm:col-span-3">
                                 <FormCheck.Input
                                     id="checkbox-switch-1"
                                     type="checkbox"
@@ -936,7 +940,7 @@ function Main() {
                                     Авито
                                 </FormCheck.Label>
                             </FormCheck>
-                            <FormCheck className="col-span-3">
+                            <FormCheck className="col-span-12 sm:col-span-3">
                                 <FormCheck.Input
                                     id="checkbox-switch-3"
                                     type="checkbox"
@@ -948,8 +952,8 @@ function Main() {
                                 </FormCheck.Label>
                             </FormCheck>
                         </div>
-                        <div className="grid grid-cols-12 mt-3">
-                            <FormCheck className="col-span-3">
+                        <div className="grid grid-cols-12 gap-3 mt-3">
+                            <FormCheck className="col-span-12 sm:col-span-3">
                                 <FormCheck.Input
                                     id="checkbox-switch-2"
                                     type="checkbox"
@@ -960,7 +964,7 @@ function Main() {
                                     Airbnb
                                 </FormCheck.Label>
                             </FormCheck>
-                            <FormCheck className="col-span-3">
+                            <FormCheck className="col-span-12 sm:col-span-3">
                                 <FormCheck.Input
                                     id="checkbox-switch-4"
                                     type="checkbox"
@@ -973,13 +977,38 @@ function Main() {
                             </FormCheck>
                         </div>
                     </div>
-                    <div className="p-5 mt-5 intro-y box flex justify-end gap-1">
-                        <Link to="/objects">
-                            <Button variant="outline-primary">Отмена</Button>
-                        </Link>
-                        <Button type="submit" variant="primary">
-                            {isCreate ? "Добавить" : "Обновить"}
-                        </Button>
+                    <div className="p-5 mt-5 intro-y box flex flex-wrap gap-3">
+                        <div className="flex items-center gap-3">
+                            <label
+                                onChange={(e) =>
+                                    setIsActivated(
+                                        (e.target as HTMLInputElement).checked
+                                    )
+                                }
+                                className="inline-flex items-center cursor-pointer"
+                            >
+                                <input
+                                    type="checkbox"
+                                    checked={isActivated}
+                                    className="sr-only peer"
+                                />
+                                <div className="mr-3 relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                                Активировать сразу?
+                            </label>
+                            <Tippy content="Определяет будет ли объект отображаться в виджете">
+                                <Lucide icon="Info" className="cursor-help" />
+                            </Tippy>
+                        </div>
+                        <div className="ml-auto flex gap-1">
+                            <Link to="/objects">
+                                <Button variant="outline-primary">
+                                    Отмена
+                                </Button>
+                            </Link>
+                            <Button type="submit" variant="primary">
+                                Добавить
+                            </Button>
+                        </div>
                     </div>
                 </form>
                 {/* BEGIN: Success Notification Content */}
@@ -1007,12 +1036,6 @@ function Main() {
                     </div>
                 </Notification>
                 {/* END: Success Notification Content */}
-                {/* END: Success Notification Content */}
-                {/* <div className="fixed bottom-0 right-0 bg-slate-50 z-40 py-4 px-6 border-t border-gray-300 w-full">
-                    <Button type="submit" variant="primary">
-                        {isCreate ? "Добавить" : "Обновить"}
-                    </Button>
-                </div> */}
             </div>
         </>
     );

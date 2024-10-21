@@ -7,7 +7,7 @@ newReservationsIndicator.textContent = "1";
 const menu: Array<Menu | "divider"> = [
     {
         icon: "Users",
-        pathname: "/users",
+        pathname: "/",
         title: "Пользователи",
     },
     {

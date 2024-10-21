@@ -93,7 +93,7 @@ function Router() {
             children: [
                 {
                     path: "/",
-                    element: <DashboardOverview1 />,
+                    element: <Users />,
                 },
                 {
                     path: "users",
@@ -133,6 +133,10 @@ function Router() {
                 },
                 {
                     path: "objects/create",
+                    element: <CreateObject />,
+                },
+                {
+                    path: "objects/update/:id",
                     element: <CreateObject />,
                 },
                 {
