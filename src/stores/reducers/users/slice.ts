@@ -24,7 +24,7 @@ export const userSlice = createSlice({
     },
     extraReducers(builder) {
         builder.addCase(fetchUsers.fulfilled, (state, action) => {
-            state.users = action.payload.users;
+            state.users = action.payload;
         });
         // .addCase(deleteUser.fulfilled, (state, action) => {
         //     state.users = state.users.filter(
