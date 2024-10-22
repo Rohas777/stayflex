@@ -57,7 +57,7 @@ function Main() {
     const regionsState = useAppSelector((state) => state.region);
     const amenitiesState = useAppSelector((state) => state.amenity);
     const propertyTypesState = useAppSelector((state) => state.propertyType);
-    const { isCreated, status, error } = useAppSelector(
+    const { isUpdated, status, error } = useAppSelector(
         (state) => state.object
     );
     const objectState = useAppSelector((state) => state.object);
@@ -201,12 +201,7 @@ function Main() {
         photos.forEach((file) => {
             objectData.append("files", file);
         });
-        console.log(objectData);
-        if (isCreate) {
-            dispatch(createObject(objectData));
-        } else {
-            // onUpdate(objectData);
-        }
+        // onUpdate(objectData);
     };
     useEffect(() => {
         dispatch(
@@ -238,7 +233,6 @@ function Main() {
             setIsObjectActivated(
                 objectState.objectOne ? objectState.objectOne.active : true
             );
-            console.log(objectState.objectOne);
         }
     }, [objectState.statusOne]);
 
@@ -277,11 +271,11 @@ function Main() {
         }
     }, [editorData]);
     useEffect(() => {
-        if (status === Status.ERROR) {
+        if (objectState.statusOne === Status.ERROR) {
             stopLoader(setIsLoaderOpen);
             console.log(error);
         }
-        if (isCreated) {
+        if (isUpdated) {
             const successEl = document
                 .querySelectorAll("#create-success-notification")[0]
                 .cloneNode(true) as HTMLElement;
@@ -299,7 +293,7 @@ function Main() {
             dispatch(resetIsCreated());
             navigate("/objects");
         }
-    }, [isCreated, status]);
+    }, [isUpdated, objectState.statusOne, error]);
 
     useEffect(() => {
         const regionID = Number(
