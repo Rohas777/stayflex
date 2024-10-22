@@ -28,3 +28,8 @@ export interface UserUpdateType {
     phone: string;
     id: number;
 }
+export interface UserTariffUpdateType {
+    user_id: number;
+    tariff_id: number;
+    balance: number;
+}

@@ -18,6 +18,7 @@ import {
     fetchUsers,
     updateUserAdmin,
     updateUserIsActive,
+    updateUserTariff,
 } from "@/stores/reducers/users/actions";
 import tippy from "tippy.js";
 import { Link } from "react-router-dom";
@@ -27,11 +28,16 @@ import { ListPlus } from "lucide-react";
 import { startLoader, stopLoader } from "@/utils/customUtils";
 import Toastify from "toastify-js";
 import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
-import { UserCreateType, UserUpdateType } from "@/stores/reducers/users/types";
+import {
+    UserCreateType,
+    UserTariffUpdateType,
+    UserUpdateType,
+} from "@/stores/reducers/users/types";
 import Notification from "@/components/Base/Notification";
 import clsx from "clsx";
 import UserCreateModal from "./createModal";
 import UserUpdateModal from "./updateModal";
+import { fetchTariffs } from "@/stores/reducers/tariffs/actions";
 
 window.DateTime = DateTime;
 interface Response {
@@ -96,7 +102,7 @@ function Main() {
                 paginationSizeSelector: [10, 20, 50, 100],
                 layout: "fitColumns",
                 responsiveLayout: "collapse",
-                placeholder: "Соответствующих записей не найдено",
+                placeholder: "Записи не найдены",
                 columns: [
                     {
                         title: "",
@@ -235,6 +241,7 @@ function Main() {
                             });
                             editA.addEventListener("click", function () {
                                 dispatch(fetchUserById(response.id!));
+                                dispatch(fetchTariffs());
                                 setUpdateModalPreview(true);
                             });
 
@@ -402,7 +409,9 @@ function Main() {
     const onUpdate = async (user: UserUpdateType) => {
         await dispatch(updateUserAdmin(user));
     };
-
+    const onUpdateTariff = async (tariffData: UserTariffUpdateType) => {
+        await dispatch(updateUserTariff(tariffData));
+    };
     useEffect(() => {
         if (!isCreated && !isUpdated && !isActiveStatusUpdated && !isDeleted) {
             stopLoader(setIsLoaderOpen);
@@ -645,7 +654,8 @@ function Main() {
                     <UserUpdateModal
                         isLoaderOpen={isLoaderOpen}
                         setIsLoaderOpen={setIsLoaderOpen}
-                        onUpdate={onUpdate}
+                        onUpdateUser={onUpdate}
+                        onUpdateUserTariff={onUpdateTariff}
                     />
                 </Dialog.Panel>
             </Dialog>

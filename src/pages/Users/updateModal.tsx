@@ -10,7 +10,11 @@ import { useEffect, useState } from "react";
 import TomSelect from "@/components/Base/CustomTomSelect";
 import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
 import { startLoader, stopLoader } from "@/utils/customUtils";
-import { UserCreateType, UserUpdateType } from "@/stores/reducers/users/types";
+import {
+    UserCreateType,
+    UserTariffUpdateType,
+    UserUpdateType,
+} from "@/stores/reducers/users/types";
 import PhoneInput from "react-phone-input-2";
 import ru from "react-phone-input-2/lang/ru.json";
 import Lucide from "@/components/Base/Lucide";
@@ -20,21 +24,30 @@ import { Status } from "@/stores/reducers/types";
 import Loader from "@/components/Custom/Loader/Loader";
 import { Tab } from "@/components/Base/Headless";
 import UserUpdateForm from "./updateUserForm";
+import UserTariffUpdateForm from "./updateTariffForm";
 
 interface UserUpdateModalProps {
-    onUpdate: (userData: UserUpdateType) => void;
+    onUpdateUser: (userData: UserUpdateType) => void;
+    onUpdateUserTariff: (userData: UserTariffUpdateType) => void;
     setIsLoaderOpen: React.Dispatch<React.SetStateAction<boolean>>;
     isLoaderOpen: boolean;
 }
 
 function UserUpdateModal({
-    onUpdate,
+    onUpdateUser,
+    onUpdateUserTariff,
     setIsLoaderOpen,
     isLoaderOpen,
 }: UserUpdateModalProps) {
     const { statusOne } = useAppSelector((state) => state.user);
+    const tariffState = useAppSelector((state) => state.tariff);
 
-    if (statusOne === Status.LOADING && !isLoaderOpen) return <Loader />;
+    if (
+        (statusOne === Status.LOADING ||
+            tariffState.statusAll === Status.LOADING) &&
+        !isLoaderOpen
+    )
+        return <Loader />;
 
     return (
         <>
@@ -59,14 +72,14 @@ function UserUpdateModal({
                     <Tab.Panels className="mt-5">
                         <Tab.Panel className="leading-relaxed">
                             <UserUpdateForm
-                                onUpdate={onUpdate}
+                                onUpdate={onUpdateUser}
                                 setIsLoaderOpen={setIsLoaderOpen}
                                 isLoaderOpen={isLoaderOpen}
                             />
                         </Tab.Panel>
                         <Tab.Panel className="leading-relaxed">
-                            <UserUpdateForm
-                                onUpdate={onUpdate}
+                            <UserTariffUpdateForm
+                                onUpdate={onUpdateUserTariff}
                                 setIsLoaderOpen={setIsLoaderOpen}
                                 isLoaderOpen={isLoaderOpen}
                             />

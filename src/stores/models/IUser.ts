@@ -3,7 +3,10 @@ export interface IUser {
     id: number;
     fullname: string;
     phone: string;
-    tarif: string;
+    tariff: {
+        id: number;
+        name: string;
+    };
     is_active: boolean;
     is_verified: boolean;
     is_admin: boolean;

@@ -7,6 +7,7 @@ import {
     fetchUsers,
     updateUserAdmin,
     updateUserIsActive,
+    updateUserTariff,
 } from "./actions";
 import { Status } from "../types";
 
@@ -85,6 +86,9 @@ export const userSlice = createSlice({
 
         builder
             .addCase(updateUserAdmin.fulfilled, (state) => {
+                state.isUpdated = true;
+            })
+            .addCase(updateUserTariff.fulfilled, (state) => {
                 state.isUpdated = true;
             })
             .addCase(updateUserIsActive.fulfilled, (state) => {

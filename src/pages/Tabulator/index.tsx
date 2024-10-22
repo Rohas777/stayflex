@@ -42,7 +42,7 @@ function Main() {
                 paginationSizeSelector: [10, 20, 30, 40],
                 layout: "fitColumns",
                 responsiveLayout: "collapse",
-                placeholder: "Соответствующих записей не найдено",
+                placeholder: "Записи не найдены",
                 columns: [
                     {
                         title: "",

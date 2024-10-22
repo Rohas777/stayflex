@@ -110,8 +110,6 @@ function UserUpdateForm({
         setTel(userOne.phone);
     }, [statusOne, userOne]);
 
-    if (statusOne === Status.LOADING && !isLoaderOpen) return <Loader />;
-
     return (
         <>
             <form className="validate-form mt-5" onSubmit={onSubmit}>

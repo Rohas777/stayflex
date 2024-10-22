@@ -61,7 +61,7 @@ function Main() {
                 paginationSizeSelector: [10, 20, 50, 100],
                 layout: "fitColumns",
                 responsiveLayout: "collapse",
-                placeholder: "Соответствующих записей не найдено",
+                placeholder: "Записи не найдены",
                 columns: [
                     {
                         title: "",

@@ -1,7 +1,7 @@
 import { IUser } from "@/stores/models/IUser";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { instance } from "@/vars";
-import { UserCreateType, UserUpdateType } from "./types";
+import { UserCreateType, UserTariffUpdateType, UserUpdateType } from "./types";
 
 export const fetchUsers = createAsyncThunk(
     "user/fetchAll",
@@ -56,6 +56,21 @@ export const updateUserAdmin = createAsyncThunk(
                 "Content-Type": "application/json",
             },
         });
+        return response.data;
+    }
+);
+export const updateUserTariff = createAsyncThunk(
+    "/user/updateTariff",
+    async (tariffData: UserTariffUpdateType) => {
+        const response = await instance.put(
+            `/user/tariff/activate`,
+            tariffData,
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            }
+        );
         return response.data;
     }
 );
