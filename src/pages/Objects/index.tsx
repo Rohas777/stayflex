@@ -12,7 +12,7 @@ import { DateTime } from "luxon";
 import { useAppDispatch, useAppSelector } from "@/stores/hooks";
 import { deleteUser } from "@/stores/reducers/users/actions";
 import tippy from "tippy.js";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Status } from "@/stores/reducers/types";
 import LoadingIcon from "@/components/Base/LoadingIcon";
 import { ListPlus } from "lucide-react";
@@ -73,6 +73,8 @@ function Main() {
         cancelLabel: null,
         is_danger: true,
     });
+
+    const navigate = useNavigate();
 
     const tableRef = createRef<HTMLDivElement>();
     const tabulator = useRef<Tabulator>();
@@ -209,6 +211,9 @@ function Main() {
                                 );
                                 setCurrentObjectID(response.id!);
                                 setCalendarModal(true);
+                            });
+                            editA.addEventListener("click", function () {
+                                navigate(`/objects/update/${response.id}`);
                             });
                             deleteA.addEventListener("click", function () {
                                 setConfirmModalContent({

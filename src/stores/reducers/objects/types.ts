@@ -3,7 +3,9 @@ import { Status } from "../types";
 
 export interface ObjectState {
     objects: IObject[];
+    objectOne: IObject | null;
     status: Status;
+    statusOne: Status;
     error: string | null;
     isCreated: boolean;
     isUpdated: boolean;

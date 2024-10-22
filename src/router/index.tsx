@@ -77,6 +77,7 @@ import Amenities from "../pages/Amenities";
 import Objects from "../pages/Objects";
 import ObjectsClient from "../pages/ObjectsClient";
 import CreateObject from "../pages/CreateObject";
+import UpdateObject from "../pages/UpdateObject";
 import Clients from "../pages/Clients";
 import Reservations from "../pages/Reservations";
 import ClientReservations from "../pages/ClientReservations";
@@ -137,7 +138,7 @@ function Router() {
                 },
                 {
                     path: "objects/update/:id",
-                    element: <CreateObject />,
+                    element: <UpdateObject />,
                 },
                 {
                     path: "tariffs",

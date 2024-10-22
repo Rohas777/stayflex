@@ -4,46 +4,60 @@ import { Dialog, Menu } from "@/components/Base/Headless";
 import Button from "@/components/Base/Button";
 import { FormInput, FormSelect } from "@/components/Base/Form";
 import * as xlsx from "xlsx";
-import { useEffect, useRef, createRef, useState } from "react";
+import { useEffect, useRef, createRef, useState, ChangeEvent } from "react";
 import { createIcons, icons } from "lucide";
 import { TabulatorFull as Tabulator } from "tabulator-tables";
 import { stringToHTML } from "@/utils/helper";
 import { DateTime } from "luxon";
 import { useAppDispatch, useAppSelector } from "@/stores/hooks";
-import { userSlice } from "@/stores/reducers/users/slice";
-import { deleteUser, fetchUsers } from "@/stores/reducers/users/actions";
+import { deleteUser } from "@/stores/reducers/users/actions";
 import tippy from "tippy.js";
-import { Link } from "react-router-dom";
-import { propertyTypeSlice } from "@/stores/reducers/property-types/slice";
-import { fetchPropertyTypes } from "@/stores/reducers/property-types/actions";
+import { Link, useNavigate } from "react-router-dom";
 import { Status } from "@/stores/reducers/types";
 import LoadingIcon from "@/components/Base/LoadingIcon";
 import { ListPlus } from "lucide-react";
 import {
+    deleteObject,
     fetchObjects,
     updateObiectIsActive,
 } from "@/stores/reducers/objects/actions";
-import { startLoader, stopLoader } from "@/utils/customUtils";
 import { objectSlice } from "@/stores/reducers/objects/slice";
-import Toastify from "toastify-js";
-import Notification from "@/components/Base/Notification";
 import clsx from "clsx";
+import Toastify from "toastify-js";
+import { startLoader, stopLoader } from "@/utils/customUtils";
+import Notification from "@/components/Base/Notification";
 import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
+import Calendar from "@/components/Calendar";
+import ReservationsCalendar from "./calendar";
+import { reservationSlice } from "@/stores/reducers/reservations/slice";
+import {
+    createReservation,
+    deleteReservation,
+    fetchReservationsByObject,
+    updateReservation,
+} from "@/stores/reducers/reservations/actions";
+import {
+    ReservationCreateType,
+    ReservationUpdateType,
+} from "@/stores/reducers/reservations/types";
+import { clientSlice } from "@/stores/reducers/clients/slice";
 
 window.DateTime = DateTime;
 interface Response {
     id?: number;
     name?: string;
+    owner?: string;
+    active?: boolean;
 }
 
 function Main() {
+    const [confirmationModal, setConfirmationModal] = useState(false);
+    const [reservationModal, setReservationModal] = useState(false);
+    const [calendarModal, setCalendarModal] = useState(false);
     const [isLoaderOpen, setIsLoaderOpen] = useState(false);
-    const [deleteConfirmationModal, setDeleteConfirmationModal] =
-        useState(false);
+    const [currentObjectID, setCurrentObjectID] = useState<number | null>(null);
     const [switcherIsActive, setSwitcherIsActive] =
         useState<HTMLInputElement | null>(null);
-    const [confirmationModal, setConfirmationModal] = useState(false);
-
     const [confirmModalContent, setConfirmModalContent] = useState<{
         title: string | null;
         description: string | null;
@@ -59,6 +73,8 @@ function Main() {
         cancelLabel: null,
         is_danger: true,
     });
+
+    const navigate = useNavigate();
 
     const tableRef = createRef<HTMLDivElement>();
     const tabulator = useRef<Tabulator>();
@@ -116,8 +132,8 @@ function Main() {
                         },
                     },
                     {
-                        minWidth: 300,
                         title: "Действия",
+                        minWidth: 30,
                         field: "id",
                         responsive: 1,
                         hozAlign: "right",
@@ -159,7 +175,9 @@ function Main() {
                             });
                             const switcher = stringToHTML(
                                 `<label class="inline-flex items-center cursor-pointer mr-3">
-                                    <input type="checkbox" value="" class="sr-only peer">
+                                    <input type="checkbox" ${
+                                        response.active ? "checked" : ""
+                                    } class="sr-only peer">
                                     <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
                                 </label>`
                             );
@@ -170,11 +188,22 @@ function Main() {
                             });
                             a.append(switcher, dateA, editA, deleteA);
                             a.addEventListener("hover", function () {});
+                            dateA.addEventListener("click", function () {
+                                dispatch(
+                                    fetchReservationsByObject(response.id!)
+                                );
+                                setCurrentObjectID(response.id!);
+                                setCalendarModal(true);
+                            });
+                            editA.addEventListener("click", function () {
+                                navigate(`/objects/update/${response.id}`);
+                            });
                             deleteA.addEventListener("click", function () {
                                 setConfirmModalContent({
                                     title: "Удалить объект?",
                                     description: `Вы уверены, что хотите удалить объект "${response.name?.trim()}"?<br/>Это действие нельзя будет отменить.`,
                                     onConfirm: () => {
+                                        console.log("first");
                                         onDelete(response.id!);
                                     },
                                     confirmLabel: "Удалить",
@@ -305,8 +334,23 @@ function Main() {
         }
     };
 
+    const onCreateReservation = async (
+        reservationData: ReservationCreateType
+    ) => {
+        await dispatch(createReservation(reservationData));
+    };
+    const onUpdateReservation = async (
+        reservationData: ReservationUpdateType
+    ) => {
+        await dispatch(updateReservation(reservationData));
+    };
+    const onDeleteReservation = async (id: number) => {
+        await dispatch(deleteReservation(String(id)));
+    };
+
     const onDelete = async (id: number) => {
-        // await dispatch(deleteUser(id));
+        startLoader(setIsLoaderOpen);
+        await dispatch(deleteObject(id));
     };
     const onUpdateIsActive = async (target: HTMLInputElement, id: number) => {
         startLoader(setIsLoaderOpen);
@@ -323,6 +367,9 @@ function Main() {
         isDeleted,
     } = useAppSelector((state) => state.object);
     const objectActions = objectSlice.actions;
+    const reservationState = useAppSelector((state) => state.reservation);
+    const reservationActions = reservationSlice.actions;
+    const clientActions = clientSlice.actions;
     const dispatch = useAppDispatch();
 
     useEffect(() => {
@@ -339,6 +386,8 @@ function Main() {
                 .querySelectorAll("#success-notification-content")[0]
                 .cloneNode(true) as HTMLElement;
             successEl.querySelector(".text-content")!.textContent = isCreated
+                ? "Объект успешно создан"
+                : isDeleted
                 ? "Объект успешно удалён"
                 : "Объект успешно обновлен";
             successEl.classList.remove("hidden");
@@ -358,17 +407,68 @@ function Main() {
             dispatch(objectActions.resetIsActiveStatusUpdated());
         }
     }, [isCreated, isUpdated, isActiveStatusUpdated, isDeleted]);
+
+    useEffect(() => {
+        if (
+            !reservationState.isCreated &&
+            !reservationState.isUpdated &&
+            !reservationState.isDeleted
+        ) {
+            stopLoader(setIsLoaderOpen);
+        }
+
+        if (
+            reservationState.isCreated ||
+            reservationState.isUpdated ||
+            reservationState.isDeleted
+        ) {
+            dispatch(fetchReservationsByObject(currentObjectID!));
+            setReservationModal(false);
+            const successEl = document
+                .querySelectorAll("#success-notification-content")[0]
+                .cloneNode(true) as HTMLElement;
+            successEl.querySelector(".text-content")!.textContent =
+                reservationState.isCreated
+                    ? "Бронь успешно создана"
+                    : reservationState.isDeleted
+                    ? "Бронь успешно удалена"
+                    : "Бронь успешно обновлена";
+            successEl.classList.remove("hidden");
+            Toastify({
+                node: successEl,
+                duration: 3000,
+                newWindow: true,
+                close: true,
+                gravity: "top",
+                position: "right",
+                stopOnFocus: true,
+            }).showToast();
+            stopLoader(setIsLoaderOpen);
+            dispatch(reservationActions.resetIsCreated());
+            dispatch(reservationActions.resetIsUpdated());
+            dispatch(reservationActions.resetIsDeleted());
+            dispatch(clientActions.resetClientByPhone());
+        }
+    }, [
+        reservationState.isCreated,
+        reservationState.isUpdated,
+        reservationState.isDeleted,
+    ]);
+
     useEffect(() => {
         initTabulator();
         reInitOnResizeWindow();
 
         dispatch(fetchObjects());
     }, []);
+
     useEffect(() => {
         if (objects.length) {
             const formattedData = objects.map((object) => ({
                 id: object.id,
                 name: object.name,
+                owner: object.author.fullname,
+                active: object.active,
             }));
             tabulator.current
                 ?.setData(formattedData.reverse())
@@ -504,6 +604,39 @@ function Main() {
                 </div>
             </div>
             {/* END: HTML Table Data */}
+
+            {/* BEGIN: Delete Calendar Modal */}
+            <Dialog
+                open={calendarModal}
+                onClose={() => {
+                    setCalendarModal(false);
+                }}
+                size="xl"
+            >
+                <Dialog.Panel>
+                    <a
+                        onClick={(event: React.MouseEvent) => {
+                            event.preventDefault();
+                            setCalendarModal(false);
+                        }}
+                        className="absolute top-0 right-0 mt-3 mr-3"
+                        href="#"
+                    >
+                        <Lucide icon="X" className="w-8 h-8 text-slate-400" />
+                    </a>
+                    <ReservationsCalendar
+                        isLoaderOpen={isLoaderOpen}
+                        setIsLoaderOpen={setIsLoaderOpen}
+                        objectID={currentObjectID!}
+                        onCreate={onCreateReservation}
+                        onUpdate={onUpdateReservation}
+                        onDelete={onDeleteReservation}
+                        reservationModal={reservationModal}
+                        setReservationModal={setReservationModal}
+                    />
+                </Dialog.Panel>
+            </Dialog>
+            {/* END: Delete Calendar Modal */}
             {/* BEGIN: Delete Confirmation Modal */}
             <Dialog
                 open={confirmationModal}
@@ -543,6 +676,7 @@ function Main() {
                             onClick={() => {
                                 setConfirmationModal(false);
                             }}
+                            disabled={isLoaderOpen}
                             className="col-span-6 mr-1"
                         >
                             {confirmModalContent.cancelLabel}
@@ -553,6 +687,7 @@ function Main() {
                                     ? "danger"
                                     : "warning"
                             }
+                            disabled={isLoaderOpen}
                             type="button"
                             className="col-span-6"
                             onClick={() => {

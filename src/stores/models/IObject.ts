@@ -14,12 +14,15 @@ export interface IObject {
     photos: string[];
     active: boolean;
     city: {
+        id: number;
         name: string;
         region: {
             name: string;
+            id: number;
         };
     };
     apartment: {
+        id: number;
         name: string;
     };
     author: {
@@ -28,7 +31,8 @@ export interface IObject {
         phone: string;
         mail: string;
     };
-    amenities: {
+    conveniences: {
+        id: number;
         name: string;
         photo: string;
     }[];
