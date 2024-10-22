@@ -5,11 +5,11 @@ import { useAppSelector } from "@/stores/hooks";
 import { convertDateString } from "@/utils/customUtils";
 
 function InfoModal() {
-    const { reservationById, statusByID, error } = useAppSelector(
+    const { reservationOne, statusOne, error } = useAppSelector(
         (state) => state.reservation
     );
 
-    if (statusByID === Status.LOADING) {
+    if (statusOne === Status.LOADING) {
         return (
             <>
                 <div className="w-full h-60 relative rounded-md overflow-hidden">
@@ -32,32 +32,32 @@ function InfoModal() {
                 <ul className="mt-7">
                     <li>
                         <strong className="inline-block w-20">Объект:</strong>
-                        {reservationById && reservationById?.object.name}
+                        {reservationOne && reservationOne?.object.name}
                     </li>
                     <li>
                         <strong className="inline-block mt-3 w-20">Имя:</strong>
-                        {reservationById && reservationById?.client.fullname}
+                        {reservationOne && reservationOne?.client.fullname}
                     </li>
                     <li>
                         <strong className="inline-block mt-3 w-20">
                             Номер:
                         </strong>
-                        {reservationById && reservationById?.client.phone}
+                        {reservationOne && reservationOne?.client.phone}
                     </li>
                     <li>
                         <strong className="inline-block mt-3 w-20">
                             Email:
                         </strong>
-                        {reservationById && reservationById?.client.email}
+                        {reservationOne && reservationOne?.client.email}
                     </li>
                     <li>
                         <strong className="inline-block mt-3 mb-10 w-20">
                             Дата:
                         </strong>
-                        {reservationById &&
-                            convertDateString(reservationById?.start_date!) +
+                        {reservationOne &&
+                            convertDateString(reservationOne?.start_date!) +
                                 " - " +
-                                convertDateString(reservationById?.end_date!)}
+                                convertDateString(reservationOne?.end_date!)}
                     </li>
                 </ul>
             </div>

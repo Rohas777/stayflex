@@ -120,6 +120,13 @@ function Main() {
                     </Button>
                 </div>
             </div>
+            {!tariffs.length && (
+                <div className="flex flex-col mt-5 intro-y box lg:flex-row">
+                    <div className="w-full p-5 text-center text-slate-600 dark:text-slate-500">
+                        Не создано ни одного тарифа
+                    </div>
+                </div>
+            )}
             {/* BEGIN: Pricing Layout */}
             {chunkTariffs(tariffs, 3).map((tariffsChunk, index) => (
                 <div

@@ -1,7 +1,12 @@
 import { AnyAction, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Status } from "../types";
 import { ObjectState } from "./types";
-import { createObject, fetchObjects, updateObiectIsActive } from "./actions";
+import {
+    createObject,
+    deleteObject,
+    fetchObjects,
+    updateObiectIsActive,
+} from "./actions";
 
 const initialState: ObjectState = {
     objects: [],
@@ -9,6 +14,7 @@ const initialState: ObjectState = {
     error: null,
     isCreated: false,
     isUpdated: false,
+    isDeleted: false,
     isActiveStatusUpdated: false,
 };
 
@@ -21,6 +27,9 @@ export const objectSlice = createSlice({
         },
         resetIsUpdated: (state) => {
             state.isUpdated = false;
+        },
+        resetIsDeleted: (state) => {
+            state.isDeleted = false;
         },
         resetIsActiveStatusUpdated: (state) => {
             state.isActiveStatusUpdated = false;
@@ -47,9 +56,13 @@ export const objectSlice = createSlice({
                 }
             );
 
-        builder.addCase(updateObiectIsActive.fulfilled, (state) => {
-            state.isActiveStatusUpdated = true;
-        });
+        builder
+            .addCase(updateObiectIsActive.fulfilled, (state) => {
+                state.isActiveStatusUpdated = true;
+            })
+            .addCase(deleteObject.fulfilled, (state) => {
+                state.isDeleted = true;
+            });
         builder
             .addCase(createObject.fulfilled, (state) => {
                 state.isCreated = true;

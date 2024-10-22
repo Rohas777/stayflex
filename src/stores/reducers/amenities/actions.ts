@@ -29,7 +29,7 @@ export const createAmenity = createAsyncThunk(
 export const deleteAmenity = createAsyncThunk<string, string>(
     "amenity/delete",
     async (id) => {
-        const response = await instance.delete(`/convenience/delete?id=${id}`);
+        const response = await instance.delete(`/convenience/delete/${id}`);
         return response.data.id;
     }
 );

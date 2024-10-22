@@ -8,6 +8,7 @@ export interface ObjectState {
     isCreated: boolean;
     isUpdated: boolean;
     isActiveStatusUpdated: boolean;
+    isDeleted: boolean;
 }
 
 export interface ObjectCreateType {

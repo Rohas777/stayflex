@@ -25,6 +25,15 @@ export const fetchReservationsByClient = createAsyncThunk(
         return response.data;
     }
 );
+export const fetchReservationsByObject = createAsyncThunk(
+    "reservation/fetchByObject",
+    async (object_id: number) => {
+        const response = await instance.get(
+            `/reservation/objectid/${object_id}`
+        );
+        return response.data;
+    }
+);
 
 export const createReservation = createAsyncThunk(
     "/reservation/create",
@@ -73,10 +82,10 @@ export const updateReservation = createAsyncThunk(
         return response.data;
     }
 );
-// export const deleteUser = createAsyncThunk<string, string>(
-//     "/user/deleteUser",
-//     async (id) => {
-//         const response = await instance.delete(`/user/delete/${id}`);
-//         return response.data.id;
-//     }
-// );
+export const deleteReservation = createAsyncThunk<string, string>(
+    "reservation/delete",
+    async (id) => {
+        const response = await instance.delete(`/reservation/delete/${id}`);
+        return response.data.id;
+    }
+);

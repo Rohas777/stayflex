@@ -39,3 +39,19 @@ export const updateObiectIsActive = createAsyncThunk(
         return response.data;
     }
 );
+
+export const deleteObject = createAsyncThunk<string, number>(
+    "object/delete",
+    async (id) => {
+        const response = await instance.delete(`/object/delete?id=${id}`);
+        return response.data.id;
+    }
+);
+
+export const fetchObjectById = createAsyncThunk(
+    "object/fetch",
+    async (id: number) => {
+        const response = await instance.get(`/object/id/${id}`);
+        return response.data;
+    }
+);

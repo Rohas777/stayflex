@@ -3,6 +3,7 @@ export interface IReservation {
     end_date: string;
     id: number;
     status: string;
+    description: string;
     client: {
         id: number;
         fullname: string;

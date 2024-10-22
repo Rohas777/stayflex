@@ -3,12 +3,13 @@ import { IReservation } from "@/stores/models/IReservation";
 
 export interface ReservationState {
     reservations: IReservation[];
-    reservationById: IReservation | null;
+    reservationOne: IReservation | null;
     statusAll: Status;
-    statusByID: Status;
+    statusOne: Status;
     error: string | null;
     isCreated: boolean;
     isUpdated: boolean;
+    isDeleted: boolean;
 }
 
 export interface ReservationCreateType {
@@ -19,5 +20,6 @@ export interface ReservationCreateType {
     description: string;
 }
 export interface ReservationUpdateType extends ReservationCreateType {
+    status: string;
     id: number;
 }

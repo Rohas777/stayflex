@@ -26,6 +26,8 @@ import { AmenityCreateType } from "@/stores/reducers/amenities/types";
 import Toastify from "toastify-js";
 import { startLoader, stopLoader } from "@/utils/customUtils";
 import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
+import { IconType } from "@/vars";
+import ReactDOMServer from "react-dom/server";
 
 window.DateTime = DateTime;
 interface Response {
@@ -99,7 +101,11 @@ function Main() {
                             return `<div class="flex items-center justify-center">
                                 ${
                                     response.icon &&
-                                    `<i data-lucide="${response.icon}" class="size-7 mr-2"></i>`
+                                    ReactDOMServer.renderToString(
+                                        takeLucideIcon(
+                                            response.icon as IconType
+                                        )
+                                    )
                                 }
                                         <div class="font-medium whitespace-nowrap">${
                                             response.name
@@ -239,14 +245,18 @@ function Main() {
         }
     };
 
+    const takeLucideIcon = (icon: IconType) => {
+        return <Lucide className="size-7 mr-2" icon={icon} />;
+    };
+
     const { amenities, status, error, isCreated, isDeleted } = useAppSelector(
         (state) => state.amenity
     );
     const amenityActions = amenitySlice.actions;
     const dispatch = useAppDispatch();
 
-    const onDelete = () => {
-        dispatch(deleteAmenity(String(amenityData?.id)));
+    const onDelete = async () => {
+        await dispatch(deleteAmenity(String(amenityData?.id)));
     };
     const onCreate = async (amenityData: AmenityCreateType) => {
         await dispatch(createAmenity(amenityData));

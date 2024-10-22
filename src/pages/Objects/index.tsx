@@ -17,15 +17,30 @@ import { Status } from "@/stores/reducers/types";
 import LoadingIcon from "@/components/Base/LoadingIcon";
 import { ListPlus } from "lucide-react";
 import {
+    deleteObject,
     fetchObjects,
     updateObiectIsActive,
 } from "@/stores/reducers/objects/actions";
 import { objectSlice } from "@/stores/reducers/objects/slice";
 import clsx from "clsx";
 import Toastify from "toastify-js";
-import { stopLoader } from "@/utils/customUtils";
+import { startLoader, stopLoader } from "@/utils/customUtils";
 import Notification from "@/components/Base/Notification";
 import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
+import Calendar from "@/components/Calendar";
+import ReservationsCalendar from "./calendar";
+import { reservationSlice } from "@/stores/reducers/reservations/slice";
+import {
+    createReservation,
+    deleteReservation,
+    fetchReservationsByObject,
+    updateReservation,
+} from "@/stores/reducers/reservations/actions";
+import {
+    ReservationCreateType,
+    ReservationUpdateType,
+} from "@/stores/reducers/reservations/types";
+import { clientSlice } from "@/stores/reducers/clients/slice";
 
 window.DateTime = DateTime;
 interface Response {
@@ -37,7 +52,10 @@ interface Response {
 
 function Main() {
     const [confirmationModal, setConfirmationModal] = useState(false);
+    const [reservationModal, setReservationModal] = useState(false);
+    const [calendarModal, setCalendarModal] = useState(false);
     const [isLoaderOpen, setIsLoaderOpen] = useState(false);
+    const [currentObjectID, setCurrentObjectID] = useState<number | null>(null);
     const [switcherIsActive, setSwitcherIsActive] =
         useState<HTMLInputElement | null>(null);
     const [confirmModalContent, setConfirmModalContent] = useState<{
@@ -185,11 +203,19 @@ function Main() {
                             });
                             a.append(switcher, dateA, editA, deleteA);
                             a.addEventListener("hover", function () {});
+                            dateA.addEventListener("click", function () {
+                                dispatch(
+                                    fetchReservationsByObject(response.id!)
+                                );
+                                setCurrentObjectID(response.id!);
+                                setCalendarModal(true);
+                            });
                             deleteA.addEventListener("click", function () {
                                 setConfirmModalContent({
                                     title: "Удалить объект?",
                                     description: `Вы уверены, что хотите удалить объект "${response.name?.trim()}"?<br/>Это действие нельзя будет отменить.`,
                                     onConfirm: () => {
+                                        console.log("first");
                                         onDelete(response.id!);
                                     },
                                     confirmLabel: "Удалить",
@@ -327,11 +353,26 @@ function Main() {
         }
     };
 
+    const onCreateReservation = async (
+        reservationData: ReservationCreateType
+    ) => {
+        await dispatch(createReservation(reservationData));
+    };
+    const onUpdateReservation = async (
+        reservationData: ReservationUpdateType
+    ) => {
+        await dispatch(updateReservation(reservationData));
+    };
+    const onDeleteReservation = async (id: number) => {
+        await dispatch(deleteReservation(String(id)));
+    };
+
     const onDelete = async (id: number) => {
-        // await dispatch(deleteUser(id));
+        startLoader(setIsLoaderOpen);
+        await dispatch(deleteObject(id));
     };
     const onUpdateIsActive = async (target: HTMLInputElement, id: number) => {
-        setIsLoaderOpen(true);
+        startLoader(setIsLoaderOpen);
         await dispatch(updateObiectIsActive({ id: id }));
     };
 
@@ -342,24 +383,30 @@ function Main() {
         isCreated,
         isUpdated,
         isActiveStatusUpdated,
+        isDeleted,
     } = useAppSelector((state) => state.object);
     const objectActions = objectSlice.actions;
+    const reservationState = useAppSelector((state) => state.reservation);
+    const reservationActions = reservationSlice.actions;
+    const clientActions = clientSlice.actions;
     const dispatch = useAppDispatch();
 
     useEffect(() => {
-        if (!isCreated && !isUpdated && !isActiveStatusUpdated) {
+        if (!isCreated && !isUpdated && !isActiveStatusUpdated && !isDeleted) {
             stopLoader(setIsLoaderOpen);
         }
         if (isActiveStatusUpdated) {
             switcherIsActive!.checked = !switcherIsActive!.checked;
         }
-        if (isCreated || isUpdated || isActiveStatusUpdated) {
+        if (isCreated || isUpdated || isActiveStatusUpdated || isDeleted) {
             dispatch(fetchObjects());
             setConfirmationModal(false);
             const successEl = document
                 .querySelectorAll("#success-notification-content")[0]
                 .cloneNode(true) as HTMLElement;
             successEl.querySelector(".text-content")!.textContent = isCreated
+                ? "Объект успешно создан"
+                : isDeleted
                 ? "Объект успешно удалён"
                 : "Объект успешно обновлен";
             successEl.classList.remove("hidden");
@@ -375,9 +422,57 @@ function Main() {
             stopLoader(setIsLoaderOpen);
             dispatch(objectActions.resetIsCreated());
             dispatch(objectActions.resetIsUpdated());
+            dispatch(objectActions.resetIsDeleted());
             dispatch(objectActions.resetIsActiveStatusUpdated());
         }
-    }, [isCreated, isUpdated, isActiveStatusUpdated]);
+    }, [isCreated, isUpdated, isActiveStatusUpdated, isDeleted]);
+
+    useEffect(() => {
+        if (
+            !reservationState.isCreated &&
+            !reservationState.isUpdated &&
+            !reservationState.isDeleted
+        ) {
+            stopLoader(setIsLoaderOpen);
+        }
+
+        if (
+            reservationState.isCreated ||
+            reservationState.isUpdated ||
+            reservationState.isDeleted
+        ) {
+            dispatch(fetchReservationsByObject(currentObjectID!));
+            setReservationModal(false);
+            const successEl = document
+                .querySelectorAll("#success-notification-content")[0]
+                .cloneNode(true) as HTMLElement;
+            successEl.querySelector(".text-content")!.textContent =
+                reservationState.isCreated
+                    ? "Бронь успешно создана"
+                    : reservationState.isDeleted
+                    ? "Бронь успешно удалена"
+                    : "Бронь успешно обновлена";
+            successEl.classList.remove("hidden");
+            Toastify({
+                node: successEl,
+                duration: 3000,
+                newWindow: true,
+                close: true,
+                gravity: "top",
+                position: "right",
+                stopOnFocus: true,
+            }).showToast();
+            stopLoader(setIsLoaderOpen);
+            dispatch(reservationActions.resetIsCreated());
+            dispatch(reservationActions.resetIsUpdated());
+            dispatch(reservationActions.resetIsDeleted());
+            dispatch(clientActions.resetClientByPhone());
+        }
+    }, [
+        reservationState.isCreated,
+        reservationState.isUpdated,
+        reservationState.isDeleted,
+    ]);
 
     useEffect(() => {
         initTabulator();
@@ -521,6 +616,38 @@ function Main() {
             </div>
             {/* END: HTML Table Data */}
 
+            {/* BEGIN: Delete Calendar Modal */}
+            <Dialog
+                open={calendarModal}
+                onClose={() => {
+                    setCalendarModal(false);
+                }}
+                size="xl"
+            >
+                <Dialog.Panel>
+                    <a
+                        onClick={(event: React.MouseEvent) => {
+                            event.preventDefault();
+                            setCalendarModal(false);
+                        }}
+                        className="absolute top-0 right-0 mt-3 mr-3"
+                        href="#"
+                    >
+                        <Lucide icon="X" className="w-8 h-8 text-slate-400" />
+                    </a>
+                    <ReservationsCalendar
+                        isLoaderOpen={isLoaderOpen}
+                        setIsLoaderOpen={setIsLoaderOpen}
+                        objectID={currentObjectID!}
+                        onCreate={onCreateReservation}
+                        onUpdate={onUpdateReservation}
+                        onDelete={onDeleteReservation}
+                        reservationModal={reservationModal}
+                        setReservationModal={setReservationModal}
+                    />
+                </Dialog.Panel>
+            </Dialog>
+            {/* END: Delete Calendar Modal */}
             {/* BEGIN: Delete Confirmation Modal */}
             <Dialog
                 open={confirmationModal}
@@ -560,6 +687,7 @@ function Main() {
                             onClick={() => {
                                 setConfirmationModal(false);
                             }}
+                            disabled={isLoaderOpen}
                             className="col-span-6 mr-1"
                         >
                             {confirmModalContent.cancelLabel}
@@ -570,6 +698,7 @@ function Main() {
                                     ? "danger"
                                     : "warning"
                             }
+                            disabled={isLoaderOpen}
                             type="button"
                             className="col-span-6"
                             onClick={() => {

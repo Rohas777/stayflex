@@ -19,7 +19,16 @@ import { fetchPropertyTypes } from "@/stores/reducers/property-types/actions";
 import { Status } from "@/stores/reducers/types";
 import LoadingIcon from "@/components/Base/LoadingIcon";
 import { ListPlus } from "lucide-react";
-import { fetchObjects } from "@/stores/reducers/objects/actions";
+import {
+    fetchObjects,
+    updateObiectIsActive,
+} from "@/stores/reducers/objects/actions";
+import { startLoader, stopLoader } from "@/utils/customUtils";
+import { objectSlice } from "@/stores/reducers/objects/slice";
+import Toastify from "toastify-js";
+import Notification from "@/components/Base/Notification";
+import clsx from "clsx";
+import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
 
 window.DateTime = DateTime;
 interface Response {
@@ -28,17 +37,28 @@ interface Response {
 }
 
 function Main() {
+    const [isLoaderOpen, setIsLoaderOpen] = useState(false);
     const [deleteConfirmationModal, setDeleteConfirmationModal] =
         useState(false);
-    const [columnAcionFocusId, setcolumnAcionFocusId] = useState<number | null>(
-        null
-    );
-    const [buttonModalPreview, setButtonModalPreview] = useState(false);
-    const [isCreatePopup, setIsCreatePopup] = useState(true);
-    const [objectData, setObjectData] = useState<{
-        name: string;
-        icon: string;
-    } | null>(null);
+    const [switcherIsActive, setSwitcherIsActive] =
+        useState<HTMLInputElement | null>(null);
+    const [confirmationModal, setConfirmationModal] = useState(false);
+
+    const [confirmModalContent, setConfirmModalContent] = useState<{
+        title: string | null;
+        description: string | null;
+        onConfirm: (() => void) | null;
+        confirmLabel: string | null;
+        cancelLabel: string | null;
+        is_danger: boolean;
+    }>({
+        title: null,
+        description: null,
+        onConfirm: null,
+        confirmLabel: null,
+        cancelLabel: null,
+        is_danger: true,
+    });
 
     const tableRef = createRef<HTMLDivElement>();
     const tabulator = useRef<Tabulator>();
@@ -96,7 +116,7 @@ function Main() {
                         },
                     },
                     {
-                        minWidth: 100,
+                        minWidth: 300,
                         title: "Действия",
                         field: "id",
                         responsive: 1,
@@ -106,6 +126,7 @@ function Main() {
                         headerSort: false,
                         vertAlign: "middle",
                         formatter(cell) {
+                            const response: Response = cell.getData();
                             const a = stringToHTML(
                                 `<div class="flex lg:justify-center items-center"></div>`
                             );
@@ -150,10 +171,40 @@ function Main() {
                             a.append(switcher, dateA, editA, deleteA);
                             a.addEventListener("hover", function () {});
                             deleteA.addEventListener("click", function () {
-                                setDeleteConfirmationModal(true);
-                                const rowId = cell.getRow().getData().id;
-                                console.log(rowId);
-                                setcolumnAcionFocusId(rowId);
+                                setConfirmModalContent({
+                                    title: "Удалить объект?",
+                                    description: `Вы уверены, что хотите удалить объект "${response.name?.trim()}"?<br/>Это действие нельзя будет отменить.`,
+                                    onConfirm: () => {
+                                        onDelete(response.id!);
+                                    },
+                                    confirmLabel: "Удалить",
+                                    cancelLabel: "Отмена",
+                                    is_danger: true,
+                                });
+                                setConfirmationModal(true);
+                            });
+                            switcher.addEventListener("change", (e) => {
+                                const target = e.target as HTMLInputElement;
+                                setSwitcherIsActive(target);
+                                if (!target.checked) {
+                                    target.checked = true;
+                                    setConfirmModalContent({
+                                        title: "Деактивировать объект?",
+                                        description: `Вы уверены, что хотите деактивировать объект "${response.name?.trim()}"?<br/>Он больше не будет выводится в виджете.`,
+                                        onConfirm: () => {
+                                            onUpdateIsActive(
+                                                target,
+                                                response.id!
+                                            );
+                                        },
+                                        confirmLabel: "Деактивировать",
+                                        cancelLabel: "Отмена",
+                                        is_danger: false,
+                                    });
+                                    setConfirmationModal(true);
+                                } else {
+                                    onUpdateIsActive(target, response.id!);
+                                }
                             });
                             return a;
                         },
@@ -254,17 +305,59 @@ function Main() {
         }
     };
 
-    const onDelete = () => {
-        if (columnAcionFocusId) {
-            dispatch(deleteUser(String(columnAcionFocusId)));
-            reInitTabulator();
-            setDeleteConfirmationModal(false);
-        }
+    const onDelete = async (id: number) => {
+        // await dispatch(deleteUser(id));
+    };
+    const onUpdateIsActive = async (target: HTMLInputElement, id: number) => {
+        startLoader(setIsLoaderOpen);
+        await dispatch(updateObiectIsActive({ id: id }));
     };
 
-    const { objects, status, error } = useAppSelector((state) => state.object);
+    const {
+        objects,
+        status,
+        error,
+        isCreated,
+        isUpdated,
+        isActiveStatusUpdated,
+        isDeleted,
+    } = useAppSelector((state) => state.object);
+    const objectActions = objectSlice.actions;
     const dispatch = useAppDispatch();
 
+    useEffect(() => {
+        if (!isCreated && !isUpdated && !isActiveStatusUpdated && !isDeleted) {
+            stopLoader(setIsLoaderOpen);
+        }
+        if (isActiveStatusUpdated) {
+            switcherIsActive!.checked = !switcherIsActive!.checked;
+        }
+        if (isCreated || isUpdated || isActiveStatusUpdated || isDeleted) {
+            dispatch(fetchObjects());
+            setConfirmationModal(false);
+            const successEl = document
+                .querySelectorAll("#success-notification-content")[0]
+                .cloneNode(true) as HTMLElement;
+            successEl.querySelector(".text-content")!.textContent = isCreated
+                ? "Объект успешно удалён"
+                : "Объект успешно обновлен";
+            successEl.classList.remove("hidden");
+            Toastify({
+                node: successEl,
+                duration: 3000,
+                newWindow: true,
+                close: true,
+                gravity: "top",
+                position: "right",
+                stopOnFocus: true,
+            }).showToast();
+            stopLoader(setIsLoaderOpen);
+            dispatch(objectActions.resetIsCreated());
+            dispatch(objectActions.resetIsUpdated());
+            dispatch(objectActions.resetIsDeleted());
+            dispatch(objectActions.resetIsActiveStatusUpdated());
+        }
+    }, [isCreated, isUpdated, isActiveStatusUpdated, isDeleted]);
     useEffect(() => {
         initTabulator();
         reInitOnResizeWindow();
@@ -287,6 +380,7 @@ function Main() {
 
     return (
         <>
+            {isLoaderOpen && <OverlayLoader />}
             <div className="flex flex-col items-center mt-8 intro-y sm:flex-row">
                 <h2 className="mr-auto text-lg font-medium">Объекты</h2>
                 <div className="flex w-full mt-4 sm:w-auto sm:mt-0">
@@ -410,51 +504,81 @@ function Main() {
                 </div>
             </div>
             {/* END: HTML Table Data */}
-
             {/* BEGIN: Delete Confirmation Modal */}
             <Dialog
-                open={deleteConfirmationModal}
+                open={confirmationModal}
                 onClose={() => {
-                    setDeleteConfirmationModal(false);
+                    setConfirmationModal(false);
                 }}
             >
                 <Dialog.Panel>
                     <div className="p-5 text-center">
                         <Lucide
-                            icon="XCircle"
-                            className="w-16 h-16 mx-auto mt-3 text-danger"
+                            icon={
+                                confirmModalContent.is_danger
+                                    ? "XCircle"
+                                    : "BadgeInfo"
+                            }
+                            className={clsx("w-16 h-16 mx-auto mt-3", {
+                                "text-danger": confirmModalContent.is_danger,
+                                "text-warning": !confirmModalContent.is_danger,
+                            })}
                         />
-                        <div className="mt-5 text-3xl">Are you sure?</div>
-                        <div className="mt-2 text-slate-500">
-                            Do you really want to delete these records? <br />
-                            This process cannot be undone.
+                        <div className="mt-5 text-3xl">
+                            {confirmModalContent.title}
                         </div>
+                        <div
+                            className="mt-2 text-slate-500"
+                            dangerouslySetInnerHTML={{
+                                __html: confirmModalContent.description
+                                    ? confirmModalContent.description
+                                    : "",
+                            }}
+                        ></div>
                     </div>
-                    <div className="px-5 pb-8 text-center">
+                    <div className="px-5 pb-8 grid grid-cols-12">
                         <Button
                             variant="outline-secondary"
                             type="button"
                             onClick={() => {
-                                setDeleteConfirmationModal(false);
+                                setConfirmationModal(false);
                             }}
-                            className="w-24 mr-1"
+                            className="col-span-6 mr-1"
                         >
-                            Cancel
+                            {confirmModalContent.cancelLabel}
                         </Button>
                         <Button
-                            variant="danger"
+                            variant={
+                                confirmModalContent.is_danger
+                                    ? "danger"
+                                    : "warning"
+                            }
                             type="button"
-                            className="w-24"
+                            className="col-span-6"
                             onClick={() => {
-                                onDelete();
+                                confirmModalContent.onConfirm &&
+                                    confirmModalContent.onConfirm();
                             }}
                         >
-                            Delete
+                            {confirmModalContent.confirmLabel}
                         </Button>
                     </div>
                 </Dialog.Panel>
             </Dialog>
             {/* END: Delete Confirmation Modal */}
+            {/* BEGIN: Success Notification Content */}
+            <Notification
+                id="success-notification-content"
+                className="flex hidden"
+            >
+                <Lucide icon="CheckCircle" className="text-success" />
+                <div className="ml-4 mr-4">
+                    <div className="font-medium text-content">
+                        Объект успешно добавлен
+                    </div>
+                </div>
+            </Notification>
+            {/* END: Success Notification Content */}
         </>
     );
 }

@@ -353,8 +353,8 @@ function Main() {
 
     const {
         reservations,
-        reservationById,
-        statusByID,
+        reservationOne,
+        statusOne,
         statusAll,
         isCreated,
         isUpdated,
@@ -403,7 +403,7 @@ function Main() {
         await dispatch(updateReservationStatus(reservationData));
     };
     useEffect(() => {
-        if (statusByID === Status.ERROR) {
+        if (statusOne === Status.ERROR) {
             stopLoader(setIsLoaderOpen);
             console.log(error);
         }
@@ -431,7 +431,7 @@ function Main() {
             dispatch(resetIsUpdated());
             dispatch(resetClientByPhone());
         }
-    }, [isCreated, statusByID, isUpdated]);
+    }, [isCreated, statusOne, isUpdated]);
 
     return (
         <>

@@ -12,7 +12,10 @@ import { FormLabel, FormInput, FormTextarea } from "@/components/Base/Form";
 import { useEffect, useRef, useState } from "react";
 import TomSelect from "@/components/Base/TomSelect";
 import { RegionCreateType } from "@/stores/reducers/regions/types";
-import { ReservationCreateType } from "@/stores/reducers/reservations/types";
+import {
+    ReservationCreateType,
+    ReservationUpdateType,
+} from "@/stores/reducers/reservations/types";
 import { useAppDispatch, useAppSelector } from "@/stores/hooks";
 import { objectSlice } from "@/stores/reducers/objects/slice";
 import { clientSlice } from "@/stores/reducers/clients/slice";
@@ -30,11 +33,19 @@ import OpacityLoader from "@/components/Custom/OpacityLoader/Loader";
 import { DateTime } from "luxon";
 import { formatDate, startLoader, stopLoader } from "@/utils/customUtils";
 import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
+import { IReservation } from "@/stores/models/IReservation";
 
 interface ReservationFormProps {
-    onCreate: (name: ReservationCreateType) => void;
+    onCreate: (reservation: ReservationCreateType) => void;
+    onUpdate: (reservation: ReservationUpdateType) => void;
+    onDelete: (id: number) => void;
     setIsLoaderOpen: React.Dispatch<React.SetStateAction<boolean>>;
     isLoaderOpen: boolean;
+    currentUnreservedData?: {
+        start_date: string;
+        objectID: number;
+    } | null;
+    currentReservation?: IReservation;
 }
 type CustomErrors = {
     isValid: boolean;
@@ -48,16 +59,34 @@ type CustomErrors = {
 
 function ReservationForm({
     onCreate,
+    onUpdate,
+    onDelete,
     setIsLoaderOpen,
     isLoaderOpen,
+    currentReservation,
+    currentUnreservedData,
 }: ReservationFormProps) {
-    const [selectedObject, setSelectedObject] = useState("-1");
-    const [startDate, setStartDate] = useState("");
-    const [endDate, setEndDate] = useState("");
-    const [tel, setTel] = useState<string>();
+    console.log(currentUnreservedData);
+    const [selectedObject, setSelectedObject] = useState(
+        currentReservation?.object.id
+            ? String(currentReservation?.object.id)
+            : currentUnreservedData?.objectID
+            ? String(currentUnreservedData?.objectID)
+            : "-1"
+    );
+    const [startDate, setStartDate] = useState(
+        currentReservation?.start_date ||
+            currentUnreservedData?.start_date ||
+            ""
+    );
+    const [endDate, setEndDate] = useState(currentReservation?.end_date || "");
+    const [tel, setTel] = useState<string>(
+        currentReservation?.client?.phone || ""
+    );
     const [isTelChecking, setIsTelChecking] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [formData, setFormData] = useState<FormData | null>(null);
+    const [isCreate, setIsCreate] = useState(true);
 
     const objectsState = useAppSelector((state) => state.object);
     const clientsState = useAppSelector((state) => state.client);
@@ -261,7 +290,15 @@ function ReservationForm({
                 client_id: clientsState.createdClient?.id!,
                 description: String(formData?.get("description")),
             };
-            onCreate(reservationData);
+            if (isCreate) {
+                onCreate(reservationData);
+            } else {
+                onUpdate({
+                    id: currentReservation?.id!,
+                    status: currentReservation?.status!,
+                    ...reservationData,
+                });
+            }
             dispatch(clientActions.resetIsCreated());
             setIsSubmitting(false);
         }
@@ -273,7 +310,15 @@ function ReservationForm({
                 client_id: clientsState.clientByPhone?.id!,
                 description: String(formData?.get("description")),
             };
-            onCreate(reservationData);
+            if (isCreate) {
+                onCreate(reservationData);
+            } else {
+                onUpdate({
+                    id: currentReservation?.id!,
+                    status: currentReservation?.status!,
+                    ...reservationData,
+                });
+            }
             dispatch(clientActions.resetIsCreated());
             setIsSubmitting(false);
         }
@@ -283,6 +328,13 @@ function ReservationForm({
         isSubmitting,
         formData,
     ]);
+
+    useEffect(() => {
+        if (!currentReservation) return;
+        setIsCreate(false);
+        setIsTelChecking(true);
+        dispatch(fetchClientByPhone(currentReservation.client.phone));
+    }, [currentReservation]);
 
     useEffect(() => {
         if (clientsState.statusByPhone !== Status.LOADING) {
@@ -302,7 +354,7 @@ function ReservationForm({
 
             <div className="p-5">
                 <div className="mt-5 text-lg font-bold text-center">
-                    Добавить бронь
+                    {isCreate ? "Добавить" : "Редактировать"} бронь
                 </div>
                 <form className="validate-form mt-5" onSubmit={onSubmit}>
                     <div className="input-form mt-3">
@@ -678,6 +730,10 @@ function ReservationForm({
                             className={clsx({
                                 "border-danger": errors.description,
                             })}
+                            defaultValue={
+                                currentReservation &&
+                                currentReservation.description
+                            }
                             placeholder="Дополнительная информация о брони"
                         ></FormTextarea>
                         {errors.description && (
@@ -687,13 +743,29 @@ function ReservationForm({
                             </div>
                         )}
                     </div>
-                    <Button
-                        type="submit"
-                        variant="primary"
-                        className="w-full mt-5"
-                    >
-                        Добавить
-                    </Button>
+                    <div className="flex gap-3">
+                        {!isCreate && (
+                            <Button
+                                type="button"
+                                variant="danger"
+                                className="w-full mt-5"
+                                onClick={() => {
+                                    startLoader(setIsLoaderOpen);
+                                    currentReservation &&
+                                        onDelete(currentReservation?.id);
+                                }}
+                            >
+                                Удалить
+                            </Button>
+                        )}
+                        <Button
+                            type="submit"
+                            variant="primary"
+                            className="w-full mt-5"
+                        >
+                            {isCreate ? "Добавить" : "Обновить"}
+                        </Button>
+                    </div>
                 </form>
             </div>
         </>
