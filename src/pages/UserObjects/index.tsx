@@ -4,61 +4,59 @@ import { Dialog, Menu } from "@/components/Base/Headless";
 import Button from "@/components/Base/Button";
 import { FormInput, FormSelect } from "@/components/Base/Form";
 import * as xlsx from "xlsx";
-import { useEffect, useRef, createRef, useState } from "react";
+import { useEffect, useRef, createRef, useState, ChangeEvent } from "react";
 import { createIcons, icons } from "lucide";
 import { TabulatorFull as Tabulator } from "tabulator-tables";
 import { stringToHTML } from "@/utils/helper";
 import { DateTime } from "luxon";
 import { useAppDispatch, useAppSelector } from "@/stores/hooks";
-import { userSlice } from "@/stores/reducers/users/slice";
-import {
-    createUser,
-    deleteUser,
-    fetchUserById,
-    fetchUsers,
-    updateUserAdmin,
-    updateUserIsActive,
-    updateUserTariff,
-} from "@/stores/reducers/users/actions";
+import { deleteUser, fetchUserById } from "@/stores/reducers/users/actions";
 import tippy from "tippy.js";
 import { Link, useNavigate } from "react-router-dom";
-import LoadingIcon from "@/components/Base/LoadingIcon";
 import { Status } from "@/stores/reducers/types";
+import LoadingIcon from "@/components/Base/LoadingIcon";
 import { ListPlus } from "lucide-react";
-import { startLoader, stopLoader } from "@/utils/customUtils";
-import Toastify from "toastify-js";
-import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
 import {
-    UserCreateType,
-    UserTariffUpdateType,
-    UserUpdateType,
-} from "@/stores/reducers/users/types";
-import Notification from "@/components/Base/Notification";
+    deleteObject,
+    fetchObjects,
+    fetchObjectsByUser,
+    updateObiectIsActive,
+} from "@/stores/reducers/objects/actions";
+import { objectSlice } from "@/stores/reducers/objects/slice";
 import clsx from "clsx";
-import UserCreateModal from "./createModal";
-import UserUpdateModal from "./updateModal";
-import { fetchTariffs } from "@/stores/reducers/tariffs/actions";
+import Toastify from "toastify-js";
+import { startLoader, stopLoader } from "@/utils/customUtils";
+import Notification from "@/components/Base/Notification";
+import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
+import Calendar from "@/components/Calendar";
+import ReservationsCalendar from "./calendar";
+import { reservationSlice } from "@/stores/reducers/reservations/slice";
+import {
+    createReservation,
+    deleteReservation,
+    fetchReservationsByObject,
+    updateReservation,
+} from "@/stores/reducers/reservations/actions";
+import {
+    ReservationCreateType,
+    ReservationUpdateType,
+} from "@/stores/reducers/reservations/types";
+import { clientSlice } from "@/stores/reducers/clients/slice";
 
 window.DateTime = DateTime;
 interface Response {
     id?: number;
     name?: string;
+    owner?: string;
     active?: boolean;
-    objects?: number;
-    subscription?: DateTime;
 }
 
 function Main() {
-    const [userData, setUserData] = useState<{
-        name: string;
-        id: number;
-    } | null>(null);
+    const [confirmationModal, setConfirmationModal] = useState(false);
+    const [reservationModal, setReservationModal] = useState(false);
+    const [calendarModal, setCalendarModal] = useState(false);
     const [isLoaderOpen, setIsLoaderOpen] = useState(false);
-    const [createModalPreview, setCreateModalPreview] = useState(false);
-    const [updateModalPreview, setUpdateModalPreview] = useState(false);
-
-    const [confirmationModalPreview, setConfirmationModalPreview] =
-        useState(false);
+    const [currentObjectID, setCurrentObjectID] = useState<number | null>(null);
     const [switcherIsActive, setSwitcherIsActive] =
         useState<HTMLInputElement | null>(null);
     const [confirmModalContent, setConfirmModalContent] = useState<{
@@ -119,7 +117,7 @@ function Main() {
 
                     // For HTML table
                     {
-                        title: "Имя",
+                        title: "Название",
                         minWidth: 200,
                         responsive: 0,
                         field: "name",
@@ -135,60 +133,23 @@ function Main() {
                         },
                     },
                     {
-                        title: "Объекты",
-                        minWidth: 200,
-                        field: "objects",
-                        hozAlign: "center",
-                        headerHozAlign: "center",
-                        vertAlign: "middle",
-                        print: false,
-                        download: false,
-                        sorter: "number",
-                        formatter(cell) {
-                            const response: Response = cell.getData();
-                            return `<div class="flex lg:justify-center">
-                                        <div class="font-medium whitespace-nowrap">${response.objects}</div>
-                                    </div>`;
-                        },
-                    },
-                    {
-                        title: "Активен до",
-                        minWidth: 200,
-                        field: "subscription",
-                        hozAlign: "center",
-                        headerHozAlign: "center",
-                        vertAlign: "middle",
-                        print: false,
-                        download: false,
-                        sorter: "date",
-                        sorterParams: { format: "DD/MM/YY" },
-                        formatter(cell) {
-                            const response: Response = cell.getData();
-                            const formattedDate =
-                                response.subscription!.toFormat("dd.MM.yyyy");
-                            return `<div class="flex lg:justify-center">
-                                        <div class="font-medium whitespace-nowrap">${formattedDate}</div>
-                                    </div>`;
-                        },
-                    },
-                    {
                         title: "Действия",
-                        minWidth: 200,
+                        minWidth: 30,
                         field: "id",
                         responsive: 1,
                         hozAlign: "right",
-                        headerHozAlign: "center",
-                        vertAlign: "middle",
-                        // resizable: false,
+                        headerHozAlign: "right",
+                        resizable: false,
                         headerSort: false,
+                        vertAlign: "middle",
                         formatter(cell) {
                             const response: Response = cell.getData();
                             const a = stringToHTML(
                                 `<div class="flex lg:justify-center items-center"></div>`
                             );
-                            const infoA =
+                            const dateA =
                                 stringToHTML(`<a class="flex items-center mr-3 w-7 h-7 p-1 border border-black rounded-md hover:opacity-70" href="javascript:;">
-                                <i data-lucide="info"></i>
+                                <i data-lucide="calendar"></i>
                               </a>`);
                             const editA =
                                 stringToHTML(`<a class="flex items-center mr-3 w-7 h-7 p-1 border border-black rounded-md hover:opacity-70" href="javascript:;">
@@ -198,8 +159,8 @@ function Main() {
                                 stringToHTML(`<a class="flex items-center text-danger w-7 h-7 p-1 border border-danger rounded-md hover:opacity-70" href="javascript:;">
                                 <i data-lucide="trash-2"></i>
                               </a>`);
-                            tippy(infoA, {
-                                content: "К объектам",
+                            tippy(dateA, {
+                                content: "Брони",
                                 placement: "bottom",
                                 animation: "shift-away",
                             });
@@ -217,7 +178,7 @@ function Main() {
                                 `<label class="inline-flex items-center cursor-pointer mr-3">
                                     <input type="checkbox" ${
                                         response.active ? "checked" : ""
-                                    }  class="sr-only peer">
+                                    } class="sr-only peer">
                                     <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
                                 </label>`
                             );
@@ -226,38 +187,40 @@ function Main() {
                                 placement: "bottom",
                                 animation: "shift-away",
                             });
-                            a.append(switcher, infoA, editA, deleteA);
+                            a.append(switcher, dateA, editA, deleteA);
                             a.addEventListener("hover", function () {});
+                            dateA.addEventListener("click", function () {
+                                dispatch(
+                                    fetchReservationsByObject(response.id!)
+                                );
+                                setCurrentObjectID(response.id!);
+                                setCalendarModal(true);
+                            });
+                            editA.addEventListener("click", function () {
+                                navigate(`/objects  /update/${response.id}`);
+                            });
                             deleteA.addEventListener("click", function () {
                                 setConfirmModalContent({
-                                    title: "Удалить пользователя?",
-                                    description: `Вы уверены, что хотите удалить пользователя "${response.name?.trim()}"?<br/>Это действие нельзя будет отменить.`,
+                                    title: "Удалить объект?",
+                                    description: `Вы уверены, что хотите удалить объект "${response.name?.trim()}"?<br/>Это действие нельзя будет отменить.`,
                                     onConfirm: () => {
+                                        console.log("first");
                                         onDelete(response.id!);
                                     },
                                     confirmLabel: "Удалить",
                                     cancelLabel: "Отмена",
                                     is_danger: true,
                                 });
-                                setConfirmationModalPreview(true);
+                                setConfirmationModal(true);
                             });
-                            editA.addEventListener("click", function () {
-                                dispatch(fetchUserById(response.id!));
-                                dispatch(fetchTariffs());
-                                setUpdateModalPreview(true);
-                            });
-                            infoA.addEventListener("click", function () {
-                                navigate(`/objects/user/${response.id}`);
-                            });
-
                             switcher.addEventListener("change", (e) => {
                                 const target = e.target as HTMLInputElement;
                                 setSwitcherIsActive(target);
                                 if (!target.checked) {
                                     target.checked = true;
                                     setConfirmModalContent({
-                                        title: "Деактивировать пользователя?",
-                                        description: `Вы уверены, что хотите деактивировать пользователя "${response.name?.trim()}"?<br/>Он больше не будет иметь доступа к сервису.`,
+                                        title: "Деактивировать объект?",
+                                        description: `Вы уверены, что хотите деактивировать объект "${response.name?.trim()}"?<br/>Он больше не будет выводится в виджете.`,
                                         onConfirm: () => {
                                             onUpdateIsActive(
                                                 target,
@@ -268,7 +231,7 @@ function Main() {
                                         cancelLabel: "Отмена",
                                         is_danger: false,
                                     });
-                                    setConfirmationModalPreview(true);
+                                    setConfirmationModal(true);
                                 } else {
                                     onUpdateIsActive(target, response.id!);
                                 }
@@ -279,22 +242,8 @@ function Main() {
 
                     // For print format
                     {
-                        title: "NAME",
+                        title: "НАЗВАНИЕ",
                         field: "name",
-                        visible: false,
-                        print: true,
-                        download: true,
-                    },
-                    {
-                        title: "OBJECTS",
-                        field: "objects",
-                        visible: false,
-                        print: true,
-                        download: true,
-                    },
-                    {
-                        title: "SUBSCRIPTION",
-                        field: "subscription",
                         visible: false,
                         print: true,
                         download: true,
@@ -386,37 +335,45 @@ function Main() {
         }
     };
 
-    const {
-        users,
-        status,
-        error,
-        isCreated,
-        isDeleted,
-        isUpdated,
-        isActiveStatusUpdated,
-        statusOne,
-    } = useAppSelector((state) => state.user);
-    const userActions = userSlice.actions;
-    const dispatch = useAppDispatch();
+    const onCreateReservation = async (
+        reservationData: ReservationCreateType
+    ) => {
+        await dispatch(createReservation(reservationData));
+    };
+    const onUpdateReservation = async (
+        reservationData: ReservationUpdateType
+    ) => {
+        await dispatch(updateReservation(reservationData));
+    };
+    const onDeleteReservation = async (id: number) => {
+        await dispatch(deleteReservation(String(id)));
+    };
 
     const onDelete = async (id: number) => {
         startLoader(setIsLoaderOpen);
-        await dispatch(deleteUser(String(id)));
+        await dispatch(deleteObject(id));
     };
     const onUpdateIsActive = async (target: HTMLInputElement, id: number) => {
         startLoader(setIsLoaderOpen);
-        await dispatch(updateUserIsActive({ id: id }));
+        await dispatch(updateObiectIsActive({ id: id }));
     };
 
-    const onCreate = async (user: UserCreateType) => {
-        await dispatch(createUser(user));
-    };
-    const onUpdate = async (user: UserUpdateType) => {
-        await dispatch(updateUserAdmin(user));
-    };
-    const onUpdateTariff = async (tariffData: UserTariffUpdateType) => {
-        await dispatch(updateUserTariff(tariffData));
-    };
+    const {
+        objects,
+        status,
+        error,
+        isCreated,
+        isUpdated,
+        isActiveStatusUpdated,
+        isDeleted,
+    } = useAppSelector((state) => state.object);
+    const objectActions = objectSlice.actions;
+    const reservationState = useAppSelector((state) => state.reservation);
+    const reservationActions = reservationSlice.actions;
+    const clientActions = clientSlice.actions;
+    const userOne = useAppSelector((state) => state.user.userOne);
+    const dispatch = useAppDispatch();
+
     useEffect(() => {
         if (!isCreated && !isUpdated && !isActiveStatusUpdated && !isDeleted) {
             stopLoader(setIsLoaderOpen);
@@ -425,17 +382,16 @@ function Main() {
             switcherIsActive!.checked = !switcherIsActive!.checked;
         }
         if (isCreated || isUpdated || isActiveStatusUpdated || isDeleted) {
-            dispatch(fetchUsers());
-            setCreateModalPreview(false);
-            setConfirmationModalPreview(false);
+            dispatch(fetchObjects());
+            setConfirmationModal(false);
             const successEl = document
                 .querySelectorAll("#success-notification-content")[0]
                 .cloneNode(true) as HTMLElement;
             successEl.querySelector(".text-content")!.textContent = isCreated
-                ? "Пользователь успешно создан"
+                ? "Объект успешно создан"
                 : isDeleted
-                ? "Пользователь успешно удалён"
-                : "Пользователь успешно обновлен";
+                ? "Объект успешно удалён"
+                : "Объект успешно обновлен";
             successEl.classList.remove("hidden");
             Toastify({
                 node: successEl,
@@ -447,27 +403,77 @@ function Main() {
                 stopOnFocus: true,
             }).showToast();
             stopLoader(setIsLoaderOpen);
-            dispatch(userActions.resetIsCreated());
-            dispatch(userActions.resetIsUpdated());
-            dispatch(userActions.resetIsDeleted());
-            dispatch(userActions.resetIsActiveStatusUpdated());
+            dispatch(objectActions.resetIsCreated());
+            dispatch(objectActions.resetIsUpdated());
+            dispatch(objectActions.resetIsDeleted());
+            dispatch(objectActions.resetIsActiveStatusUpdated());
         }
     }, [isCreated, isUpdated, isActiveStatusUpdated, isDeleted]);
+
+    useEffect(() => {
+        if (
+            !reservationState.isCreated &&
+            !reservationState.isUpdated &&
+            !reservationState.isDeleted
+        ) {
+            stopLoader(setIsLoaderOpen);
+        }
+
+        if (
+            reservationState.isCreated ||
+            reservationState.isUpdated ||
+            reservationState.isDeleted
+        ) {
+            dispatch(fetchReservationsByObject(currentObjectID!));
+            setReservationModal(false);
+            const successEl = document
+                .querySelectorAll("#success-notification-content")[0]
+                .cloneNode(true) as HTMLElement;
+            successEl.querySelector(".text-content")!.textContent =
+                reservationState.isCreated
+                    ? "Бронь успешно создана"
+                    : reservationState.isDeleted
+                    ? "Бронь успешно удалена"
+                    : "Бронь успешно обновлена";
+            successEl.classList.remove("hidden");
+            Toastify({
+                node: successEl,
+                duration: 3000,
+                newWindow: true,
+                close: true,
+                gravity: "top",
+                position: "right",
+                stopOnFocus: true,
+            }).showToast();
+            stopLoader(setIsLoaderOpen);
+            dispatch(reservationActions.resetIsCreated());
+            dispatch(reservationActions.resetIsUpdated());
+            dispatch(reservationActions.resetIsDeleted());
+            dispatch(clientActions.resetClientByPhone());
+        }
+    }, [
+        reservationState.isCreated,
+        reservationState.isUpdated,
+        reservationState.isDeleted,
+    ]);
 
     useEffect(() => {
         initTabulator();
         reInitOnResizeWindow();
 
-        dispatch(fetchUsers());
+        const userId = Number(location.pathname.replace("/objects/user/", ""));
+
+        dispatch(fetchObjectsByUser(userId));
+        dispatch(fetchUserById(userId));
     }, []);
+
     useEffect(() => {
-        if (users && users.length) {
-            const formattedData = users.map((user) => ({
-                id: user.id,
-                name: user.fullname,
-                active: user.is_active,
-                objects: Math.floor(Math.random() * 101),
-                subscription: DateTime.fromISO(user.date_before),
+        if (objects.length) {
+            const formattedData = objects.map((object) => ({
+                id: object.id,
+                name: object.name,
+                owner: object.author.fullname,
+                active: object.active,
             }));
             tabulator.current
                 ?.setData(formattedData.reverse())
@@ -475,31 +481,19 @@ function Main() {
                     reInitTabulator();
                 });
         }
-    }, [users]);
+    }, [objects]);
 
     return (
         <>
+            {isLoaderOpen && <OverlayLoader />}
             <div className="flex flex-col items-center mt-8 intro-y sm:flex-row">
-                <h2 className="mr-auto text-lg font-medium">Пользователи</h2>
-                <div className="flex w-full mt-4 sm:w-auto sm:mt-0">
-                    <Button
-                        as="a"
-                        href="#"
-                        variant="primary"
-                        className="mr-2 shadow-md"
-                        onClick={(event: React.MouseEvent) => {
-                            event.preventDefault();
-                            setCreateModalPreview(true);
-                        }}
-                    >
-                        <ListPlus className="size-5 mr-2" />
-                        Добавить
-                    </Button>
-                </div>
+                <h2 className="mr-auto text-lg font-medium">
+                    Объекты пользователя - {userOne?.fullname}
+                </h2>
             </div>
             {/* BEGIN: HTML Table Data */}
             <div className="p-5 mt-5 intro-y box">
-                {status === Status.LOADING && !isLoaderOpen && (
+                {status === Status.LOADING && (
                     <div className="absolute z-50 bg-slate-50 bg-opacity-70 flex justify-center items-center w-full h-full">
                         <div className="w-10 h-10">
                             <LoadingIcon icon="ball-triangle" />
@@ -609,71 +603,47 @@ function Main() {
                 </div>
             </div>
             {/* END: HTML Table Data */}
-            {/* BEGIN: Modal Content */}
+
+            {/* BEGIN: Calendar Modal */}
             <Dialog
-                open={createModalPreview}
+                open={calendarModal}
                 onClose={() => {
-                    setCreateModalPreview(false);
-                    dispatch(userActions.resetUserOne());
+                    setCalendarModal(false);
                 }}
+                size="xl"
             >
                 <Dialog.Panel>
                     <a
                         onClick={(event: React.MouseEvent) => {
                             event.preventDefault();
-                            setCreateModalPreview(false);
+                            setCalendarModal(false);
                         }}
                         className="absolute top-0 right-0 mt-3 mr-3"
                         href="#"
                     >
                         <Lucide icon="X" className="w-8 h-8 text-slate-400" />
                     </a>
-                    <UserCreateModal
+                    <ReservationsCalendar
                         isLoaderOpen={isLoaderOpen}
                         setIsLoaderOpen={setIsLoaderOpen}
-                        onCreate={onCreate}
+                        objectID={currentObjectID!}
+                        onCreate={onCreateReservation}
+                        onUpdate={onUpdateReservation}
+                        onDelete={onDeleteReservation}
+                        reservationModal={reservationModal}
+                        setReservationModal={setReservationModal}
                     />
                 </Dialog.Panel>
             </Dialog>
-            {/* END: Modal Content */}
-            {/* BEGIN: Modal Content */}
-            <Dialog
-                open={updateModalPreview}
-                onClose={() => {
-                    setUpdateModalPreview(false);
-                    dispatch(userActions.resetUserOne());
-                }}
-            >
-                <Dialog.Panel>
-                    <a
-                        onClick={(event: React.MouseEvent) => {
-                            event.preventDefault();
-                            setUpdateModalPreview(false);
-                            dispatch(userActions.resetUserOne());
-                        }}
-                        className="absolute top-0 right-0 mt-3 mr-3"
-                        href="#"
-                    >
-                        <Lucide icon="X" className="w-8 h-8 text-slate-400" />
-                    </a>
-                    <UserUpdateModal
-                        isLoaderOpen={isLoaderOpen}
-                        setIsLoaderOpen={setIsLoaderOpen}
-                        onUpdateUser={onUpdate}
-                        onUpdateUserTariff={onUpdateTariff}
-                    />
-                </Dialog.Panel>
-            </Dialog>
-            {/* END: Modal Content */}
+            {/* END: Calendar Modal */}
             {/* BEGIN: Confirmation Modal */}
             <Dialog
-                open={confirmationModalPreview}
+                open={confirmationModal}
                 onClose={() => {
-                    setConfirmationModalPreview(false);
+                    setConfirmationModal(false);
                 }}
             >
                 <Dialog.Panel>
-                    {isLoaderOpen && <OverlayLoader />}
                     <div className="p-5 text-center">
                         <Lucide
                             icon={
@@ -703,7 +673,7 @@ function Main() {
                             variant="outline-secondary"
                             type="button"
                             onClick={() => {
-                                setConfirmationModalPreview(false);
+                                setConfirmationModal(false);
                             }}
                             disabled={isLoaderOpen}
                             className="col-span-6 mr-1"
@@ -738,7 +708,7 @@ function Main() {
                 <Lucide icon="CheckCircle" className="text-success" />
                 <div className="ml-4 mr-4">
                     <div className="font-medium text-content">
-                        Пользователь успешно добавлен
+                        Объект успешно добавлен
                     </div>
                 </div>
             </Notification>

@@ -75,6 +75,7 @@ import Cities from "../pages/Cities";
 import PropertyTypes from "../pages/PropertyTypes";
 import Amenities from "../pages/Amenities";
 import Objects from "../pages/Objects";
+import UserObjects from "../pages/UserObjects";
 import ObjectsClient from "../pages/ObjectsClient";
 import CreateObject from "../pages/CreateObject";
 import UpdateObject from "../pages/UpdateObject";
@@ -127,6 +128,10 @@ function Router() {
                 {
                     path: "admin-objects",
                     element: <Objects />,
+                },
+                {
+                    path: "objects/user/:id",
+                    element: <UserObjects />,
                 },
                 {
                     path: "objects",

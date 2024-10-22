@@ -6,6 +6,7 @@ import {
     deleteObject,
     fetchObjectById,
     fetchObjects,
+    fetchObjectsByUser,
     updateObiectIsActive,
 } from "./actions";
 
@@ -56,6 +57,24 @@ export const objectSlice = createSlice({
             })
             .addCase(
                 fetchObjects.rejected,
+                (state, action: PayloadAction<any>) => {
+                    state.objects = [];
+                    state.error = action.payload;
+                    state.status = Status.ERROR;
+                }
+            )
+            .addCase(fetchObjectsByUser.fulfilled, (state, action) => {
+                state.objects = action.payload;
+                state.status = Status.SUCCESS;
+                state.error = null;
+            })
+            .addCase(fetchObjectsByUser.pending, (state) => {
+                state.objects = [];
+                state.status = Status.LOADING;
+                state.error = null;
+            })
+            .addCase(
+                fetchObjectsByUser.rejected,
                 (state, action: PayloadAction<any>) => {
                     state.objects = [];
                     state.error = action.payload;

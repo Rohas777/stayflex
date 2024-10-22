@@ -55,3 +55,10 @@ export const fetchObjectById = createAsyncThunk(
         return response.data;
     }
 );
+export const fetchObjectsByUser = createAsyncThunk(
+    "object/fetchByUser",
+    async (id: number) => {
+        const response = await instance.get(`/object/userid/${id}`);
+        return response.data;
+    }
+);
