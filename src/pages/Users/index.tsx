@@ -15,6 +15,7 @@ import {
     createUser,
     deleteUser,
     fetchUsers,
+    updateUserIsActive,
 } from "@/stores/reducers/users/actions";
 import tippy from "tippy.js";
 import { Link } from "react-router-dom";
@@ -26,23 +27,42 @@ import Toastify from "toastify-js";
 import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
 import { UserCreateType } from "@/stores/reducers/users/types";
 import Notification from "@/components/Base/Notification";
+import clsx from "clsx";
 
 window.DateTime = DateTime;
 interface Response {
     id?: number;
     name?: string;
+    active?: boolean;
     objects?: number;
     subscription?: DateTime;
 }
 
 function Main() {
-    const [deleteConfirmationModal, setDeleteConfirmationModal] =
-        useState(false);
     const [userData, setUserData] = useState<{
         name: string;
         id: number;
     } | null>(null);
-    const [isLoaderOpened, setIsLoaderOpened] = useState(false);
+    const [isLoaderOpen, setIsLoaderOpen] = useState(false);
+
+    const [confirmationModal, setConfirmationModal] = useState(false);
+    const [switcherIsActive, setSwitcherIsActive] =
+        useState<HTMLInputElement | null>(null);
+    const [confirmModalContent, setConfirmModalContent] = useState<{
+        title: string | null;
+        description: string | null;
+        onConfirm: (() => void) | null;
+        confirmLabel: string | null;
+        cancelLabel: string | null;
+        is_danger: boolean;
+    }>({
+        title: null,
+        description: null,
+        onConfirm: null,
+        confirmLabel: null,
+        cancelLabel: null,
+        is_danger: true,
+    });
 
     const tableRef = createRef<HTMLDivElement>();
     const tabulator = useRef<Tabulator>();
@@ -180,7 +200,9 @@ function Main() {
                             });
                             const switcher = stringToHTML(
                                 `<label class="inline-flex items-center cursor-pointer mr-3">
-                                    <input type="checkbox" value="" class="sr-only peer">
+                                    <input type="checkbox" ${
+                                        response.active ? "checked" : ""
+                                    }  class="sr-only peer">
                                     <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
                                 </label>`
                             );
@@ -192,11 +214,42 @@ function Main() {
                             a.append(switcher, dateA, editA, deleteA);
                             a.addEventListener("hover", function () {});
                             deleteA.addEventListener("click", function () {
-                                setDeleteConfirmationModal(true);
-                                setUserData({
-                                    name: response.name!,
-                                    id: response.id!,
+                                setConfirmModalContent({
+                                    title: "Удалить пользователя?",
+                                    description: `Вы уверены, что хотите удалить пользователя "${response.name?.trim()}"?<br/>Это действие нельзя будет отменить.`,
+                                    onConfirm: () => {
+                                        console.log("first");
+                                        onDelete(response.id!);
+                                    },
+                                    confirmLabel: "Удалить",
+                                    cancelLabel: "Отмена",
+                                    is_danger: true,
                                 });
+                                setConfirmationModal(true);
+                            });
+
+                            switcher.addEventListener("change", (e) => {
+                                const target = e.target as HTMLInputElement;
+                                setSwitcherIsActive(target);
+                                if (!target.checked) {
+                                    target.checked = true;
+                                    setConfirmModalContent({
+                                        title: "Деактивировать пользователя?",
+                                        description: `Вы уверены, что хотите деактивировать пользователя "${response.name?.trim()}"?<br/>Он больше не будет иметь доступа к сервису.`,
+                                        onConfirm: () => {
+                                            onUpdateIsActive(
+                                                target,
+                                                response.id!
+                                            );
+                                        },
+                                        confirmLabel: "Деактивировать",
+                                        cancelLabel: "Отмена",
+                                        is_danger: false,
+                                    });
+                                    setConfirmationModal(true);
+                                } else {
+                                    onUpdateIsActive(target, response.id!);
+                                }
                             });
                             return a;
                         },
@@ -311,14 +364,25 @@ function Main() {
         }
     };
 
-    const { users, status, error, isCreated, isDeleted } = useAppSelector(
-        (state) => state.user
-    );
+    const {
+        users,
+        status,
+        error,
+        isCreated,
+        isDeleted,
+        isUpdated,
+        isActiveStatusUpdated,
+    } = useAppSelector((state) => state.user);
     const userActions = userSlice.actions;
     const dispatch = useAppDispatch();
 
-    const onDelete = () => {
-        dispatch(deleteUser(String(userData?.id)));
+    const onDelete = async (id: number) => {
+        startLoader(setIsLoaderOpen);
+        await dispatch(deleteUser(String(id)));
+    };
+    const onUpdateIsActive = async (target: HTMLInputElement, id: number) => {
+        startLoader(setIsLoaderOpen);
+        await dispatch(updateUserIsActive({ id: id }));
     };
 
     const onCreate = (user: UserCreateType) => {
@@ -326,26 +390,24 @@ function Main() {
     };
 
     useEffect(() => {
-        let notificationText = "";
-        if (isDeleted) {
-            setDeleteConfirmationModal(false);
-            notificationText = "Пользователь успешно удалён";
+        if (!isCreated && !isUpdated && !isActiveStatusUpdated && !isDeleted) {
+            stopLoader(setIsLoaderOpen);
         }
-        if (isCreated) {
-            // setButtonModalPreview(false);
-            notificationText = "Пользователь успешно добавлен";
+        if (isActiveStatusUpdated) {
+            switcherIsActive!.checked = !switcherIsActive!.checked;
         }
-
-        if (isCreated || isDeleted) {
+        if (isCreated || isUpdated || isActiveStatusUpdated || isDeleted) {
             dispatch(fetchUsers());
-
+            setConfirmationModal(false);
             const successEl = document
                 .querySelectorAll("#success-notification-content")[0]
                 .cloneNode(true) as HTMLElement;
+            successEl.querySelector(".text-content")!.textContent = isCreated
+                ? "Пользователь успешно создан"
+                : isDeleted
+                ? "Пользователь успешно удалён"
+                : "Пользователь успешно обновлен";
             successEl.classList.remove("hidden");
-
-            successEl.querySelector(".text-content")!.textContent =
-                notificationText;
             Toastify({
                 node: successEl,
                 duration: 3000,
@@ -355,12 +417,13 @@ function Main() {
                 position: "right",
                 stopOnFocus: true,
             }).showToast();
-
+            stopLoader(setIsLoaderOpen);
             dispatch(userActions.resetIsCreated());
+            dispatch(userActions.resetIsUpdated());
             dispatch(userActions.resetIsDeleted());
-            stopLoader(setIsLoaderOpened);
+            dispatch(userActions.resetIsActiveStatusUpdated());
         }
-    }, [isCreated, isDeleted]);
+    }, [isCreated, isUpdated, isActiveStatusUpdated, isDeleted]);
 
     useEffect(() => {
         initTabulator();
@@ -373,12 +436,15 @@ function Main() {
             const formattedData = users.map((user) => ({
                 id: user.id,
                 name: user.fullname,
+                active: user.is_active,
                 objects: Math.floor(Math.random() * 101),
                 subscription: DateTime.fromISO(user.date_before),
             }));
-            tabulator.current?.setData(formattedData).then(function () {
-                reInitTabulator();
-            });
+            tabulator.current
+                ?.setData(formattedData.reverse())
+                .then(function () {
+                    reInitTabulator();
+                });
         }
     }, [users]);
 
@@ -397,7 +463,7 @@ function Main() {
             </div>
             {/* BEGIN: HTML Table Data */}
             <div className="p-5 mt-5 intro-y box">
-                {status === Status.LOADING && !isLoaderOpened && (
+                {status === Status.LOADING && !isLoaderOpen && (
                     <div className="absolute z-50 bg-slate-50 bg-opacity-70 flex justify-center items-center w-full h-full">
                         <div className="w-10 h-10">
                             <LoadingIcon icon="ball-triangle" />
@@ -508,53 +574,70 @@ function Main() {
             </div>
             {/* END: HTML Table Data */}
 
-            {/* BEGIN: Delete Confirmation Modal */}
+            {/* BEGIN: Confirmation Modal */}
             <Dialog
-                open={deleteConfirmationModal}
+                open={confirmationModal}
                 onClose={() => {
-                    setDeleteConfirmationModal(false);
+                    setConfirmationModal(false);
                 }}
             >
                 <Dialog.Panel>
-                    {isLoaderOpened && <OverlayLoader />}
                     <div className="p-5 text-center">
                         <Lucide
-                            icon="XCircle"
-                            className="w-16 h-16 mx-auto mt-3 text-danger"
+                            icon={
+                                confirmModalContent.is_danger
+                                    ? "XCircle"
+                                    : "BadgeInfo"
+                            }
+                            className={clsx("w-16 h-16 mx-auto mt-3", {
+                                "text-danger": confirmModalContent.is_danger,
+                                "text-warning": !confirmModalContent.is_danger,
+                            })}
                         />
-                        <div className="mt-5 text-3xl">Вы уверены?</div>
-                        <div className="mt-2 text-slate-500">
-                            Вы уверены, что хотите удалить пользователя "
-                            {userData?.name}"? <br />
-                            Это действие нельзя будет отменить.
+                        <div className="mt-5 text-3xl">
+                            {confirmModalContent.title}
                         </div>
+                        <div
+                            className="mt-2 text-slate-500"
+                            dangerouslySetInnerHTML={{
+                                __html: confirmModalContent.description
+                                    ? confirmModalContent.description
+                                    : "",
+                            }}
+                        ></div>
                     </div>
-                    <div className="px-5 pb-8 text-center">
+                    <div className="px-5 pb-8 grid grid-cols-12">
                         <Button
                             variant="outline-secondary"
                             type="button"
                             onClick={() => {
-                                setDeleteConfirmationModal(false);
+                                setConfirmationModal(false);
                             }}
-                            className="w-24 mr-1"
+                            disabled={isLoaderOpen}
+                            className="col-span-6 mr-1"
                         >
-                            Отмена
+                            {confirmModalContent.cancelLabel}
                         </Button>
                         <Button
-                            variant="danger"
+                            variant={
+                                confirmModalContent.is_danger
+                                    ? "danger"
+                                    : "warning"
+                            }
+                            disabled={isLoaderOpen}
                             type="button"
-                            className="w-24"
+                            className="col-span-6"
                             onClick={() => {
-                                startLoader(setIsLoaderOpened);
-                                onDelete();
+                                confirmModalContent.onConfirm &&
+                                    confirmModalContent.onConfirm();
                             }}
                         >
-                            Удалить
+                            {confirmModalContent.confirmLabel}
                         </Button>
                     </div>
                 </Dialog.Panel>
             </Dialog>
-            {/* END: Delete Confirmation Modal */}
+            {/* END: Confirmation Modal */}
             {/* BEGIN: Success Notification Content */}
             <Notification
                 id="success-notification-content"

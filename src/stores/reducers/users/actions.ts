@@ -25,7 +25,26 @@ export const createUser = createAsyncThunk(
 export const deleteUser = createAsyncThunk<string, string>(
     "/user/deleteUser",
     async (id) => {
-        const response = await instance.delete(`/user/delete?id_user=${id}`);
+        const response = await instance.delete(`/user/delete/${id}`);
         return response.data.id;
+    }
+);
+
+export const updateUserIsActive = createAsyncThunk(
+    "/user/activate",
+    async (data: { id: number }) => {
+        const response = await instance.put(`/user/activate`, data, {
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+        return response.data;
+    }
+);
+export const fetchUserById = createAsyncThunk(
+    "user/fetch",
+    async (id: number) => {
+        const response = await instance.get(`/user/id/?id=${id}`);
+        return response.data;
     }
 );

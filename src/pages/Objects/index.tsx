@@ -213,7 +213,7 @@ function Main() {
                                 setCalendarModal(true);
                             });
                             editA.addEventListener("click", function () {
-                                navigate(`/objects/update/${response.id}`);
+                                navigate(`/objects  /update/${response.id}`);
                             });
                             deleteA.addEventListener("click", function () {
                                 setConfirmModalContent({
@@ -621,7 +621,7 @@ function Main() {
             </div>
             {/* END: HTML Table Data */}
 
-            {/* BEGIN: Delete Calendar Modal */}
+            {/* BEGIN: Calendar Modal */}
             <Dialog
                 open={calendarModal}
                 onClose={() => {
@@ -652,8 +652,8 @@ function Main() {
                     />
                 </Dialog.Panel>
             </Dialog>
-            {/* END: Delete Calendar Modal */}
-            {/* BEGIN: Delete Confirmation Modal */}
+            {/* END: Calendar Modal */}
+            {/* BEGIN: Confirmation Modal */}
             <Dialog
                 open={confirmationModal}
                 onClose={() => {
@@ -716,7 +716,7 @@ function Main() {
                     </div>
                 </Dialog.Panel>
             </Dialog>
-            {/* END: Delete Confirmation Modal */}
+            {/* END: Confirmation Modal */}
             {/* BEGIN: Success Notification Content */}
             <Notification
                 id="success-notification-content"

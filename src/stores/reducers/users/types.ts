@@ -3,10 +3,14 @@ import { IUser } from "@/stores/models/IUser";
 
 export interface UserState {
     users: IUser[];
+    userOne: IUser | null;
     status: Status;
+    statusOne: Status;
     error: string | null;
     isCreated: boolean;
+    isActiveStatusUpdated: boolean;
     isDeleted: boolean;
+    isUpdated: boolean;
 }
 
 export interface UserCreateType {
