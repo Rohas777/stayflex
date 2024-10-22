@@ -101,7 +101,7 @@ function Main() {
                 paginationSizeSelector: [10, 20, 50, 100],
                 layout: "fitColumns",
                 responsiveLayout: "collapse",
-                placeholder: "No matching records found",
+                placeholder: "Соответствующих записей не найдено",
                 columns: [
                     {
                         title: "",

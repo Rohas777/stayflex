@@ -1,3 +1,4 @@
+import { useLayoutEffect } from "react";
 import { lock, unlock } from "tua-body-scroll-lock";
 
 export const startLoader = (

@@ -1,7 +1,7 @@
 import { IUser } from "@/stores/models/IUser";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { instance } from "@/vars";
-import { UserCreateType } from "./types";
+import { UserCreateType, UserUpdateType } from "./types";
 
 export const fetchUsers = createAsyncThunk(
     "user/fetchAll",
@@ -45,6 +45,17 @@ export const fetchUserById = createAsyncThunk(
     "user/fetch",
     async (id: number) => {
         const response = await instance.get(`/user/id/?id=${id}`);
+        return response.data;
+    }
+);
+export const updateUserAdmin = createAsyncThunk(
+    "/user/update",
+    async (userData: UserUpdateType) => {
+        const response = await instance.put(`/user/update/admin`, userData, {
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
         return response.data;
     }
 );

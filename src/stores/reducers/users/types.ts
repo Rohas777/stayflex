@@ -22,3 +22,9 @@ export interface UserCreateType {
     is_active: boolean;
     is_verified: boolean;
 }
+export interface UserUpdateType {
+    mail: string;
+    fullname: string;
+    phone: string;
+    id: number;
+}

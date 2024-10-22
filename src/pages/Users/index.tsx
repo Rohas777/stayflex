@@ -14,7 +14,9 @@ import { userSlice } from "@/stores/reducers/users/slice";
 import {
     createUser,
     deleteUser,
+    fetchUserById,
     fetchUsers,
+    updateUserAdmin,
     updateUserIsActive,
 } from "@/stores/reducers/users/actions";
 import tippy from "tippy.js";
@@ -25,10 +27,11 @@ import { ListPlus } from "lucide-react";
 import { startLoader, stopLoader } from "@/utils/customUtils";
 import Toastify from "toastify-js";
 import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
-import { UserCreateType } from "@/stores/reducers/users/types";
+import { UserCreateType, UserUpdateType } from "@/stores/reducers/users/types";
 import Notification from "@/components/Base/Notification";
 import clsx from "clsx";
-import UserForm from "./form";
+import UserCreateModal from "./createModal";
+import UserUpdateModal from "./updateModal";
 
 window.DateTime = DateTime;
 interface Response {
@@ -46,6 +49,7 @@ function Main() {
     } | null>(null);
     const [isLoaderOpen, setIsLoaderOpen] = useState(false);
     const [createModalPreview, setCreateModalPreview] = useState(false);
+    const [updateModalPreview, setUpdateModalPreview] = useState(false);
 
     const [confirmationModalPreview, setConfirmationModalPreview] =
         useState(false);
@@ -92,7 +96,7 @@ function Main() {
                 paginationSizeSelector: [10, 20, 50, 100],
                 layout: "fitColumns",
                 responsiveLayout: "collapse",
-                placeholder: "No matching records found",
+                placeholder: "Соответствующих записей не найдено",
                 columns: [
                     {
                         title: "",
@@ -228,6 +232,10 @@ function Main() {
                                     is_danger: true,
                                 });
                                 setConfirmationModalPreview(true);
+                            });
+                            editA.addEventListener("click", function () {
+                                dispatch(fetchUserById(response.id!));
+                                setUpdateModalPreview(true);
                             });
 
                             switcher.addEventListener("change", (e) => {
@@ -374,6 +382,7 @@ function Main() {
         isDeleted,
         isUpdated,
         isActiveStatusUpdated,
+        statusOne,
     } = useAppSelector((state) => state.user);
     const userActions = userSlice.actions;
     const dispatch = useAppDispatch();
@@ -389,6 +398,9 @@ function Main() {
 
     const onCreate = async (user: UserCreateType) => {
         await dispatch(createUser(user));
+    };
+    const onUpdate = async (user: UserUpdateType) => {
+        await dispatch(updateUserAdmin(user));
     };
 
     useEffect(() => {
@@ -591,7 +603,6 @@ function Main() {
                     dispatch(userActions.resetUserOne());
                 }}
             >
-                {isLoaderOpen && <OverlayLoader />}
                 <Dialog.Panel>
                     <a
                         onClick={(event: React.MouseEvent) => {
@@ -603,10 +614,38 @@ function Main() {
                     >
                         <Lucide icon="X" className="w-8 h-8 text-slate-400" />
                     </a>
-                    <UserForm
+                    <UserCreateModal
                         isLoaderOpen={isLoaderOpen}
                         setIsLoaderOpen={setIsLoaderOpen}
                         onCreate={onCreate}
+                    />
+                </Dialog.Panel>
+            </Dialog>
+            {/* END: Modal Content */}
+            {/* BEGIN: Modal Content */}
+            <Dialog
+                open={updateModalPreview}
+                onClose={() => {
+                    setUpdateModalPreview(false);
+                    dispatch(userActions.resetUserOne());
+                }}
+            >
+                <Dialog.Panel>
+                    <a
+                        onClick={(event: React.MouseEvent) => {
+                            event.preventDefault();
+                            setUpdateModalPreview(false);
+                            dispatch(userActions.resetUserOne());
+                        }}
+                        className="absolute top-0 right-0 mt-3 mr-3"
+                        href="#"
+                    >
+                        <Lucide icon="X" className="w-8 h-8 text-slate-400" />
+                    </a>
+                    <UserUpdateModal
+                        isLoaderOpen={isLoaderOpen}
+                        setIsLoaderOpen={setIsLoaderOpen}
+                        onUpdate={onUpdate}
                     />
                 </Dialog.Panel>
             </Dialog>
@@ -618,8 +657,8 @@ function Main() {
                     setConfirmationModalPreview(false);
                 }}
             >
-                {isLoaderOpen && <OverlayLoader />}
                 <Dialog.Panel>
+                    {isLoaderOpen && <OverlayLoader />}
                     <div className="p-5 text-center">
                         <Lucide
                             icon={

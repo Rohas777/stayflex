@@ -17,7 +17,7 @@ import ru from "react-phone-input-2/lang/ru.json";
 import Lucide from "@/components/Base/Lucide";
 import Tippy from "@/components/Base/Tippy";
 
-interface UserFormProps {
+interface UserCreateModalProps {
     onCreate: (userData: UserCreateType) => void;
     setIsLoaderOpen: React.Dispatch<React.SetStateAction<boolean>>;
     isLoaderOpen: boolean;
@@ -27,7 +27,11 @@ type CustomErrors = {
     tel: string | null;
 };
 
-function UserForm({ onCreate, setIsLoaderOpen, isLoaderOpen }: UserFormProps) {
+function UserCreateModal({
+    onCreate,
+    setIsLoaderOpen,
+    isLoaderOpen,
+}: UserCreateModalProps) {
     const [tel, setTel] = useState<string>();
     const [maskLengthValidation, setMaskLengthValidation] = useState(false);
     const [isUserActive, setIsUserActive] = useState(false);
@@ -134,9 +138,10 @@ function UserForm({ onCreate, setIsLoaderOpen, isLoaderOpen }: UserFormProps) {
 
     return (
         <>
+            {isLoaderOpen && <OverlayLoader />}
             <div className="p-5">
                 <div className="mt-5 text-lg font-bold text-center">
-                    Добваить пользователя
+                    Добавить пользователя
                 </div>
                 <form className="validate-form mt-5" onSubmit={onSubmit}>
                     <div className="input-form mt-3">
@@ -353,7 +358,7 @@ function UserForm({ onCreate, setIsLoaderOpen, isLoaderOpen }: UserFormProps) {
                                 className="sr-only peer"
                             />
                             <div className="mr-3 relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-                            Верифициорвать сразу?
+                            Верифицировать сразу?
                         </label>
                         <Tippy content="Определяет будет ли пользователен верифицирован сразу">
                             <Lucide icon="Info" className="cursor-help" />
@@ -372,4 +377,4 @@ function UserForm({ onCreate, setIsLoaderOpen, isLoaderOpen }: UserFormProps) {
     );
 }
 
-export default UserForm;
+export default UserCreateModal;
