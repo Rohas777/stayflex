@@ -7,7 +7,8 @@ import fakerData from "@/utils/faker";
 import _ from "lodash";
 import clsx from "clsx";
 import { Transition } from "@headlessui/react";
-import { useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+import { useAppSelector } from "@/stores/hooks";
 
 function Main() {
     const [searchDropdown, setSearchDropdown] = useState(false);
@@ -19,6 +20,8 @@ function Main() {
         setSearchDropdown(false);
     };
     const location = useLocation();
+
+    const { userOne } = useAppSelector((state) => state.user);
 
     useEffect(() => {
         if (location.pathname !== "/") {
@@ -56,7 +59,7 @@ function Main() {
                             icon="Bell"
                             className="w-5 h-5 dark:text-slate-500"
                         />
-                    </Popover.Button> */}
+                    </Popover.Button>
                     <Popover.Panel className="w-[280px] sm:w-[350px] p-5 mt-2">
                         <div className="mb-5 font-medium">Notifications</div>
                         {_.take(fakerData, 5).map((faker, fakerKey) => (
@@ -93,56 +96,44 @@ function Main() {
                                 </div>
                             </div>
                         ))}
-                    </Popover.Panel>
+                    </Popover.Panel> */}
                 </Popover>
                 {/* END: Notifications  */}
                 {/* BEGIN: Account Menu */}
                 <Menu>
-                    <Menu.Button className="block w-8 h-8 overflow-hidden rounded-full shadow-lg image-fit zoom-in intro-x">
-                        <img
-                            alt="Midone Tailwind HTML Admin Template"
-                            src={fakerData[9].photos[0]}
-                        />
+                    <Menu.Button className="flex items-center justify-center transition bg-slate-300 w-8 h-8 overflow-hidden rounded-full shadow-lg image-fit zoom-in intro-x">
+                        <Lucide icon="User" />
                     </Menu.Button>
                     <Menu.Items className="w-56 mt-px text-white bg-primary">
                         <Menu.Header className="font-normal">
                             <div className="font-medium">
-                                {fakerData[0].users[0].name}
+                                {userOne?.fullname}
                             </div>
                             <div className="text-xs text-white/70 mt-0.5 dark:text-slate-500">
-                                {fakerData[0].jobs[0]}
+                                Баланс: {userOne?.balance}
                             </div>
                         </Menu.Header>
                         <Menu.Divider className="bg-white/[0.08]" />
                         <Menu.Item className="hover:bg-white/5">
-                            <Lucide icon="User" className="w-4 h-4 mr-2" />{" "}
-                            Profile
+                            <Link
+                                to={`/profile/${userOne?.id}`}
+                                className="flex items-center w-full"
+                            >
+                                <Lucide icon="User" className="w-4 h-4 mr-2" />{" "}
+                                Профиль
+                            </Link>
                         </Menu.Item>
-                        <Menu.Item className="hover:bg-white/5">
-                            <Lucide
-                                icon="FilePenLine"
-                                className="w-4 h-4 mr-2"
-                            />{" "}
-                            Add Account
-                        </Menu.Item>
-                        <Menu.Item className="hover:bg-white/5">
+                        {/* <Menu.Item className="hover:bg-white/5">
                             <Lucide icon="Lock" className="w-4 h-4 mr-2" />{" "}
                             Reset Password
-                        </Menu.Item>
-                        <Menu.Item className="hover:bg-white/5">
-                            <Lucide
-                                icon="HelpCircle"
-                                className="w-4 h-4 mr-2"
-                            />{" "}
-                            Help
-                        </Menu.Item>
+                        </Menu.Item> */}
                         <Menu.Divider className="bg-white/[0.08]" />
                         <Menu.Item className="hover:bg-white/5">
                             <Lucide
                                 icon="ToggleRight"
                                 className="w-4 h-4 mr-2"
                             />{" "}
-                            Logout
+                            Выйти
                         </Menu.Item>
                     </Menu.Items>
                 </Menu>

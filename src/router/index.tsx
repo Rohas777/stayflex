@@ -20,9 +20,7 @@ import CrudForm from "../pages/CrudForm";
 import UsersLayout1 from "../pages/UsersLayout1";
 import UsersLayout2 from "../pages/UsersLayout2";
 import UsersLayout3 from "../pages/UsersLayout3";
-import ProfileOverview1 from "../pages/ProfileOverview1";
-import ProfileOverview2 from "../pages/ProfileOverview2";
-import ProfileOverview3 from "../pages/ProfileOverview3";
+import ProfileOverview from "../pages/ProfileOverview";
 import WizardLayout1 from "../pages/WizardLayout1";
 import WizardLayout2 from "../pages/WizardLayout2";
 import WizardLayout3 from "../pages/WizardLayout3";
@@ -86,13 +84,26 @@ import Channels from "../pages/Channels";
 import Widget from "../pages/Widget";
 import Tariffs from "../pages/Tariffs";
 import TariffsClient from "../pages/TariffsClient";
+import { useEffect } from "react";
+import { useAppDispatch } from "@/stores/hooks";
+import { fetchUserById } from "@/stores/reducers/users/actions";
 
 function Router() {
+    const dispatch = useAppDispatch();
+
+    useEffect(() => {
+        dispatch(fetchUserById(import.meta.env.VITE_CURRENT_USER_ID));
+    }, []);
+
     const routes = [
         {
             path: "/",
             element: <Layout />,
             children: [
+                {
+                    path: "/profile/:id",
+                    element: <ProfileOverview />,
+                },
                 {
                     path: "/",
                     element: <Users />,
@@ -260,18 +271,6 @@ function Router() {
                 {
                     path: "users-layout-3",
                     element: <UsersLayout3 />,
-                },
-                {
-                    path: "profile-overview-1",
-                    element: <ProfileOverview1 />,
-                },
-                {
-                    path: "profile-overview-2",
-                    element: <ProfileOverview2 />,
-                },
-                {
-                    path: "profile-overview-3",
-                    element: <ProfileOverview3 />,
                 },
                 {
                     path: "wizard-layout-1",
