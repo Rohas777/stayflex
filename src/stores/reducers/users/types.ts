@@ -19,5 +19,6 @@ export interface UserCreateType {
     phone: string;
     password: string;
     balance: number;
-    date_before: string;
+    is_active: boolean;
+    is_verified: boolean;
 }

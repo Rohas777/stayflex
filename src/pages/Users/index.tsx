@@ -28,6 +28,7 @@ import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
 import { UserCreateType } from "@/stores/reducers/users/types";
 import Notification from "@/components/Base/Notification";
 import clsx from "clsx";
+import UserForm from "./form";
 
 window.DateTime = DateTime;
 interface Response {
@@ -44,8 +45,10 @@ function Main() {
         id: number;
     } | null>(null);
     const [isLoaderOpen, setIsLoaderOpen] = useState(false);
+    const [createModalPreview, setCreateModalPreview] = useState(false);
 
-    const [confirmationModal, setConfirmationModal] = useState(false);
+    const [confirmationModalPreview, setConfirmationModalPreview] =
+        useState(false);
     const [switcherIsActive, setSwitcherIsActive] =
         useState<HTMLInputElement | null>(null);
     const [confirmModalContent, setConfirmModalContent] = useState<{
@@ -171,9 +174,9 @@ function Main() {
                             const a = stringToHTML(
                                 `<div class="flex lg:justify-center items-center"></div>`
                             );
-                            const dateA =
+                            const infoA =
                                 stringToHTML(`<a class="flex items-center mr-3 w-7 h-7 p-1 border border-black rounded-md hover:opacity-70" href="javascript:;">
-                                <i data-lucide="calendar"></i>
+                                <i data-lucide="info"></i>
                               </a>`);
                             const editA =
                                 stringToHTML(`<a class="flex items-center mr-3 w-7 h-7 p-1 border border-black rounded-md hover:opacity-70" href="javascript:;">
@@ -183,8 +186,8 @@ function Main() {
                                 stringToHTML(`<a class="flex items-center text-danger w-7 h-7 p-1 border border-danger rounded-md hover:opacity-70" href="javascript:;">
                                 <i data-lucide="trash-2"></i>
                               </a>`);
-                            tippy(dateA, {
-                                content: "Подписан до",
+                            tippy(infoA, {
+                                content: "К объектам",
                                 placement: "bottom",
                                 animation: "shift-away",
                             });
@@ -211,7 +214,7 @@ function Main() {
                                 placement: "bottom",
                                 animation: "shift-away",
                             });
-                            a.append(switcher, dateA, editA, deleteA);
+                            a.append(switcher, infoA, editA, deleteA);
                             a.addEventListener("hover", function () {});
                             deleteA.addEventListener("click", function () {
                                 setConfirmModalContent({
@@ -225,7 +228,7 @@ function Main() {
                                     cancelLabel: "Отмена",
                                     is_danger: true,
                                 });
-                                setConfirmationModal(true);
+                                setConfirmationModalPreview(true);
                             });
 
                             switcher.addEventListener("change", (e) => {
@@ -246,7 +249,7 @@ function Main() {
                                         cancelLabel: "Отмена",
                                         is_danger: false,
                                     });
-                                    setConfirmationModal(true);
+                                    setConfirmationModalPreview(true);
                                 } else {
                                     onUpdateIsActive(target, response.id!);
                                 }
@@ -398,7 +401,7 @@ function Main() {
         }
         if (isCreated || isUpdated || isActiveStatusUpdated || isDeleted) {
             dispatch(fetchUsers());
-            setConfirmationModal(false);
+            setCreateModalPreview(false);
             const successEl = document
                 .querySelectorAll("#success-notification-content")[0]
                 .cloneNode(true) as HTMLElement;
@@ -453,12 +456,19 @@ function Main() {
             <div className="flex flex-col items-center mt-8 intro-y sm:flex-row">
                 <h2 className="mr-auto text-lg font-medium">Пользователи</h2>
                 <div className="flex w-full mt-4 sm:w-auto sm:mt-0">
-                    <Link to="create">
-                        <Button variant="primary" className="mr-2 shadow-md">
-                            <ListPlus className="size-5 mr-2" />
-                            Добавить
-                        </Button>
-                    </Link>
+                    <Button
+                        as="a"
+                        href="#"
+                        variant="primary"
+                        className="mr-2 shadow-md"
+                        onClick={(event: React.MouseEvent) => {
+                            event.preventDefault();
+                            setCreateModalPreview(true);
+                        }}
+                    >
+                        <ListPlus className="size-5 mr-2" />
+                        Добавить
+                    </Button>
                 </div>
             </div>
             {/* BEGIN: HTML Table Data */}
@@ -573,12 +583,38 @@ function Main() {
                 </div>
             </div>
             {/* END: HTML Table Data */}
-
+            {/* BEGIN: Modal Content */}
+            <Dialog
+                open={createModalPreview}
+                onClose={() => {
+                    setCreateModalPreview(false);
+                    dispatch(userActions.resetUserOne());
+                }}
+            >
+                <Dialog.Panel>
+                    <a
+                        onClick={(event: React.MouseEvent) => {
+                            event.preventDefault();
+                            setCreateModalPreview(false);
+                        }}
+                        className="absolute top-0 right-0 mt-3 mr-3"
+                        href="#"
+                    >
+                        <Lucide icon="X" className="w-8 h-8 text-slate-400" />
+                    </a>
+                    <UserForm
+                        isLoaderOpen={isLoaderOpen}
+                        setIsLoaderOpen={setIsLoaderOpen}
+                        onCreate={onCreate}
+                    />
+                </Dialog.Panel>
+            </Dialog>
+            {/* END: Modal Content */}
             {/* BEGIN: Confirmation Modal */}
             <Dialog
-                open={confirmationModal}
+                open={confirmationModalPreview}
                 onClose={() => {
-                    setConfirmationModal(false);
+                    setConfirmationModalPreview(false);
                 }}
             >
                 <Dialog.Panel>
@@ -611,7 +647,7 @@ function Main() {
                             variant="outline-secondary"
                             type="button"
                             onClick={() => {
-                                setConfirmationModal(false);
+                                setConfirmationModalPreview(false);
                             }}
                             disabled={isLoaderOpen}
                             className="col-span-6 mr-1"
