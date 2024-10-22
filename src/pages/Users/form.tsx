@@ -134,7 +134,6 @@ function UserForm({ onCreate, setIsLoaderOpen, isLoaderOpen }: UserFormProps) {
 
     return (
         <>
-            {isLoaderOpen && <OverlayLoader />}
             <div className="p-5">
                 <div className="mt-5 text-lg font-bold text-center">
                     Добваить пользователя

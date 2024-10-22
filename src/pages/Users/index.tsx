@@ -221,7 +221,6 @@ function Main() {
                                     title: "Удалить пользователя?",
                                     description: `Вы уверены, что хотите удалить пользователя "${response.name?.trim()}"?<br/>Это действие нельзя будет отменить.`,
                                     onConfirm: () => {
-                                        console.log("first");
                                         onDelete(response.id!);
                                     },
                                     confirmLabel: "Удалить",
@@ -388,8 +387,8 @@ function Main() {
         await dispatch(updateUserIsActive({ id: id }));
     };
 
-    const onCreate = (user: UserCreateType) => {
-        dispatch(createUser(user));
+    const onCreate = async (user: UserCreateType) => {
+        await dispatch(createUser(user));
     };
 
     useEffect(() => {
@@ -402,6 +401,7 @@ function Main() {
         if (isCreated || isUpdated || isActiveStatusUpdated || isDeleted) {
             dispatch(fetchUsers());
             setCreateModalPreview(false);
+            setConfirmationModalPreview(false);
             const successEl = document
                 .querySelectorAll("#success-notification-content")[0]
                 .cloneNode(true) as HTMLElement;
@@ -591,6 +591,7 @@ function Main() {
                     dispatch(userActions.resetUserOne());
                 }}
             >
+                {isLoaderOpen && <OverlayLoader />}
                 <Dialog.Panel>
                     <a
                         onClick={(event: React.MouseEvent) => {
@@ -617,6 +618,7 @@ function Main() {
                     setConfirmationModalPreview(false);
                 }}
             >
+                {isLoaderOpen && <OverlayLoader />}
                 <Dialog.Panel>
                     <div className="p-5 text-center">
                         <Lucide
