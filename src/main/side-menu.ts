@@ -7,7 +7,7 @@ newReservationsIndicator.textContent = "1";
 const menu: Array<Menu | "divider"> = [
     {
         icon: "Users",
-        pathname: "/",
+        pathname: "/admin/",
         title: "Пользователи",
     },
     {
@@ -16,49 +16,49 @@ const menu: Array<Menu | "divider"> = [
         subMenu: [
             {
                 icon: "Map",
-                pathname: "/regions",
+                pathname: "/admin/regions",
                 title: "Регионы",
             },
             {
                 icon: "MapPin",
-                pathname: "/cities",
+                pathname: "/admin/cities",
                 title: "Города",
             },
             {
                 icon: "Home",
-                pathname: "/property-types",
+                pathname: "/admin/property-types",
                 title: "Типы недвижимости",
             },
             {
                 icon: "Coffee",
-                pathname: "/amenities",
+                pathname: "/admin/amenities",
                 title: "Удобства",
             },
             {
                 icon: "Home",
-                pathname: "/admin-objects",
+                pathname: "/admin/objects",
                 title: "Объекты",
             },
         ],
     },
     {
         icon: "Server",
-        pathname: "/servers",
+        pathname: "/admin/servers",
         title: "Серверы",
     },
     {
         icon: "UserCheck",
-        pathname: "/admin-clients",
+        pathname: "/admin/clients",
         title: "Клиенты",
     },
     {
         icon: "Gem",
-        pathname: "/tariffs-admin",
+        pathname: "/admin/tariffs",
         title: "Тарифы",
     },
     {
         icon: "Calendar",
-        pathname: "/admin-reservations",
+        pathname: "/admin/reservations",
         title: "Брони",
     },
     {
@@ -67,7 +67,7 @@ const menu: Array<Menu | "divider"> = [
         subMenu: [
             {
                 icon: "Activity",
-                pathname: "/icon",
+                pathname: "/admin/icon",
                 title: "Иконки",
             },
         ],

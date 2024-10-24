@@ -7,34 +7,38 @@ import clsx from "clsx";
 import Lucide from "@/components/Base/Lucide";
 import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/stores/hooks";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import * as yup from "yup";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { SignInCredentials } from "@/stores/reducers/auth/types";
-import { signIn } from "@/stores/reducers/auth/actions";
+import {
+    CodeCredentials,
+    SignInCredentials,
+} from "@/stores/reducers/auth/types";
+import { activate, auth, signIn } from "@/stores/reducers/auth/actions";
 import { Status } from "@/stores/reducers/types";
 import { authSlice } from "@/stores/reducers/auth/slice";
-import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
 import { startLoader, stopLoader } from "@/utils/customUtils";
+import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
 
 function Main() {
-    const [showPassword, setShowPassword] = useState(false);
-    const [isLoaderOpen, setIsLoaderOpen] = useState(false);
-
-    const { signInStatus, error } = useAppSelector((state) => state.auth);
-    const authActions = authSlice.actions;
-
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
+    const location = useLocation();
+
+    const [isLoaderOpen, setIsLoaderOpen] = useState(false);
+
+    const [isSignUp, setIsSignUp] = useState(
+        location.pathname === "/register/activate"
+    );
+
+    const { codeStatus, signInStatus, signUpStatus, authTempUser, error } =
+        useAppSelector((state) => state.auth);
+    const authActions = authSlice.actions;
 
     const schema = yup
         .object({
-            email: yup
-                .string()
-                .email("Введите корректный email")
-                .required("Вам необходимо ввести email"),
-            password: yup.string().required("Вам необходимо ввести пароль"),
+            code: yup.string().required("Вам необходимо ввести код"),
         })
         .required();
     const {
@@ -56,20 +60,30 @@ function Main() {
             return;
         }
 
-        const signInData: SignInCredentials = {
-            mail: String(formData.get("email")),
-            password: String(formData.get("password")),
+        const authData: CodeCredentials = {
+            mail: authTempUser.mail,
+            code: String(formData.get("code")),
         };
 
-        dispatch(signIn(signInData));
+        if (!isSignUp) {
+            dispatch(auth(authData));
+        } else {
+            dispatch(activate(authData));
+        }
     };
 
     useEffect(() => {
-        if (signInStatus === Status.SUCCESS) {
-            stopLoader(setIsLoaderOpen);
-            navigate("/login/auth");
+        if (signInStatus !== Status.SUCCESS && !isSignUp) {
+            navigate("/login");
         }
-    }, [signInStatus]);
+        if (signUpStatus !== Status.SUCCESS && isSignUp) {
+            navigate("/register");
+        }
+        if (codeStatus === Status.SUCCESS) {
+            navigate("/");
+            stopLoader(setIsLoaderOpen);
+        }
+    }, [codeStatus, signInStatus, signUpStatus, isSignUp]);
 
     return (
         <>
@@ -96,15 +110,20 @@ function Main() {
                                     src={logoUrl}
                                 />
                             </a>
-                            <div className="my-auto w-96">
+                            <div className="my-auto">
                                 <img
-                                    alt="Stayflex"
-                                    className="w-3/4 -mt-16 -intro-x"
+                                    alt="Midone Tailwind HTML Admin Template"
+                                    className="w-1/2 -mt-16 -intro-x"
                                     src={illustrationUrl}
                                 />
                                 <div className="mt-10 text-4xl font-medium leading-tight text-white -intro-x">
-                                    Осталось несколько кликов, чтобы войти в
-                                    свою учетную запись.
+                                    На ваш email отправлено
+                                    <br />
+                                    уведомлние с кодом
+                                    <br />о подтверждении.
+                                </div>
+                                <div className="mt-5 text-lg text-white -intro-x text-opacity-70 dark:text-slate-400">
+                                    Пожалуйста, введите код.
                                 </div>
                             </div>
                         </div>
@@ -116,100 +135,40 @@ function Main() {
                         >
                             <div className="w-full px-5 py-8 mx-auto my-auto bg-white rounded-md shadow-md xl:ml-20 dark:bg-darkmode-600 xl:bg-transparent sm:px-8 xl:p-0 xl:shadow-none sm:w-3/4 lg:w-2/4 xl:w-auto">
                                 <h2 className="text-2xl font-bold text-center intro-x xl:text-3xl xl:text-left">
-                                    Войти
+                                    Подтвердить вход
                                 </h2>
                                 <div className="mt-2 text-center intro-x text-slate-400 xl:hidden">
-                                    Осталось несколько кликов, чтобы войти в
-                                    свою учетную запись.
+                                    На ваш email отправлено уведомлние с кодом о
+                                    подтверждении. Пожалуйста, введите код.
                                 </div>
                                 <div className="mt-8 intro-x">
                                     <FormInput
-                                        {...register("email")}
+                                        {...register("code")}
                                         type="text"
-                                        name="email"
+                                        name="code"
                                         className={clsx(
                                             "block px-4 py-3 intro-x min-w-full xl:min-w-[350px]",
                                             {
-                                                "border-danger": errors.email,
+                                                "border-danger": errors.code,
                                             }
                                         )}
-                                        placeholder="Email"
+                                        placeholder="Ваш код"
                                     />
-                                    {errors.email && (
+                                    {errors.code && (
                                         <div className="mt-2 text-danger">
-                                            {typeof errors.email.message ===
-                                                "string" &&
-                                                errors.email.message}
-                                        </div>
-                                    )}
-                                    <div className="relative mt-3">
-                                        <Lucide
-                                            icon={
-                                                showPassword ? "EyeOff" : "Eye"
-                                            }
-                                            onClick={() =>
-                                                setShowPassword(!showPassword)
-                                            }
-                                            className="w-6 h-6 absolute top-2/4 -translate-y-2/4 mr-3 right-0 z-50 cursor-pointer text-slate-500 dark:text-slate-400"
-                                        />
-                                        <FormInput
-                                            {...register("password")}
-                                            type={
-                                                showPassword
-                                                    ? "text"
-                                                    : "password"
-                                            }
-                                            name="password"
-                                            className={clsx(
-                                                "block px-4 py-3 intro-x min-w-full xl:min-w-[350px]",
-                                                {
-                                                    "border-danger":
-                                                        errors.password,
-                                                }
-                                            )}
-                                            placeholder="Пароль"
-                                        />
-                                    </div>
-                                    {errors.password && (
-                                        <div className="mt-2 text-danger">
-                                            {typeof errors.password.message ===
-                                                "string" &&
-                                                errors.password.message}
+                                            {typeof errors.code.message ===
+                                                "string" && errors.code.message}
                                         </div>
                                     )}
                                 </div>
-                                {/* <div className="flex mt-4 text-xs intro-x text-slate-600 dark:text-slate-500 sm:text-sm">
-                                    <div className="flex items-center mr-auto">
-                                        <FormCheck.Input
-                                            id="remember-me"
-                                            type="checkbox"
-                                            className="mr-2 border"
-                                        />
-                                        <label
-                                            className="cursor-pointer select-none"
-                                            htmlFor="remember-me"
-                                        >
-                                            Запомнить меня
-                                        </label>
-                                    </div>
-                                    <a href="">Забыли пароль?</a>
-                                </div> */}
                                 <div className="mt-5 text-center intro-x xl:mt-8 xl:text-left">
                                     <Button
                                         variant="primary"
                                         className="w-full px-4 py-3 align-top xl:w-32 xl:mr-3"
                                         type="submit"
                                     >
-                                        Войти
+                                        Продолжить
                                     </Button>
-                                    <Link to="/register">
-                                        <Button
-                                            variant="outline-secondary"
-                                            className="w-full px-4 py-3 mt-3 align-top xl:w-44 xl:mt-0"
-                                        >
-                                            Зарегистрироваться
-                                        </Button>
-                                    </Link>
                                 </div>
                                 <div className="mt-10 text-center intro-x xl:mt-24 text-slate-600 dark:text-slate-500 xl:text-left">
                                     Регистрируясь, вы соглашаетесь с нашими{" "}

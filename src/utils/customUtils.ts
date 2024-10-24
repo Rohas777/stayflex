@@ -6,14 +6,14 @@ export const startLoader = (
     targetElement?: HTMLElement
 ) => {
     setIsLoaderOpen(true);
-    lock(targetElement);
+    // lock(targetElement);
 };
 export const stopLoader = (
     setIsLoaderOpen: React.Dispatch<React.SetStateAction<boolean>>,
     targetElement?: HTMLElement
 ) => {
     setIsLoaderOpen(false);
-    unlock(targetElement);
+    // unlock(targetElement);
 };
 
 export const convertDateString = (str: string) => {

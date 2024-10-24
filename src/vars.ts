@@ -2,7 +2,7 @@ import axios from "axios";
 import * as lucideIcons from "lucide-react";
 
 export const instance = axios.create({
-    withCredentials: false, //NOTE - Разобратья
+    withCredentials: true,
     baseURL: import.meta.env.VITE_API,
 });
 

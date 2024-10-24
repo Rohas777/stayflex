@@ -1,69 +1,13 @@
 import { useRoutes } from "react-router-dom";
-import DashboardOverview1 from "../pages/DashboardOverview1";
-import DashboardOverview4 from "../pages/DashboardOverview4";
-import Categories from "../pages/Categories";
-import ProductList from "../pages/ProductList";
-import ProductGrid from "../pages/ProductGrid";
-import TransactionList from "../pages/TransactionList";
-import TransactionDetail from "../pages/TransactionDetail";
-import SellerList from "../pages/SellerList";
-import SellerDetail from "../pages/SellerDetail";
-import Reviews from "../pages/Reviews";
-import Inbox from "../pages/Inbox";
-import FileManager from "../pages/FileManager";
-import PointOfSale from "../pages/PointOfSale";
-import Chat from "../pages/Chat";
-import Post from "../pages/Post";
-import Calendar from "../pages/Calendar";
-import CrudDataList from "../pages/CrudDataList";
-import CrudForm from "../pages/CrudForm";
-import UsersLayout1 from "../pages/UsersLayout1";
-import UsersLayout2 from "../pages/UsersLayout2";
-import UsersLayout3 from "../pages/UsersLayout3";
+
 import ProfileOverview from "../pages/ProfileOverview";
-import WizardLayout1 from "../pages/WizardLayout1";
-import WizardLayout2 from "../pages/WizardLayout2";
-import WizardLayout3 from "../pages/WizardLayout3";
-import BlogLayout1 from "../pages/BlogLayout1";
-import BlogLayout2 from "../pages/BlogLayout2";
-import BlogLayout3 from "../pages/BlogLayout3";
-import PricingLayout1 from "../pages/PricingLayout1";
-import PricingLayout2 from "../pages/PricingLayout2";
-import InvoiceLayout1 from "../pages/InvoiceLayout1";
-import InvoiceLayout2 from "../pages/InvoiceLayout2";
-import FaqLayout1 from "../pages/FaqLayout1";
-import FaqLayout2 from "../pages/FaqLayout2";
-import FaqLayout3 from "../pages/FaqLayout3";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
+import ActivateCode from "../pages/ActivateCode";
 import ErrorPage from "../pages/ErrorPage";
-import UpdateProfile from "../pages/UpdateProfile";
-import ChangePassword from "../pages/ChangePassword";
-import RegularTable from "../pages/RegularTable";
-import Tabulator from "../pages/Tabulator";
-import Modal from "../pages/Modal";
-import Slideover from "../pages/Slideover";
-import Notification from "../pages/Notification";
-import Tab from "../pages/Tab";
-import Accordion from "../pages/Accordion";
-import Button from "../pages/Button";
-import ProgressBar from "../pages/ProgressBar";
-import Tooltip from "../pages/Tooltip";
-import Dropdown from "../pages/Dropdown";
-import Typography from "../pages/Typography";
-import Icon from "../pages/Icon";
-import LoadingIcon from "../pages/LoadingIcon";
-import RegularForm from "../pages/RegularForm";
-import Datepicker from "../pages/Datepicker";
-import TomSelect from "../pages/TomSelect";
-import FileUpload from "../pages/FileUpload";
-import WysiwygEditor from "../pages/WysiwygEditor";
-import Validation from "../pages/Validation";
-import Chart from "../pages/Chart";
-import Slider from "../pages/Slider";
-import ImageZoom from "../pages/ImageZoom";
 
 import Layout from "../themes";
+import AdminLayout from "../themes/adminLayout";
 
 import Users from "../pages/Users";
 import CreateUser from "../pages/CreateUser";
@@ -84,6 +28,7 @@ import Channels from "../pages/Channels";
 import Widget from "../pages/Widget";
 import Tariffs from "../pages/Tariffs";
 import TariffsClient from "../pages/TariffsClient";
+import Icon from "../pages/Icon";
 import { useEffect } from "react";
 import { useAppDispatch } from "@/stores/hooks";
 import { fetchUserById } from "@/stores/reducers/users/actions";
@@ -101,48 +46,8 @@ function Router() {
             element: <Layout />,
             children: [
                 {
-                    path: "/profile/:id",
-                    element: <ProfileOverview />,
-                },
-                {
                     path: "/",
-                    element: <Users />,
-                },
-                {
-                    path: "users",
-                    element: <Users />,
-                },
-                {
-                    path: "users/create",
-                    element: <CreateUser />,
-                },
-                {
-                    path: "servers",
-                    element: <Servers />,
-                },
-                {
-                    path: "regions",
-                    element: <Regions />,
-                },
-                {
-                    path: "cities",
-                    element: <Cities />,
-                },
-                {
-                    path: "property-types",
-                    element: <PropertyTypes />,
-                },
-                {
-                    path: "amenities",
-                    element: <Amenities />,
-                },
-                {
-                    path: "admin-objects",
-                    element: <Objects />,
-                },
-                {
-                    path: "objects/user/:id",
-                    element: <UserObjects />,
+                    element: <ObjectsClient />,
                 },
                 {
                     path: "objects",
@@ -161,20 +66,8 @@ function Router() {
                     element: <TariffsClient />,
                 },
                 {
-                    path: "tariffs-admin",
-                    element: <Tariffs />,
-                },
-                {
-                    path: "admin-clients",
-                    element: <Clients />,
-                },
-                {
                     path: "clients",
                     element: <Clients />,
-                },
-                {
-                    path: "admin-reservations",
-                    element: <Reservations />,
                 },
                 {
                     path: "reservations",
@@ -193,236 +86,82 @@ function Router() {
                     element: <Widget />,
                 },
                 {
-                    path: "dashboard-overview-4",
-                    element: <DashboardOverview4 />,
+                    path: "/profile/:id",
+                    element: <ProfileOverview />,
+                },
+            ],
+        },
+        {
+            path: "/admin/",
+            element: <Layout admin />,
+            children: [
+                {
+                    path: "/admin/",
+                    element: <Users />,
                 },
                 {
-                    path: "categories",
-                    element: <Categories />,
+                    path: "/admin/users",
+                    element: <Users />,
                 },
                 {
-                    path: "product-list",
-                    element: <ProductList />,
+                    path: "/admin/users/create",
+                    element: <CreateUser />,
                 },
                 {
-                    path: "product-grid",
-                    element: <ProductGrid />,
+                    path: "/admin/servers",
+                    element: <Servers />,
                 },
                 {
-                    path: "transaction-list",
-                    element: <TransactionList />,
+                    path: "/admin/regions",
+                    element: <Regions />,
                 },
                 {
-                    path: "transaction-detail",
-                    element: <TransactionDetail />,
+                    path: "/admin/cities",
+                    element: <Cities />,
                 },
                 {
-                    path: "seller-list",
-                    element: <SellerList />,
+                    path: "/admin/property-types",
+                    element: <PropertyTypes />,
                 },
                 {
-                    path: "seller-detail",
-                    element: <SellerDetail />,
+                    path: "/admin/amenities",
+                    element: <Amenities />,
                 },
                 {
-                    path: "reviews",
-                    element: <Reviews />,
+                    path: "/admin/objects",
+                    element: <Objects />,
                 },
                 {
-                    path: "inbox",
-                    element: <Inbox />,
+                    path: "/admin/objects/user/:id",
+                    element: <UserObjects />,
                 },
                 {
-                    path: "file-manager",
-                    element: <FileManager />,
+                    path: "/admin/objects/create",
+                    element: <CreateObject />,
                 },
                 {
-                    path: "point-of-sale",
-                    element: <PointOfSale />,
+                    path: "/admin/objects/update/:id",
+                    element: <UpdateObject />,
                 },
                 {
-                    path: "chat",
-                    element: <Chat />,
+                    path: "/admin/tariffs",
+                    element: <Tariffs />,
                 },
                 {
-                    path: "post",
-                    element: <Post />,
+                    path: "/admin/clients",
+                    element: <Clients />,
                 },
                 {
-                    path: "calendar",
-                    element: <Calendar />,
+                    path: "/admin/reservations",
+                    element: <Reservations />,
                 },
                 {
-                    path: "crud-data-list",
-                    element: <CrudDataList />,
-                },
-                {
-                    path: "crud-form",
-                    element: <CrudForm />,
-                },
-                {
-                    path: "users-layout-1",
-                    element: <UsersLayout1 />,
-                },
-                {
-                    path: "users-layout-2",
-                    element: <UsersLayout2 />,
-                },
-                {
-                    path: "users-layout-3",
-                    element: <UsersLayout3 />,
-                },
-                {
-                    path: "wizard-layout-1",
-                    element: <WizardLayout1 />,
-                },
-                {
-                    path: "wizard-layout-2",
-                    element: <WizardLayout2 />,
-                },
-                {
-                    path: "wizard-layout-3",
-                    element: <WizardLayout3 />,
-                },
-                {
-                    path: "blog-layout-1",
-                    element: <BlogLayout1 />,
-                },
-                {
-                    path: "blog-layout-2",
-                    element: <BlogLayout2 />,
-                },
-                {
-                    path: "blog-layout-3",
-                    element: <BlogLayout3 />,
-                },
-                {
-                    path: "pricing-layout-1",
-                    element: <PricingLayout1 />,
-                },
-                {
-                    path: "pricing-layout-2",
-                    element: <PricingLayout2 />,
-                },
-                {
-                    path: "invoice-layout-1",
-                    element: <InvoiceLayout1 />,
-                },
-                {
-                    path: "invoice-layout-2",
-                    element: <InvoiceLayout2 />,
-                },
-                {
-                    path: "faq-layout-1",
-                    element: <FaqLayout1 />,
-                },
-                {
-                    path: "faq-layout-2",
-                    element: <FaqLayout2 />,
-                },
-                {
-                    path: "faq-layout-3",
-                    element: <FaqLayout3 />,
-                },
-                {
-                    path: "update-profile",
-                    element: <UpdateProfile />,
-                },
-                {
-                    path: "change-password",
-                    element: <ChangePassword />,
-                },
-                {
-                    path: "regular-table",
-                    element: <RegularTable />,
-                },
-                {
-                    path: "tabulator",
-                    element: <Tabulator />,
-                },
-                {
-                    path: "modal",
-                    element: <Modal />,
-                },
-                {
-                    path: "slideover",
-                    element: <Slideover />,
-                },
-                {
-                    path: "notification",
-                    element: <Notification />,
-                },
-                {
-                    path: "tab",
-                    element: <Tab />,
-                },
-                {
-                    path: "accordion",
-                    element: <Accordion />,
-                },
-                {
-                    path: "button",
-                    element: <Button />,
-                },
-                {
-                    path: "progress-bar",
-                    element: <ProgressBar />,
-                },
-                {
-                    path: "tooltip",
-                    element: <Tooltip />,
-                },
-                {
-                    path: "dropdown",
-                    element: <Dropdown />,
-                },
-                {
-                    path: "typography",
-                    element: <Typography />,
-                },
-                {
-                    path: "icon",
+                    path: "/admin/icon",
                     element: <Icon />,
                 },
                 {
-                    path: "loading-icon",
-                    element: <LoadingIcon />,
-                },
-                {
-                    path: "regular-form",
-                    element: <RegularForm />,
-                },
-                {
-                    path: "datepicker",
-                    element: <Datepicker />,
-                },
-                {
-                    path: "tom-select",
-                    element: <TomSelect />,
-                },
-                {
-                    path: "file-upload",
-                    element: <FileUpload />,
-                },
-                {
-                    path: "wysiwyg-editor",
-                    element: <WysiwygEditor />,
-                },
-                {
-                    path: "validation",
-                    element: <Validation />,
-                },
-                {
-                    path: "chart",
-                    element: <Chart />,
-                },
-                {
-                    path: "slider",
-                    element: <Slider />,
-                },
-                {
-                    path: "image-zoom",
-                    element: <ImageZoom />,
+                    path: "/admin/reservations/client/:id",
+                    element: <ClientReservations />,
                 },
             ],
         },
@@ -431,11 +170,19 @@ function Router() {
             element: <Login />,
         },
         {
+            path: "/login/auth",
+            element: <ActivateCode />,
+        },
+        {
             path: "/register",
             element: <Register />,
         },
         {
-            path: "/error-page",
+            path: "/register/activate",
+            element: <ActivateCode />,
+        },
+        {
+            path: "/not-found",
             element: <ErrorPage />,
         },
         {
