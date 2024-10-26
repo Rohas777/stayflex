@@ -1,3 +1,5 @@
+import enFlag from "/src/assets/images/flags/en.png";
+import ruFlag from "/src/assets/images/flags/ru.png";
 import { useAppDispatch, useAppSelector } from "@/stores/hooks";
 import {
     selectColorScheme,
@@ -167,10 +169,7 @@ function Main() {
                                             ])}
                                         >
                                             <div className="h-full">
-                                                <img
-                                                    src="/src/assets/images/flags/ru.png"
-                                                    alt="Ru"
-                                                />
+                                                <img src={ruFlag} alt="Ru" />
                                             </div>
                                         </a>
                                         <div className="mt-2.5 text-center text-xs capitalize">
@@ -187,10 +186,7 @@ function Main() {
                                             ])}
                                         >
                                             <div className="h-full">
-                                                <img
-                                                    src="/src/assets/images/flags/en.png"
-                                                    alt="En"
-                                                />
+                                                <img src={enFlag} alt="En" />
                                                 <span className="absolute inset-0 size-full bg-slate-200 bg-opacity-70"></span>
                                                 <span className="absolute inset-0 text-black size-full flex items-center justify-center text-center text-sm font-bold">
                                                     В разработке
