@@ -43,7 +43,7 @@ export const updateObiectIsActive = createAsyncThunk(
 export const deleteObject = createAsyncThunk<string, number>(
     "object/delete",
     async (id) => {
-        const response = await instance.delete(`/object/delete?id=${id}`);
+        const response = await instance.delete(`/object/delete/${id}`);
         return response.data.id;
     }
 );
@@ -58,7 +58,7 @@ export const fetchObjectById = createAsyncThunk(
 export const fetchObjectsByUser = createAsyncThunk(
     "object/fetchByUser",
     async (id: number) => {
-        const response = await instance.get(`/object/userid/${id}`);
+        const response = await instance.get(`/admin/object/userid/${id}`);
         return response.data;
     }
 );

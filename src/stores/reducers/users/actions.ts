@@ -6,14 +6,14 @@ import { UserCreateType, UserTariffUpdateType, UserUpdateType } from "./types";
 export const fetchUsers = createAsyncThunk(
     "user/fetchAll",
     async (_, thunkAPI) => {
-        const response = await instance.get("/user/all");
+        const response = await instance.get("/admin/user/all");
         return response.data;
     }
 );
 export const createUser = createAsyncThunk(
     "/user/create",
     async (data: UserCreateType) => {
-        const response = await instance.post(`/user/create`, data, {
+        const response = await instance.post(`/admin/user/create`, data, {
             headers: {
                 "Content-Type": "application/json",
             },
@@ -25,7 +25,7 @@ export const createUser = createAsyncThunk(
 export const deleteUser = createAsyncThunk<string, string>(
     "/user/deleteUser",
     async (id) => {
-        const response = await instance.delete(`/user/delete/${id}`);
+        const response = await instance.delete(`/admin/user/delete/${id}`);
         return response.data.id;
     }
 );
@@ -33,7 +33,7 @@ export const deleteUser = createAsyncThunk<string, string>(
 export const updateUserIsActive = createAsyncThunk(
     "/user/activate",
     async (data: { id: number }) => {
-        const response = await instance.put(`/user/activate`, data, {
+        const response = await instance.put(`/admin/user/activate`, data, {
             headers: {
                 "Content-Type": "application/json",
             },
@@ -44,18 +44,22 @@ export const updateUserIsActive = createAsyncThunk(
 export const fetchUserById = createAsyncThunk(
     "user/fetch",
     async (id: number) => {
-        const response = await instance.get(`/user/id/?id=${id}`);
+        const response = await instance.get(`/admin/user/id/?id=${id}`);
         return response.data;
     }
 );
 export const updateUserAdmin = createAsyncThunk(
     "/user/update",
     async (userData: UserUpdateType) => {
-        const response = await instance.put(`/user/update/admin`, userData, {
-            headers: {
-                "Content-Type": "application/json",
-            },
-        });
+        const response = await instance.put(
+            `/admin/user/update/admin`,
+            userData,
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            }
+        );
         return response.data;
     }
 );
@@ -63,7 +67,7 @@ export const updateUserTariff = createAsyncThunk(
     "/user/updateTariff",
     async (tariffData: UserTariffUpdateType) => {
         const response = await instance.put(
-            `/user/tariff/activate`,
+            `/admin/user/tariff/activate`,
             tariffData,
             {
                 headers: {
@@ -71,6 +75,14 @@ export const updateUserTariff = createAsyncThunk(
                 },
             }
         );
+        return response.data;
+    }
+);
+
+export const fetchAuthorizedUser = createAsyncThunk(
+    "user/profile",
+    async (_, thunkAPI) => {
+        const response = await instance.get("/user/profile");
         return response.data;
     }
 );

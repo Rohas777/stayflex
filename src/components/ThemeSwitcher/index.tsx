@@ -98,10 +98,10 @@ function Main() {
                         <div className="flex flex-col">
                             <div className="px-8 pt-6 pb-8">
                                 <div className="text-base font-medium">
-                                    Color Schemes
+                                    Цветовые схемы
                                 </div>
                                 <div className="text-slate-500 mt-0.5">
-                                    Choose your color schemes
+                                    Выберите цветовую схему
                                 </div>
                                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-3.5 mt-5">
                                     {colorSchemes.map(
@@ -149,10 +149,67 @@ function Main() {
                             <div className="border-b border-dashed"></div>
                             <div className="px-8 pt-6 pb-8">
                                 <div className="text-base font-medium">
-                                    Appearance
+                                    Языки
                                 </div>
                                 <div className="mt-0.5 text-slate-500">
-                                    Choose your appearance
+                                    Выберите язык
+                                </div>
+                                <div className="mt-5 grid grid-cols-3 gap-3.5">
+                                    <div>
+                                        <a
+                                            // onClick={() =>
+                                            //     switchDarkMode(false)
+                                            // }
+                                            className={clsx([
+                                                "aspect-square overflow-hidden rounded-full cursor-pointer bg-slate-200 box p-1 border-slate-300/80 block",
+                                                "[&.active]:border-2 [&.active]:border-theme-1/60",
+                                                !activeDarkMode ? "active" : "",
+                                            ])}
+                                        >
+                                            <div className="h-full">
+                                                <img
+                                                    src="/src/assets/images/flags/ru.png"
+                                                    alt="Ru"
+                                                />
+                                            </div>
+                                        </a>
+                                        <div className="mt-2.5 text-center text-xs capitalize">
+                                            Русский
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <a
+                                            // onClick={() => switchDarkMode(true)}
+                                            className={clsx([
+                                                "aspect-square rounded-full overflow-hidden cursor-not-allowed bg-slate-200 box p-1 border-slate-300/80 block",
+                                                "[&.active]:border-2 [&.active]:border-theme-1/60",
+                                                activeDarkMode ? "active" : "",
+                                            ])}
+                                        >
+                                            <div className="h-full">
+                                                <img
+                                                    src="/src/assets/images/flags/en.png"
+                                                    alt="En"
+                                                />
+                                                <span className="absolute inset-0 size-full bg-slate-200 bg-opacity-70"></span>
+                                                <span className="absolute inset-0 text-black size-full flex items-center justify-center text-center text-sm font-bold">
+                                                    В разработке
+                                                </span>
+                                            </div>
+                                        </a>
+                                        <div className="mt-2.5 text-center text-xs capitalize">
+                                            Английский
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="border-b border-dashed"></div>
+                            <div className="px-8 pt-6 pb-8">
+                                <div className="text-base font-medium">
+                                    Внешний вид
+                                </div>
+                                <div className="mt-0.5 text-slate-500">
+                                    Выберите тему
                                 </div>
                                 <div className="mt-5 grid grid-cols-2 gap-3.5">
                                     <div>
@@ -169,7 +226,7 @@ function Main() {
                                             <div className="h-full overflow-hidden rounded-md bg-slate-200"></div>
                                         </a>
                                         <div className="mt-2.5 text-center text-xs capitalize">
-                                            Light
+                                            Светлая
                                         </div>
                                     </div>
                                     <div>
@@ -184,7 +241,7 @@ function Main() {
                                             <div className="h-full overflow-hidden rounded-md bg-slate-900"></div>
                                         </a>
                                         <div className="mt-2.5 text-center text-xs capitalize">
-                                            Dark
+                                            Тёмная
                                         </div>
                                     </div>
                                 </div>

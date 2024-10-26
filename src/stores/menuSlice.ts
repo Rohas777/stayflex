@@ -1,44 +1,55 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "./store";
 import { type Themes } from "@/stores/themeSlice";
 import { icons } from "@/components/Base/Lucide";
 import sideMenu from "@/main/side-menu";
+import adminSideMenu from "@/main/admin-side-menu";
 import simpleMenu from "@/main/simple-menu";
 import topMenu from "@/main/top-menu";
+import { useAppSelector } from "./hooks";
+import { IUser } from "./models/IUser";
+import { fetchAuthorizedUser } from "./reducers/users/actions";
+import { Status } from "./reducers/types";
+import { useEffect } from "react";
 
 export interface Menu {
-  icon: keyof typeof icons;
-  title: string;
-  badge?: number;
-  pathname?: string;
-  subMenu?: Menu[];
-  ignore?: boolean;
+    icon: keyof typeof icons;
+    title: string;
+    badge?: number;
+    pathname?: string;
+    subMenu?: Menu[];
+    ignore?: boolean;
 }
 
 export interface MenuState {
-  menu: Array<Menu | string>;
+    menu: Array<Menu | string>;
 }
 
 const initialState: MenuState = {
-  menu: [],
+    menu: [],
 };
 
 export const menuSlice = createSlice({
-  name: "menu",
-  initialState,
-  reducers: {},
+    name: "menu",
+    initialState,
+    reducers: {},
 });
 
 export const selectMenu = (layout: Themes["layout"]) => (state: RootState) => {
-  if (layout == "top-menu") {
-    return topMenu;
-  }
+    if (layout == "top-menu") {
+        return topMenu;
+    }
 
-  if (layout == "simple-menu") {
-    return simpleMenu;
-  }
+    const authorizedUser = state.user.authorizedUser;
+    if (layout == "simple-menu") {
+        return simpleMenu;
+    }
 
-  return sideMenu;
+    const isAdmin = !!authorizedUser ? authorizedUser?.is_admin : false;
+
+    if (isAdmin) return adminSideMenu;
+
+    return sideMenu;
 };
 
 export default menuSlice.reducer;

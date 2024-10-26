@@ -1,6 +1,8 @@
 import { Navigate } from "react-router-dom";
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { useAppSelector } from "@/stores/hooks";
+import Loader from "../Loader/Loader";
+import { Status } from "@/stores/reducers/types";
 
 type PrivateRouteType = "user" | "admin";
 
@@ -11,12 +13,22 @@ const PrivateRoute = ({
     children?: ReactNode;
     type: PrivateRouteType;
 }) => {
-    const { user } = useAppSelector((state) => state.auth);
-    // const isAuthenticated = !!user;
-    // const isAdmin = user?.is_admin;
-    const isAuthenticated = true;
-    const isAdmin = false;
+    const [isLoading, setIsLoading] = useState(true);
+    const { authorizedUserStatus, authorizedUser } = useAppSelector(
+        (state) => state.user
+    );
+    const isAuthenticated = !!authorizedUser;
+    const isAdmin = !!authorizedUser ? authorizedUser?.is_admin : false;
 
+    useEffect(() => {
+        if (authorizedUserStatus !== Status.LOADING) {
+            setIsLoading(false);
+        }
+    }, [authorizedUserStatus]);
+
+    if (isLoading) {
+        return <Loader className="w-full h-screen bg-primary" />;
+    }
     if (!isAuthenticated) {
         return <Navigate to="/login" replace />;
     }
@@ -31,10 +43,8 @@ const PrivateRoute = ({
         return children;
     }
     if (type === "admin" && !isAdmin) {
-        // return <Navigate to="/not-found" replace />;
+        return <Navigate to="/not-found" replace />;
     }
-
-    return isAuthenticated ? children : <Navigate to="/login" replace />;
 };
 
 export default PrivateRoute;

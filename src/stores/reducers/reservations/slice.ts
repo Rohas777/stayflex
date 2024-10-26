@@ -36,6 +36,10 @@ export const reservationSlice = createSlice({
         resetIsDeleted: (state) => {
             state.isDeleted = false;
         },
+        resetReservationOne: (state) => {
+            state.reservationOne = null;
+            state.statusOne = Status.LOADING;
+        },
     },
     extraReducers(builder) {
         builder

@@ -12,7 +12,7 @@ export const fetchCities = createAsyncThunk(
 export const createCity = createAsyncThunk(
     "/city/create",
     async (params: CityCreateType) => {
-        const response = await instance.post(`/city/create`, params, {
+        const response = await instance.post(`/admin/city/create`, params, {
             headers: {
                 "Content-Type": "application/json",
             },
@@ -23,7 +23,7 @@ export const createCity = createAsyncThunk(
 export const deleteCity = createAsyncThunk<string, string>(
     "/city/delete",
     async (id) => {
-        const response = await instance.delete(`/city/delete?id=${id}`);
+        const response = await instance.delete(`/admin/city/delete/${id}`);
         return response.data.id;
     }
 );

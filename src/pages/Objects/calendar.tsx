@@ -125,13 +125,40 @@ function ReservationsCalendar({
     };
 
     useEffect(() => {
+        //FIXME -
         setEvents(
-            reservations.map((reservation) => ({
-                title: reservation.client.fullname,
-                start: reservation.start_date,
-                end: reservation.end_date + "T12:00:01",
-                extendedProps: { reservation: reservation },
-            }))
+            [
+                {
+                    title: "Бронирование",
+                    start: "2024-10-20",
+                    end: "2024-10-22T12:00:01",
+                    extendedProps: {
+                        reservation: {
+                            start_date: "string",
+                            end_date: "string",
+                            id: 1,
+                            status: "string",
+                            description: "string",
+                            client: {
+                                id: 1,
+                                fullname: "string",
+                                phone: "string",
+                                email: "string",
+                            },
+                            object: {
+                                id: 1,
+                                name: "string",
+                            },
+                        },
+                    },
+                },
+            ]
+            // reservations.map((reservation) => ({
+            //     title: reservation.client.fullname,
+            //     start: reservation.start_date,
+            //     end: reservation.end_date + "T12:00:01",
+            //     extendedProps: { reservation: reservation },
+            // }))
         );
     }, [statusAll]);
 

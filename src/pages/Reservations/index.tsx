@@ -15,23 +15,32 @@ import { Link } from "react-router-dom";
 import { reservationSlice } from "@/stores/reducers/reservations/slice";
 import {
     createReservation,
+    deleteReservation,
     fetchReservationById,
     fetchReservations,
+    updateReservation,
     updateReservationStatus,
 } from "@/stores/reducers/reservations/actions";
 import { Status } from "@/stores/reducers/types";
 import LoadingIcon from "@/components/Base/LoadingIcon";
 import { ListPlus } from "lucide-react";
-import InfoModal from "./info";
-import { convertDateString, stopLoader } from "@/utils/customUtils";
+import {
+    convertDateString,
+    startLoader,
+    stopLoader,
+} from "@/utils/customUtils";
 import ReservationForm from "./form";
-import { ReservationCreateType } from "@/stores/reducers/reservations/types";
+import {
+    ReservationCreateType,
+    ReservationUpdateType,
+} from "@/stores/reducers/reservations/types";
 import Toastify from "toastify-js";
 import Notification from "@/components/Base/Notification";
 import { fetchObjects } from "@/stores/reducers/objects/actions";
 import { clientSlice } from "@/stores/reducers/clients/slice";
 import { di } from "@fullcalendar/core/internal-common";
 import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
+import clsx from "clsx";
 
 window.DateTime = DateTime;
 interface Response {
@@ -49,6 +58,22 @@ function Main() {
     const [buttonModalCreate, setButtonModalCreate] = useState(false);
     const [rowAcionFocus, setRowAcionFocus] = useState<Response | null>(null);
     const [isLoaderOpen, setIsLoaderOpen] = useState(false);
+    const [confirmationModal, setConfirmationModal] = useState(false);
+    const [confirmModalContent, setConfirmModalContent] = useState<{
+        title: string | null;
+        description: string | null;
+        onConfirm: (() => void) | null;
+        confirmLabel: string | null;
+        cancelLabel: string | null;
+        is_danger: boolean;
+    }>({
+        title: null,
+        description: null,
+        onConfirm: null,
+        confirmLabel: null,
+        cancelLabel: null,
+        is_danger: true,
+    });
 
     const tableRef = createRef<HTMLDivElement>();
     const tabulator = useRef<Tabulator>();
@@ -166,10 +191,6 @@ function Main() {
                                     value: "rejected",
                                     label: "Отклонена",
                                 },
-                                {
-                                    value: "completed",
-                                    label: "Пройдена",
-                                },
                             ];
 
                             const options = statuses.map((status) => {
@@ -180,10 +201,15 @@ function Main() {
                                 }>${status.label}</option>`;
                             });
 
-                            const selector =
+                            let selector =
                                 stringToHTML(`<select class="min-w-40 cursor-pointer bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                                     ${options.join("")}
                                     </select>`);
+                            if (response.status === "completed") {
+                                selector = stringToHTML(
+                                    `<span class="text-green-500">Завершена</span>`
+                                );
+                            }
                             a.append(selector);
                             a.addEventListener("hover", function () {});
                             selector.addEventListener("change", function () {
@@ -198,7 +224,7 @@ function Main() {
                     },
                     {
                         minWidth: 50,
-                        maxWidth: 100,
+                        maxWidth: 150,
                         title: "Действия",
                         field: "id",
                         responsive: 1,
@@ -209,28 +235,45 @@ function Main() {
                         formatter(cell) {
                             const response: Response = cell.getData();
                             const a = stringToHTML(
-                                `<div class="flex lg:justify-center items-center"></div>`
+                                `<div class="flex justify-end h-full items-center"></div>`
                             );
-                            const info =
-                                stringToHTML(`<a class="flex items-center w-7 h-7 p-1 border border-black rounded-md hover:opacity-70" href="javascript:;">
-                                <i data-lucide="info"></i>
+                            const deleteA =
+                                stringToHTML(`<a class="flex items-center text-danger w-7 h-7 p-1 border border-danger rounded-md hover:opacity-70" href="javascript:;">
+                                <i data-lucide="trash-2"></i>
                               </a>`);
-                            tippy(info, {
-                                content: "Подробнее",
+                            const editA =
+                                stringToHTML(`<a class="flex items-center mr-3 w-7 h-7 p-1 border border-black rounded-md hover:opacity-70" href="javascript:;">
+                                <i data-lucide="pencil"></i>
+                              </a>`);
+                            tippy(deleteA, {
+                                content: "Удалить",
                                 placement: "bottom",
                                 animation: "shift-away",
                             });
-                            a.append(info);
-                            a.addEventListener("hover", function () {});
-                            info.addEventListener("click", function (event) {
-                                event.preventDefault();
-                                const row = tableData.find(
-                                    (row) => row.id === response.id
-                                );
-                                dispatch(fetchReservationById(response.id!));
-                                setRowAcionFocus(row ? row : null);
-                                setButtonModalInfo(true);
+                            tippy(editA, {
+                                content: "Редактировать",
+                                placement: "bottom",
+                                animation: "shift-away",
                             });
+                            editA.addEventListener("click", function () {
+                                dispatch(fetchReservationById(response.id!));
+                                setButtonModalCreate(true);
+                            });
+                            deleteA.addEventListener("click", function () {
+                                setConfirmModalContent({
+                                    title: "Удалить бронь?",
+                                    description: `Вы уверены, что хотите удалить бронь "${response.object?.trim()} - ${response.date?.trim()}"?<br/>Это действие нельзя будет отменить.`,
+                                    onConfirm: () => {
+                                        console.log("first");
+                                        onDelete(response.id!);
+                                    },
+                                    confirmLabel: "Удалить",
+                                    cancelLabel: "Отмена",
+                                    is_danger: true,
+                                });
+                                setConfirmationModal(true);
+                            });
+                            a.append(editA, deleteA);
                             return a;
                         },
                     },
@@ -358,9 +401,11 @@ function Main() {
         statusAll,
         isCreated,
         isUpdated,
+        isDeleted,
         error,
     } = useAppSelector((state) => state.reservation);
-    const { resetIsCreated, resetIsUpdated } = reservationSlice.actions;
+    const { resetIsCreated, resetIsUpdated, resetReservationOne } =
+        reservationSlice.actions;
 
     const { resetClientByPhone } = clientSlice.actions;
 
@@ -374,27 +419,50 @@ function Main() {
     }, []);
 
     useEffect(() => {
-        if (reservations.length) {
-            const formattedData = reservations.map((reservation) => ({
-                id: reservation.id,
-                object: reservation.object.name,
-                date:
-                    convertDateString(reservation.start_date) +
-                    " - " +
-                    convertDateString(reservation.end_date),
-                name: reservation.client.fullname,
-                status: reservation.status,
-            }));
-            tabulator.current
-                ?.setData(formattedData.reverse())
-                .then(function () {
-                    reInitTabulator();
-                });
-        }
+        // if (reservations.length) {
+        // const formattedData = reservations.map((reservation) => ({
+        //     id: reservation.id,
+        //     object: reservation.object.name,
+        //     date:
+        //         convertDateString(reservation.start_date) +
+        //         " - " +
+        //         convertDateString(reservation.end_date),
+        //     name: reservation.client.fullname,
+        //     status: reservation.status,
+        // }));
+
+        const formattedData = [
+            //FIXME -
+            {
+                id: 1,
+                object: "У вокзала",
+                date: "15.11.2024 - 16.11.2024",
+                name: "Петров П.П.",
+                status: "completed",
+            },
+            {
+                id: 2,
+                object: "У вокзала",
+                date: "20.11.2024 - 21.11.2024",
+                name: "Петров П.П.",
+                status: "new",
+            },
+        ];
+        tabulator.current?.setData(formattedData.reverse()).then(function () {
+            reInitTabulator();
+        });
+        // }
     }, [reservations]);
 
     const onCreate = async (reservationData: ReservationCreateType) => {
         await dispatch(createReservation(reservationData));
+    };
+    const onUpdate = async (reservationData: ReservationUpdateType) => {
+        await dispatch(updateReservation(reservationData));
+    };
+    const onDelete = async (id: number) => {
+        startLoader(setIsLoaderOpen);
+        await dispatch(deleteReservation(String(id)));
     };
     const onUpdateStatus = async (reservationData: {
         id: number;
@@ -407,14 +475,17 @@ function Main() {
             stopLoader(setIsLoaderOpen);
             console.log(error);
         }
-        if (isCreated || isUpdated) {
+        if (isCreated || isUpdated || isDeleted) {
             dispatch(fetchReservations());
             setButtonModalCreate(false);
+            setConfirmationModal(false);
             const successEl = document
                 .querySelectorAll("#success-notification-content")[0]
                 .cloneNode(true) as HTMLElement;
             successEl.querySelector(".text-content")!.textContent = isCreated
                 ? "Бронь успешно добавлена"
+                : isDeleted
+                ? "Бронь успешно удалена"
                 : "Бронь успешно обновлена";
             successEl.classList.remove("hidden");
             Toastify({
@@ -427,11 +498,12 @@ function Main() {
                 stopOnFocus: true,
             }).showToast();
             stopLoader(setIsLoaderOpen);
+            dispatch(resetReservationOne());
             dispatch(resetIsCreated());
             dispatch(resetIsUpdated());
             dispatch(resetClientByPhone());
         }
-    }, [isCreated, statusOne, isUpdated]);
+    }, [isCreated, statusOne, isUpdated, isDeleted]);
 
     return (
         <>
@@ -473,7 +545,7 @@ function Main() {
                         }}
                     >
                         <div className="items-center mt-2 sm:flex sm:mr-4 xl:mt-0">
-                            <label className="flex-none w-12 mr-2 xl:w-auto xl:flex-initial">
+                            <label className="whitespace-nowrap flex-none mr-2 xl:w-auto xl:flex-initial">
                                 Поиск по названию
                             </label>
                             <FormInput
@@ -567,28 +639,6 @@ function Main() {
             </div>
             {/* END: HTML Table Data */}
 
-            {/* BEGIN: Delete Confirmation Modal */}
-            <Dialog
-                open={buttonModalInfo}
-                onClose={() => {
-                    setButtonModalInfo(false);
-                }}
-            >
-                <Dialog.Panel>
-                    <a
-                        onClick={(event: React.MouseEvent) => {
-                            event.preventDefault();
-                            setButtonModalInfo(false);
-                        }}
-                        className="absolute top-0 right-0 mt-3 mr-3"
-                        href="#"
-                    >
-                        <Lucide icon="X" className="w-8 h-8 text-slate-400" />
-                    </a>
-                    <InfoModal />
-                </Dialog.Panel>
-            </Dialog>
-            {/* END: Delete Confirmation Modal */}
             {/* BEGIN: Form Modal */}
             <Dialog
                 size="lg"
@@ -597,6 +647,7 @@ function Main() {
                 onClose={() => {
                     setButtonModalCreate(false);
                     dispatch(resetClientByPhone());
+                    dispatch(resetReservationOne());
                 }}
             >
                 <Dialog.Panel>
@@ -605,6 +656,7 @@ function Main() {
                             event.preventDefault();
                             setButtonModalCreate(false);
                             dispatch(resetClientByPhone());
+                            dispatch(resetReservationOne());
                         }}
                         className="absolute top-0 right-0 mt-3 mr-3"
                         href="#"
@@ -613,12 +665,78 @@ function Main() {
                     </a>
                     <ReservationForm
                         onCreate={onCreate}
+                        onUpdate={onUpdate}
                         setIsLoaderOpen={setIsLoaderOpen}
                         isLoaderOpen={isLoaderOpen}
                     />
                 </Dialog.Panel>
             </Dialog>
             {/* END: Form Modal */}
+            {/* BEGIN: Confirmation Modal */}
+            <Dialog
+                open={confirmationModal}
+                onClose={() => {
+                    setConfirmationModal(false);
+                }}
+            >
+                <Dialog.Panel>
+                    {isLoaderOpen && <OverlayLoader />}
+                    <div className="p-5 text-center">
+                        <Lucide
+                            icon={
+                                confirmModalContent.is_danger
+                                    ? "XCircle"
+                                    : "BadgeInfo"
+                            }
+                            className={clsx("w-16 h-16 mx-auto mt-3", {
+                                "text-danger": confirmModalContent.is_danger,
+                                "text-warning": !confirmModalContent.is_danger,
+                            })}
+                        />
+                        <div className="mt-5 text-3xl">
+                            {confirmModalContent.title}
+                        </div>
+                        <div
+                            className="mt-2 text-slate-500"
+                            dangerouslySetInnerHTML={{
+                                __html: confirmModalContent.description
+                                    ? confirmModalContent.description
+                                    : "",
+                            }}
+                        ></div>
+                    </div>
+                    <div className="px-5 pb-8 grid grid-cols-12">
+                        <Button
+                            variant="outline-secondary"
+                            type="button"
+                            onClick={() => {
+                                setConfirmationModal(false);
+                            }}
+                            disabled={isLoaderOpen}
+                            className="col-span-6 mr-1"
+                        >
+                            {confirmModalContent.cancelLabel}
+                        </Button>
+                        <Button
+                            variant={
+                                confirmModalContent.is_danger
+                                    ? "danger"
+                                    : "warning"
+                            }
+                            disabled={isLoaderOpen}
+                            type="button"
+                            className="col-span-6"
+                            onClick={() => {
+                                confirmModalContent.onConfirm &&
+                                    confirmModalContent.onConfirm();
+                            }}
+                        >
+                            {confirmModalContent.confirmLabel}
+                        </Button>
+                    </div>
+                </Dialog.Panel>
+            </Dialog>
+            {/* END: Confirmation Modal */}
             {/* BEGIN: Success Notification Content */}
             <Notification
                 id="success-notification-content"

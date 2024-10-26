@@ -8,11 +8,15 @@ import _ from "lodash";
 import clsx from "clsx";
 import { Transition } from "@headlessui/react";
 import { Link, useLocation } from "react-router-dom";
-import { useAppSelector } from "@/stores/hooks";
+import { useAppDispatch, useAppSelector } from "@/stores/hooks";
+import { startLoader } from "@/utils/customUtils";
+import { logout } from "@/stores/reducers/auth/actions";
+import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
 
 function Main() {
     const [searchDropdown, setSearchDropdown] = useState(false);
     const [pathname, setPathname] = useState("");
+    const [isLoaderOpen, setIsLoaderOpen] = useState(false);
     const showSearchDropdown = () => {
         setSearchDropdown(true);
     };
@@ -20,8 +24,14 @@ function Main() {
         setSearchDropdown(false);
     };
     const location = useLocation();
+    const dispatch = useAppDispatch();
 
-    const { userOne } = useAppSelector((state) => state.user);
+    const { authorizedUser } = useAppSelector((state) => state.user);
+
+    const onLogout = () => {
+        startLoader(setIsLoaderOpen);
+        dispatch(logout());
+    };
 
     useEffect(() => {
         if (location.pathname !== "/") {
@@ -45,6 +55,7 @@ function Main() {
 
     return (
         <>
+            {isLoaderOpen && <OverlayLoader />}
             {/* BEGIN: Top Bar */}
             <div className="h-[67px] z-[51] flex items-center relative border-b border-slate-200">
                 {/* BEGIN: Notifications */}
@@ -107,16 +118,19 @@ function Main() {
                     <Menu.Items className="w-56 mt-px text-white bg-primary">
                         <Menu.Header className="font-normal">
                             <div className="font-medium">
-                                {userOne?.fullname}
+                                {authorizedUser?.fullname}
                             </div>
                             <div className="text-xs text-white/70 mt-0.5 dark:text-slate-500">
-                                Баланс: {userOne?.balance}
+                                Баланс: {authorizedUser?.balance}
                             </div>
                         </Menu.Header>
                         <Menu.Divider className="bg-white/[0.08]" />
                         <Menu.Item className="hover:bg-white/5">
                             <Link
-                                to={`/profile/${userOne?.id}`}
+                                to={
+                                    (authorizedUser?.is_admin ? "/admin" : "") +
+                                    `/profile`
+                                }
                                 className="flex items-center w-full"
                             >
                                 <Lucide icon="User" className="w-4 h-4 mr-2" />{" "}
@@ -128,7 +142,10 @@ function Main() {
                             Reset Password
                         </Menu.Item> */}
                         <Menu.Divider className="bg-white/[0.08]" />
-                        <Menu.Item className="hover:bg-white/5">
+                        <Menu.Item
+                            onClick={onLogout}
+                            className="hover:bg-white/5"
+                        >
                             <Lucide
                                 icon="ToggleRight"
                                 className="w-4 h-4 mr-2"

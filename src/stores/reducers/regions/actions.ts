@@ -13,7 +13,7 @@ export const fetchRegions = createAsyncThunk(
 export const createRegion = createAsyncThunk(
     "/region/create",
     async (params: RegionCreateType) => {
-        const response = await instance.post(`/region/create`, params, {
+        const response = await instance.post(`/admin/region/create`, params, {
             headers: {
                 "Content-Type": "application/json",
             },
@@ -25,7 +25,7 @@ export const createRegion = createAsyncThunk(
 export const deleteRegion = createAsyncThunk<string, string>(
     "/region/delete",
     async (id) => {
-        const response = await instance.delete(`/region/delete?id=${id}`);
+        const response = await instance.delete(`/admin/region/delete/${id}`);
         return response.data.id;
     }
 );

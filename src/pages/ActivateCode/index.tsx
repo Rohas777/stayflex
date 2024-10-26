@@ -20,6 +20,8 @@ import { Status } from "@/stores/reducers/types";
 import { authSlice } from "@/stores/reducers/auth/slice";
 import { startLoader, stopLoader } from "@/utils/customUtils";
 import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
+import { fetchAuthorizedUser } from "@/stores/reducers/users/actions";
+import Loader from "@/components/Custom/Loader/Loader";
 
 function Main() {
     const dispatch = useAppDispatch();
@@ -27,6 +29,7 @@ function Main() {
     const location = useLocation();
 
     const [isLoaderOpen, setIsLoaderOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
 
     const [isSignUp, setIsSignUp] = useState(
         location.pathname === "/register/activate"
@@ -34,7 +37,10 @@ function Main() {
 
     const { codeStatus, signInStatus, signUpStatus, authTempUser, error } =
         useAppSelector((state) => state.auth);
-    const authActions = authSlice.actions;
+
+    const { authorizedUser, authorizedUserStatus } = useAppSelector(
+        (state) => state.user
+    );
 
     const schema = yup
         .object({
@@ -51,6 +57,7 @@ function Main() {
     });
 
     const onSignIn = async (event: React.ChangeEvent<HTMLFormElement>) => {
+        const mail = authTempUser?.mail;
         event.preventDefault();
         startLoader(setIsLoaderOpen);
         const formData = new FormData(event.target);
@@ -61,7 +68,7 @@ function Main() {
         }
 
         const authData: CodeCredentials = {
-            mail: authTempUser.mail,
+            mail: String(authTempUser[0].mail),
             code: String(formData.get("code")),
         };
 
@@ -71,19 +78,46 @@ function Main() {
             dispatch(activate(authData));
         }
     };
+    useEffect(() => {
+        if (codeStatus === Status.SUCCESS && !isSignUp) {
+            dispatch(fetchAuthorizedUser());
+        }
+    }, [codeStatus]);
 
     useEffect(() => {
-        if (signInStatus !== Status.SUCCESS && !isSignUp) {
+        if ((codeStatus === Status.SUCCESS && isSignUp) || !authTempUser) {
             navigate("/login");
+            stopLoader(setIsLoaderOpen);
         }
-        if (signUpStatus !== Status.SUCCESS && isSignUp) {
-            navigate("/register");
+        if (
+            codeStatus === Status.SUCCESS &&
+            !isSignUp &&
+            authorizedUser?.is_admin
+        ) {
+            navigate("/admin/");
+            stopLoader(setIsLoaderOpen);
         }
-        if (codeStatus === Status.SUCCESS) {
+        if (codeStatus === Status.SUCCESS && !isSignUp && !!authorizedUser) {
             navigate("/");
             stopLoader(setIsLoaderOpen);
         }
-    }, [codeStatus, signInStatus, signUpStatus, isSignUp]);
+    }, [codeStatus, signInStatus, signUpStatus, isSignUp, authorizedUser]);
+
+    useEffect(() => {
+        if (authorizedUserStatus !== Status.LOADING) {
+            setIsLoading(false);
+        }
+        if (!!authorizedUser && authorizedUser.is_admin) {
+            navigate("/admin/");
+        }
+        if (!!authorizedUser && !authorizedUser.is_admin) {
+            navigate("/");
+        }
+    }, [authorizedUserStatus, authorizedUser]);
+
+    if (isLoading) {
+        return <Loader className="w-full h-screen bg-primary" />;
+    }
 
     return (
         <>

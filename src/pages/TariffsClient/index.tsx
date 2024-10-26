@@ -98,7 +98,7 @@ function Main() {
                                 type="button"
                                 className="block px-4 py-3 mx-auto mt-8"
                             >
-                                ПРИОБРЕСТИ
+                                ПЕРЕКЛЮЧИТЬСЯ
                             </Button>
                         </div>
                     ))}

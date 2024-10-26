@@ -30,15 +30,27 @@ import Tariffs from "../pages/Tariffs";
 import TariffsClient from "../pages/TariffsClient";
 import Icon from "../pages/Icon";
 import { useEffect } from "react";
-import { useAppDispatch } from "@/stores/hooks";
-import { fetchUserById } from "@/stores/reducers/users/actions";
+import { useAppDispatch, useAppSelector } from "@/stores/hooks";
+import {
+    fetchAuthorizedUser,
+    fetchUserById,
+} from "@/stores/reducers/users/actions";
+import { startLoader } from "@/utils/customUtils";
 
 function Router() {
     const dispatch = useAppDispatch();
+    const { authorizedUser } = useAppSelector((state) => state.user);
 
     useEffect(() => {
-        dispatch(fetchUserById(import.meta.env.VITE_CURRENT_USER_ID));
+        dispatch(fetchAuthorizedUser());
     }, []);
+
+    useEffect(() => {
+        // if (!authorizedUser) {
+        //     startLoader(setIsLoaderOpen);
+        //     return
+        // }
+    }, [authorizedUser]);
 
     const routes = [
         {
@@ -86,7 +98,7 @@ function Router() {
                     element: <Widget />,
                 },
                 {
-                    path: "/profile/:id",
+                    path: "/profile",
                     element: <ProfileOverview />,
                 },
             ],
@@ -98,6 +110,10 @@ function Router() {
                 {
                     path: "/admin/",
                     element: <Users />,
+                },
+                {
+                    path: "/admin/profile",
+                    element: <ProfileOverview />,
                 },
                 {
                     path: "/admin/users",

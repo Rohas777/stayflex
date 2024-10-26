@@ -4,6 +4,8 @@ import { IUser } from "@/stores/models/IUser";
 export interface UserState {
     users: IUser[];
     userOne: IUser | null;
+    authorizedUser: IUser | null;
+    authorizedUserStatus: Status;
     status: Status;
     statusOne: Status;
     error: string | null;

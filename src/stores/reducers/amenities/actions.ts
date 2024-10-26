@@ -1,6 +1,5 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { instance } from "@/vars";
-import axios from "axios";
 import { AmenityCreateType } from "./types";
 
 export const fetchAmenities = createAsyncThunk(
@@ -14,7 +13,7 @@ export const createAmenity = createAsyncThunk(
     "amenity/create",
     async (amenityData: AmenityCreateType) => {
         const response = await instance.post(
-            `/convenience/create`,
+            `/admin/convenience/create`,
             amenityData,
             {
                 headers: {
@@ -29,7 +28,9 @@ export const createAmenity = createAsyncThunk(
 export const deleteAmenity = createAsyncThunk<string, string>(
     "amenity/delete",
     async (id) => {
-        const response = await instance.delete(`/convenience/delete/${id}`);
+        const response = await instance.delete(
+            `/admin/convenience/delete/${id}`
+        );
         return response.data.id;
     }
 );

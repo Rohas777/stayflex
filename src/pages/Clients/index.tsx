@@ -36,6 +36,8 @@ function Main() {
         null
     );
 
+    const { authorizedUser } = useAppSelector((state) => state.user);
+
     const tableRef = createRef<HTMLDivElement>();
     const tabulator = useRef<Tabulator>();
     const [filter, setFilter] = useState({
@@ -171,7 +173,7 @@ function Main() {
                     },
                     {
                         minWidth: 50,
-                        maxWidth: 100,
+                        maxWidth: 150,
                         title: "Действия",
                         field: "id",
                         responsive: 1,
@@ -182,7 +184,7 @@ function Main() {
                         formatter(cell) {
                             const response: Response = cell.getData();
                             const a = stringToHTML(
-                                `<div class="flex lg:justify-center items-center"></div>`
+                                `<div class="flex h-full justify-end items-center"></div>`
                             );
                             const info =
                                 stringToHTML(`<a class="flex items-center w-7 h-7 p-1 border border-black rounded-md hover:opacity-70" href="javascript:;">
@@ -196,7 +198,15 @@ function Main() {
                             a.append(info);
                             a.addEventListener("hover", function () {});
                             info.addEventListener("click", function () {
-                                navigate(`/reservations/client/${response.id}`);
+                                if (authorizedUser?.is_admin) {
+                                    navigate(
+                                        `/admin/reservations/client/${response.id}`
+                                    );
+                                } else {
+                                    navigate(
+                                        `/reservations/client/${response.id}`
+                                    );
+                                }
                             });
                             return a;
                         },
@@ -376,7 +386,7 @@ function Main() {
                         }}
                     >
                         <div className="items-center mt-2 sm:flex sm:mr-4 xl:mt-0">
-                            <label className="flex-none w-12 mr-2 xl:w-auto xl:flex-initial">
+                            <label className="whitespace-nowrap flex-none mr-2 xl:w-auto xl:flex-initial">
                                 Поиск по названию
                             </label>
                             <FormInput

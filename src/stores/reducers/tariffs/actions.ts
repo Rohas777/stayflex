@@ -20,11 +20,15 @@ export const fetchTariffById = createAsyncThunk(
 export const createTariff = createAsyncThunk(
     "/tariff/create",
     async (tariffData: TariffCreateType) => {
-        const response = await instance.post(`/tariff/create`, tariffData, {
-            headers: {
-                "Content-Type": "application/json",
-            },
-        });
+        const response = await instance.post(
+            `/admin/tariff/create`,
+            tariffData,
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            }
+        );
         return response.data;
     }
 );
@@ -32,18 +36,15 @@ export const createTariff = createAsyncThunk(
 export const updateTariff = createAsyncThunk(
     "/tariff/update",
     async (tariffData: TariffUpdateType) => {
-        const response = await instance.put(`/tariff/update`, tariffData, {
-            headers: {
-                "Content-Type": "application/json",
-            },
-        });
+        const response = await instance.put(
+            `/admin/tariff/update`,
+            tariffData,
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            }
+        );
         return response.data;
     }
 );
-// export const deleteUser = createAsyncThunk<string, string>(
-//     "/user/deleteUser",
-//     async (id) => {
-//         const response = await instance.delete(`/user/delete/${id}`);
-//         return response.data.id;
-//     }
-// );

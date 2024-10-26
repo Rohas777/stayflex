@@ -17,12 +17,17 @@ import { Status } from "@/stores/reducers/types";
 import { authSlice } from "@/stores/reducers/auth/slice";
 import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
 import { startLoader, stopLoader } from "@/utils/customUtils";
+import Loader from "@/components/Custom/Loader/Loader";
 
 function Main() {
     const [showPassword, setShowPassword] = useState(false);
     const [isLoaderOpen, setIsLoaderOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
 
     const { signInStatus, error } = useAppSelector((state) => state.auth);
+    const { authorizedUser, authorizedUserStatus } = useAppSelector(
+        (state) => state.user
+    );
     const authActions = authSlice.actions;
 
     const dispatch = useAppDispatch();
@@ -63,6 +68,17 @@ function Main() {
 
         dispatch(signIn(signInData));
     };
+    useEffect(() => {
+        if (authorizedUserStatus !== Status.LOADING) {
+            setIsLoading(false);
+        }
+        if (!!authorizedUser && authorizedUser.is_admin) {
+            navigate("/admin/");
+        }
+        if (!!authorizedUser && !authorizedUser.is_admin) {
+            navigate("/");
+        }
+    }, [authorizedUserStatus, authorizedUser]);
 
     useEffect(() => {
         if (signInStatus === Status.SUCCESS) {
@@ -70,6 +86,10 @@ function Main() {
             navigate("/login/auth");
         }
     }, [signInStatus]);
+
+    if (isLoading) {
+        return <Loader className="w-full h-screen bg-primary" />;
+    }
 
     return (
         <>

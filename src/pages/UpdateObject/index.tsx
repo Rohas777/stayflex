@@ -206,7 +206,7 @@ function Main() {
     useEffect(() => {
         dispatch(
             fetchObjectById(
-                Number(location.pathname.replace("/objects/update/", ""))
+                Number(location.pathname.replace("/admin/objects/update/", ""))
             )
         );
         dispatch(fetchRegions());

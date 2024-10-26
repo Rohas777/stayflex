@@ -50,13 +50,11 @@ export const authSlice = createSlice({
                 state.error = null;
             })
             .addCase(activate.pending, (state) => {
-                state.authTempUser = null;
                 state.status = Status.LOADING;
                 state.codeStatus = Status.LOADING;
                 state.error = null;
             })
             .addCase(activate.rejected, (state, action: PayloadAction<any>) => {
-                state.authTempUser = null;
                 state.error = action.payload;
                 state.codeStatus = Status.ERROR;
                 state.status = Status.ERROR;
@@ -88,13 +86,11 @@ export const authSlice = createSlice({
                 state.error = null;
             })
             .addCase(auth.pending, (state) => {
-                state.user = null;
                 state.status = Status.LOADING;
                 state.codeStatus = Status.LOADING;
                 state.error = null;
             })
             .addCase(auth.rejected, (state, action: PayloadAction<any>) => {
-                state.user = null;
                 state.error = action.payload;
                 state.codeStatus = Status.ERROR;
                 state.status = Status.ERROR;

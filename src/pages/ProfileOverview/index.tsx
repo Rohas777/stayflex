@@ -13,7 +13,7 @@ import { Tab as HeadlessTab } from "@headlessui/react";
 import { useAppSelector } from "@/stores/hooks";
 
 function Main() {
-    const { userOne } = useAppSelector((state) => state.user);
+    const { authorizedUser } = useAppSelector((state) => state.user);
 
     return (
         <>
@@ -29,10 +29,10 @@ function Main() {
                         </div>
                         <div className="ml-5">
                             <div className="w-24 text-lg font-medium truncate sm:w-40 sm:whitespace-normal">
-                                {userOne?.fullname}
+                                {authorizedUser?.fullname}
                             </div>
                             <div className="text-slate-500">
-                                Баланс: {userOne?.balance}
+                                Баланс: {authorizedUser?.balance}
                             </div>
                         </div>
                     </div>
@@ -43,11 +43,11 @@ function Main() {
                         <div className="flex flex-col items-center justify-center mt-4 lg:items-start">
                             <div className="flex items-center truncate sm:whitespace-normal">
                                 <Lucide icon="Mail" className="w-4 h-4 mr-2" />
-                                {userOne?.mail}
+                                {authorizedUser?.mail}
                             </div>
                             <div className="flex items-center mt-3 truncate sm:whitespace-normal">
                                 <Lucide icon="Phone" className="w-4 h-4 mr-2" />{" "}
-                                {userOne?.phone}
+                                {authorizedUser?.phone}
                             </div>
                         </div>
                     </div>
@@ -61,10 +61,10 @@ function Main() {
                                     icon="CreditCard"
                                     className="w-4 h-4 mr-2"
                                 />
-                                Тариф: {userOne?.tariff?.name}
+                                Тариф: {authorizedUser?.tariff?.name}
                             </div>
                             <div className="flex items-center mt-3 truncate sm:whitespace-normal">
-                                {userOne?.date_before && (
+                                {authorizedUser?.date_before && (
                                     <>
                                         <Lucide
                                             icon="Calendar"
@@ -72,7 +72,7 @@ function Main() {
                                         />
                                         Активен до:{" "}
                                         {new Date(
-                                            userOne?.date_before
+                                            authorizedUser?.date_before
                                         ).toLocaleDateString()}
                                     </>
                                 )}

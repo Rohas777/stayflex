@@ -124,14 +124,156 @@ function ReservationsCalendar({
         },
     };
 
+    const reservationEventType = (
+        status: "new" | "completed" | "approved" | "rejected"
+    ) => {
+        switch (status) {
+            case "new":
+                return {
+                    textColor: "white",
+                    classNames: ["!bg-warning", "!border-warning"],
+                };
+            case "completed":
+                return {
+                    textColor: "black",
+                    classNames: ["!bg-slate-200", "!border-slate-200"],
+                };
+            case "approved":
+                return {
+                    textColor: "white",
+                    classNames: ["!bg-success", "!border-success"],
+                };
+            case "rejected":
+                return {
+                    textColor: "white",
+                    classNames: ["!bg-danger", "!border-danger"],
+                };
+        }
+    };
+
     useEffect(() => {
+        const tempReservations = [
+            {
+                title: "Бронирование",
+                start: "2024-10-01",
+                end: "2024-10-04T12:00:01",
+                extendedProps: {
+                    reservation: {
+                        start_date: "string",
+                        end_date: "string",
+                        id: 1,
+                        status: "completed",
+                        description: "string",
+                        client: {
+                            id: 1,
+                            fullname: "string",
+                            phone: "string",
+                            email: "string",
+                        },
+                        object: {
+                            id: 1,
+                            name: "string",
+                        },
+                    },
+                },
+            },
+            {
+                title: "Бронирование",
+                start: "2024-10-05",
+                end: "2024-10-07T12:00:01",
+                extendedProps: {
+                    reservation: {
+                        start_date: "string",
+                        end_date: "string",
+                        id: 1,
+                        status: "rejected",
+                        description: "string",
+                        client: {
+                            id: 1,
+                            fullname: "string",
+                            phone: "string",
+                            email: "string",
+                        },
+                        object: {
+                            id: 1,
+                            name: "string",
+                        },
+                    },
+                },
+            },
+            {
+                title: "Бронирование",
+                start: "2024-10-08",
+                end: "2024-10-10T12:00:01",
+                extendedProps: {
+                    reservation: {
+                        start_date: "string",
+                        end_date: "string",
+                        id: 1,
+                        status: "approved",
+                        description: "string",
+                        client: {
+                            id: 1,
+                            fullname: "string",
+                            phone: "string",
+                            email: "string",
+                        },
+                        object: {
+                            id: 1,
+                            name: "string",
+                        },
+                    },
+                },
+            },
+            {
+                title: "Бронирование",
+                start: "2024-10-12",
+                end: "2024-10-18T12:00:01",
+                extendedProps: {
+                    reservation: {
+                        start_date: "string",
+                        end_date: "string",
+                        id: 1,
+                        status: "new",
+                        description: "string",
+                        client: {
+                            id: 1,
+                            fullname: "string",
+                            phone: "string",
+                            email: "string",
+                        },
+                        object: {
+                            id: 1,
+                            name: "string",
+                        },
+                    },
+                },
+            },
+        ];
+
+        //FIXME -
         setEvents(
-            reservations.map((reservation) => ({
-                title: reservation.client.fullname,
-                start: reservation.start_date,
-                end: reservation.end_date + "T12:00:01",
-                extendedProps: { reservation: reservation },
-            }))
+            tempReservations.map((reservation) => {
+                const status = reservationEventType(
+                    reservation.extendedProps.reservation.status as any
+                );
+                return {
+                    ...reservation,
+                    classNames: status.classNames,
+                    textColor: status.textColor,
+                };
+            })
+            // reservations.map((reservation) => {
+            //     const status = reservationEventType(reservation.status);
+            //     return {
+            //         title: reservation.client.fullname,
+            //         start: reservation.start_date,
+            //         end: reservation.end_date + "T12:00:01",
+            //         classNames: status.classNames,
+            //         color: status.color,
+            //         extendedProps: { reservation: reservation },
+            //     };
+            // })
         );
     }, [statusAll]);
 

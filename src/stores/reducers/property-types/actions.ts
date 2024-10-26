@@ -12,11 +12,15 @@ export const fetchPropertyTypes = createAsyncThunk(
 export const createPropertyType = createAsyncThunk(
     "/propertyType/create",
     async (params: PropertyTypeCreateType) => {
-        const response = await instance.post(`/property-type/create`, params, {
-            headers: {
-                "Content-Type": "application/json",
-            },
-        });
+        const response = await instance.post(
+            `/admin/property-type/create`,
+            params,
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            }
+        );
         return response.data;
     }
 );
@@ -24,7 +28,7 @@ export const deletePropertyType = createAsyncThunk<string, string>(
     "/propertyType/delete",
     async (id) => {
         const response = await instance.delete(
-            `/property-type/delete?id=${id}`
+            `/admin/property-type/delete/${id}`
         );
         return response.data.id;
     }

@@ -12,7 +12,10 @@ import { FormLabel, FormInput, FormTextarea } from "@/components/Base/Form";
 import { useEffect, useRef, useState } from "react";
 import TomSelect from "@/components/Base/TomSelect";
 import { RegionCreateType } from "@/stores/reducers/regions/types";
-import { ReservationCreateType } from "@/stores/reducers/reservations/types";
+import {
+    ReservationCreateType,
+    ReservationUpdateType,
+} from "@/stores/reducers/reservations/types";
 import { useAppDispatch, useAppSelector } from "@/stores/hooks";
 import { objectSlice } from "@/stores/reducers/objects/slice";
 import { clientSlice } from "@/stores/reducers/clients/slice";
@@ -30,9 +33,11 @@ import OpacityLoader from "@/components/Custom/OpacityLoader/Loader";
 import { DateTime } from "luxon";
 import { formatDate, startLoader, stopLoader } from "@/utils/customUtils";
 import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
+import { IReservation } from "@/stores/models/IReservation";
 
 interface ReservationFormProps {
-    onCreate: (name: ReservationCreateType) => void;
+    onCreate: (reservation: ReservationCreateType) => void;
+    onUpdate: (reservation: ReservationUpdateType) => void;
     setIsLoaderOpen: React.Dispatch<React.SetStateAction<boolean>>;
     isLoaderOpen: boolean;
 }
@@ -48,20 +53,22 @@ type CustomErrors = {
 
 function ReservationForm({
     onCreate,
+    onUpdate,
     setIsLoaderOpen,
     isLoaderOpen,
 }: ReservationFormProps) {
     const [selectedObject, setSelectedObject] = useState("-1");
     const [startDate, setStartDate] = useState("");
     const [endDate, setEndDate] = useState("");
-    const [tel, setTel] = useState<string>();
+    const [tel, setTel] = useState<string>("");
     const [isTelChecking, setIsTelChecking] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [formData, setFormData] = useState<FormData | null>(null);
+    const [isCreate, setIsCreate] = useState(true);
 
+    const reservationState = useAppSelector((state) => state.reservation);
     const objectsState = useAppSelector((state) => state.object);
     const clientsState = useAppSelector((state) => state.client);
-    const objectActions = objectSlice.actions;
     const clientActions = clientSlice.actions;
 
     const dispatch = useAppDispatch();
@@ -261,7 +268,15 @@ function ReservationForm({
                 client_id: clientsState.createdClient?.id!,
                 description: String(formData?.get("description")),
             };
-            onCreate(reservationData);
+            if (isCreate) {
+                onCreate(reservationData);
+            } else {
+                onUpdate({
+                    id: reservationState.reservationOne?.id!,
+                    status: reservationState.reservationOne?.status!,
+                    ...reservationData,
+                });
+            }
             dispatch(clientActions.resetIsCreated());
             setIsSubmitting(false);
         }
@@ -273,7 +288,15 @@ function ReservationForm({
                 client_id: clientsState.clientByPhone?.id!,
                 description: String(formData?.get("description")),
             };
-            onCreate(reservationData);
+            if (isCreate) {
+                onCreate(reservationData);
+            } else {
+                onUpdate({
+                    id: reservationState.reservationOne?.id!,
+                    status: reservationState.reservationOne?.status!,
+                    ...reservationData,
+                });
+            }
             dispatch(clientActions.resetIsCreated());
             setIsSubmitting(false);
         }
@@ -285,13 +308,27 @@ function ReservationForm({
     ]);
 
     useEffect(() => {
+        if (!reservationState.reservationOne) return;
+        setIsCreate(false);
+        setIsTelChecking(true);
+        setSelectedObject(String(reservationState.reservationOne.object.id));
+        setStartDate(reservationState.reservationOne.start_date);
+        setEndDate(reservationState.reservationOne.end_date);
+        setTel(reservationState.reservationOne.client.phone);
+        dispatch(
+            fetchClientByPhone(reservationState.reservationOne.client.phone)
+        );
+    }, [reservationState.reservationOne]);
+
+    useEffect(() => {
         if (clientsState.statusByPhone !== Status.LOADING) {
             setIsTelChecking(false);
         }
     }, [clientsState.statusByPhone]);
 
     if (
-        objectsState.status === Status.LOADING &&
+        (objectsState.status === Status.LOADING ||
+            reservationState.statusOne === Status.LOADING) &&
         clientsState.statusByPhone !== Status.LOADING
     ) {
         return <Loader />;
@@ -302,7 +339,7 @@ function ReservationForm({
 
             <div className="p-5">
                 <div className="mt-5 text-lg font-bold text-center">
-                    Добавить бронь
+                    {isCreate ? "Добавить" : "Редактировать"} бронь
                 </div>
                 <form className="validate-form mt-5" onSubmit={onSubmit}>
                     <div className="input-form mt-3">
@@ -388,7 +425,7 @@ function ReservationForm({
                                     name="date"
                                     options={{
                                         lang: "RU-ru",
-                                        autoApply: false,
+                                        autoApply: true,
                                         singleMode: true,
                                         showWeekNumbers: false,
                                         dropdowns: {
@@ -455,7 +492,7 @@ function ReservationForm({
                                     name="date"
                                     options={{
                                         lang: "RU-ru",
-                                        autoApply: false,
+                                        autoApply: true,
                                         singleMode: true,
                                         showWeekNumbers: false,
                                         dropdowns: {
@@ -678,6 +715,10 @@ function ReservationForm({
                             className={clsx({
                                 "border-danger": errors.description,
                             })}
+                            defaultValue={
+                                reservationState.reservationOne?.description ||
+                                ""
+                            }
                             placeholder="Дополнительная информация о брони"
                         ></FormTextarea>
                         {errors.description && (
@@ -692,7 +733,7 @@ function ReservationForm({
                         variant="primary"
                         className="w-full mt-5"
                     >
-                        Добавить
+                        {isCreate ? "Добавить" : "Обновить"}
                     </Button>
                 </form>
             </div>

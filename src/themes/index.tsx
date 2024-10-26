@@ -10,8 +10,15 @@ import ThemeSwitcher from "@/components/ThemeSwitcher";
 import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import PrivateRoute from "@/components/Custom/PrivateRoute";
+import { fetchAuthorizedUser } from "@/stores/reducers/users/actions";
 
-function Main({ admin = false }: { admin?: boolean }) {
+function Main({
+    admin = false,
+    guest = false,
+}: {
+    admin?: boolean;
+    guest?: boolean;
+}) {
     const dispatch = useAppDispatch();
     const theme = useAppSelector(selectTheme);
     const Component = getTheme(theme).component;
@@ -35,19 +42,8 @@ function Main({ admin = false }: { admin?: boolean }) {
         }
     }, []);
 
-    if (admin) {
-        return (
-            <PrivateRoute type="admin">
-                <div>
-                    <ThemeSwitcher />
-                    <Component />
-                </div>
-            </PrivateRoute>
-        );
-    }
-
     return (
-        <PrivateRoute type="user">
+        <PrivateRoute type={admin ? "admin" : "user"}>
             <div>
                 <ThemeSwitcher />
                 <Component />

@@ -17,6 +17,8 @@ import { SignUpCredentials } from "@/stores/reducers/auth/types";
 import { useAppDispatch, useAppSelector } from "@/stores/hooks";
 import { signUp } from "@/stores/reducers/auth/actions";
 import { Status } from "@/stores/reducers/types";
+import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
+import Loader from "@/components/Custom/Loader/Loader";
 
 type CustomErrors = {
     isValid: boolean;
@@ -31,9 +33,10 @@ function Main() {
     const [isLoaderOpen, setIsLoaderOpen] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [isTermsChecked, setIsTermsChecked] = useState(false);
-    const [passwordSecure, setPasswordSecure] = useState<
-        "bad" | "good" | "strong" | null
-    >(null);
+    const [isLoading, setIsLoading] = useState(true);
+    // const [passwordSecure, setPasswordSecure] = useState<
+    //     "bad" | "good" | "strong" | null
+    // >(null);
 
     const [customErrors, setCustomErrors] = useState<CustomErrors>({
         isValid: true,
@@ -43,27 +46,30 @@ function Main() {
     });
 
     const { signUpStatus } = useAppSelector((state) => state.auth);
+    const { authorizedUser, authorizedUserStatus } = useAppSelector(
+        (state) => state.user
+    );
     const dispatch = useAppDispatch();
 
     const navigate = useNavigate();
 
-    const checkPasswordSecurity = async (password: string) => {
-        const goodRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
-        const strongRegex =
-            /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[a-zA-Z\d@$!%*?&]{12,}$/;
-        if (!goodRegex.test(password)) {
-            setPasswordSecure("bad");
-        }
-        if (goodRegex.test(password)) {
-            setPasswordSecure("good");
-        }
-        if (strongRegex.test(password)) {
-            setPasswordSecure("strong");
-        }
-        if (!password.length) {
-            setPasswordSecure(null);
-        }
-    };
+    // const checkPasswordSecurity = async (password: string) => {
+    //     const goodRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
+    //     const strongRegex =
+    //         /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[a-zA-Z\d@$!%*?&]{12,}$/;
+    //     if (!goodRegex.test(password)) {
+    //         setPasswordSecure("bad");
+    //     }
+    //     if (goodRegex.test(password)) {
+    //         setPasswordSecure("good");
+    //     }
+    //     if (strongRegex.test(password)) {
+    //         setPasswordSecure("strong");
+    //     }
+    //     if (!password.length) {
+    //         setPasswordSecure(null);
+    //     }
+    // };
 
     const vaildateWithoutYup = async (formData: FormData) => {
         const errors: CustomErrors = {
@@ -108,7 +114,14 @@ function Main() {
                 .string()
                 .email("Введите корректный email")
                 .required("Вам необходимо ввести ваш email"),
-            password: yup.string().required("Вам необходимо ввести пароль"),
+            password: yup
+                .string()
+                .matches(
+                    /[a-zA-Z\d]/,
+                    "Пароль должен содержать только латинские буквы и цифры"
+                )
+                .min(8, "Пароль должен содержать не менее 8 символов")
+                .required("Вам необходимо ввести пароль"),
             terms: yup
                 .boolean()
                 .oneOf(
@@ -144,7 +157,7 @@ function Main() {
             phone: tel,
             is_active: false,
             is_verified: false,
-            is_admin: true,
+            is_admin: false,
             balance: 0,
             date_before: new Date().toISOString().split("T")[0],
         };
@@ -153,14 +166,31 @@ function Main() {
     };
 
     useEffect(() => {
+        if (authorizedUserStatus !== Status.LOADING) {
+            setIsLoading(false);
+        }
+        if (!!authorizedUser && authorizedUser.is_admin) {
+            navigate("/admin/");
+        }
+        if (!!authorizedUser && !authorizedUser.is_admin) {
+            navigate("/");
+        }
+    }, [authorizedUserStatus, authorizedUser]);
+
+    useEffect(() => {
         if (signUpStatus === Status.SUCCESS) {
             stopLoader(setIsLoaderOpen);
             navigate("/register/activate");
         }
     }, [signUpStatus]);
 
+    if (isLoading) {
+        return <Loader className="w-full h-screen bg-primary" />;
+    }
+
     return (
         <>
+            {isLoaderOpen && <OverlayLoader />}
             <div
                 className={clsx([
                     "p-3 sm:px-8 relative xl:h-screen lg:overflow-hidden bg-primary xl:bg-white dark:bg-darkmode-800 xl:dark:bg-darkmode-600",
@@ -340,10 +370,10 @@ function Main() {
                                             value={password}
                                             onChange={async (e) => {
                                                 setPassword(e.target.value);
-                                                await trigger();
-                                                checkPasswordSecurity(
-                                                    e.target.value
-                                                );
+                                                // await trigger();
+                                                // checkPasswordSecurity(
+                                                //     e.target.value
+                                                // );
                                             }}
                                         />
                                     </div>
@@ -354,7 +384,7 @@ function Main() {
                                                 errors.password.message}
                                         </div>
                                     )}
-                                    {passwordSecure !== null && (
+                                    {/* {passwordSecure !== null && (
                                         <>
                                             <div className="grid w-full h-1 grid-cols-12 gap-4 mt-3 intro-x">
                                                 {passwordSecure === "bad" && (
@@ -394,7 +424,7 @@ function Main() {
                                                 )}
                                             </p>
                                         </>
-                                    )}
+                                    )} */}
 
                                     <div className="relative mt-3">
                                         <Lucide
