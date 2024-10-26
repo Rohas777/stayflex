@@ -30,3 +30,45 @@
     --tw-border-opacity: 0.4;
     border-color: rgb(var(--color-primary) / var(--tw-border-opacity));
 }
+
+.dark .form-control {
+    --tw-bg-opacity: 1;
+    background-color: rgb(var(--color-darkmode-800) / var(--tw-bg-opacity));
+    border-color: transparent;
+    color: #c0cad7;
+
+    &:placeholder {
+        --tw-text-opacity: 0.8;
+        color: rgb(var(--color-slate-500) / var(--tw-text-opacity));
+    }
+    &:focus {
+        --tw-bg-opacity: 1;
+        background-color: rgb(var(--color-darkmode-800) / var(--tw-bg-opacity));
+        border-color: transparent;
+        --tw-ring-opacity: 0.5;
+        --tw-ring-color: rgb(51 65 85 / var(--tw-ring-opacity));
+    }
+}
+
+.dark .country-list {
+    --tw-bg-opacity: 1;
+    background-color: rgb(var(--color-darkmode-800) / var(--tw-bg-opacity));
+    border-color: transparent;
+    color: #c0cad7;
+
+    .country {
+        &:not(.highlight):hover {
+            --tw-bg-opacity: 1;
+            background-color: rgb(
+                var(--color-darkmode-600) / var(--tw-bg-opacity)
+            );
+        }
+
+        &.highlight {
+            --tw-bg-opacity: 1;
+            background-color: rgb(
+                var(--color-darkmode-600) / var(--tw-bg-opacity)
+            );
+        }
+    }
+}

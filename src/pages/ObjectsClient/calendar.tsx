@@ -154,7 +154,7 @@ function ReservationsCalendar({
     useEffect(() => {
         const tempReservations = [
             {
-                title: "Бронирование",
+                title: "Завершена",
                 start: "2024-10-01",
                 end: "2024-10-04T12:00:01",
                 extendedProps: {
@@ -178,7 +178,7 @@ function ReservationsCalendar({
                 },
             },
             {
-                title: "Бронирование",
+                title: "Отменена",
                 start: "2024-10-05",
                 end: "2024-10-07T12:00:01",
                 extendedProps: {
@@ -202,7 +202,7 @@ function ReservationsCalendar({
                 },
             },
             {
-                title: "Бронирование",
+                title: "Одобрена",
                 start: "2024-10-08",
                 end: "2024-10-10T12:00:01",
                 extendedProps: {
@@ -226,7 +226,7 @@ function ReservationsCalendar({
                 },
             },
             {
-                title: "Бронирование",
+                title: "Новая",
                 start: "2024-10-12",
                 end: "2024-10-18T12:00:01",
                 extendedProps: {
