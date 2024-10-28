@@ -13,11 +13,8 @@ export interface ClientState {
 }
 
 export interface ClientCreateType {
-    client_data: {
-        fullname: string;
-        reiting: number;
-        phone: string;
-        email: string;
-    };
-    user_id: number;
+    fullname: string;
+    reiting: number;
+    phone: string;
+    email: string;
 }

@@ -275,13 +275,10 @@ function ReservationForm({
         if (clientsState.statusByPhone === Status.ERROR) {
             await dispatch(
                 createClient({
-                    client_data: {
-                        fullname: String(form.get("name")),
-                        email: String(form.get("email")),
-                        phone: tel!,
-                        reiting: 0, //FIXME
-                    },
-                    user_id: 6, //FIXME
+                    fullname: String(form.get("name")),
+                    email: String(form.get("email")),
+                    phone: tel!,
+                    reiting: 0, //FIXME
                 })
             );
         }

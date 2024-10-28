@@ -38,6 +38,9 @@ import { objectSlice } from "@/stores/reducers/objects/slice";
 import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
 import Tippy from "@/components/Base/Tippy";
 import ImageZoom from "@/components/Base/ImageZoom";
+import { errorToastSlice } from "@/stores/errorToastSlice";
+import { amenitySlice } from "@/stores/reducers/amenities/slice";
+import { propertyTypeSlice } from "@/stores/reducers/property-types/slice";
 
 window.DateTime = DateTime;
 
@@ -59,6 +62,7 @@ type CustomErrors = {
 };
 
 function Main() {
+    const dispatch = useAppDispatch();
     const regionsState = useAppSelector((state) => state.region);
     const amenitiesState = useAppSelector((state) => state.amenity);
     const propertyTypesState = useAppSelector((state) => state.propertyType);
@@ -66,9 +70,53 @@ function Main() {
         (state) => state.object
     );
     const objectState = useAppSelector((state) => state.object);
-    const { resetIsUpdated } = objectSlice.actions;
+    const amenityActions = amenitySlice.actions;
+    const propertyTypeActions = propertyTypeSlice.actions;
+    const objectActions = objectSlice.actions;
+    const { setErrorToast } = errorToastSlice.actions;
 
-    const dispatch = useAppDispatch();
+    useEffect(() => {
+        if (status === Status.ERROR && error) {
+            dispatch(setErrorToast({ message: error, isError: true }));
+            stopLoader(setIsLoaderOpen);
+
+            dispatch(objectActions.resetStatus());
+        }
+        if (amenitiesState.status === Status.ERROR && amenitiesState.error) {
+            dispatch(
+                setErrorToast({
+                    message: amenitiesState.error,
+                    isError: true,
+                })
+            );
+            stopLoader(setIsLoaderOpen);
+
+            dispatch(amenityActions.resetStatus());
+        }
+        if (
+            propertyTypesState.status === Status.ERROR &&
+            propertyTypesState.error
+        ) {
+            dispatch(
+                setErrorToast({
+                    message: propertyTypesState.error,
+                    isError: true,
+                })
+            );
+            stopLoader(setIsLoaderOpen);
+
+            dispatch(propertyTypeActions.resetStatus());
+        }
+    }, [
+        status,
+        error,
+        regionsState.status,
+        regionsState.error,
+        amenitiesState.status,
+        amenitiesState.error,
+        propertyTypesState.status,
+        propertyTypesState.error,
+    ]);
 
     const [selectedRegion, setSelectedRegion] = useState("-1");
     const [citiesByRegion, setCitiesByRegion] = useState<City[]>([]);
@@ -321,7 +369,7 @@ function Main() {
                 stopOnFocus: true,
             }).showToast();
             stopLoader(setIsLoaderOpen);
-            dispatch(resetIsUpdated());
+            dispatch(objectActions.resetIsUpdated());
             navigate("/objects");
         }
     }, [isUpdated, objectState.statusOne, error]);
@@ -975,7 +1023,7 @@ function Main() {
                             {photos.map((photo) => (
                                 <div
                                     key={photo}
-                                    className="float-left size-20 mr-3 image-fit relative group"
+                                    className="float-left size-20 mr-3 relative group"
                                 >
                                     <Lucide
                                         icon="X"
@@ -988,10 +1036,12 @@ function Main() {
                                             );
                                         }}
                                     />
-                                    <ImageZoom
-                                        src={photo}
-                                        className="w-full rounded-md hover:scale-120 cursor-zoom-in"
-                                    />
+                                    <div className="size-full rounded-md image-fit cursor-zoom-in overflow-hidden">
+                                        <ImageZoom
+                                            src={photo}
+                                            className="size-full hover:scale-120"
+                                        />
+                                    </div>
                                 </div>
                             ))}
                         </div>

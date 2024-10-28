@@ -384,34 +384,34 @@ function Main() {
 
             dispatch(objectActions.resetStatus());
         }
-        // if (
-        //     reservationState.statusAll === Status.ERROR &&
-        //     reservationState.error
-        // ) {
-        //     dispatch(
-        //         setErrorToast({
-        //             message: reservationState.error,
-        //             isError: true,
-        //         })
-        //     );
-        //     stopLoader(setIsLoaderOpen);
+        if (
+            reservationState.statusAll === Status.ERROR &&
+            reservationState.error
+        ) {
+            dispatch(
+                setErrorToast({
+                    message: reservationState.error,
+                    isError: true,
+                })
+            );
+            stopLoader(setIsLoaderOpen);
 
-        //     dispatch(reservationActions.resetStatus());
-        // }
-        // if (
-        //     reservationState.statusOne === Status.ERROR &&
-        //     reservationState.error
-        // ) {
-        //     dispatch(
-        //         setErrorToast({
-        //             message: reservationState.error,
-        //             isError: true,
-        //         })
-        //     );
-        //     stopLoader(setIsLoaderOpen);
+            dispatch(reservationActions.resetStatus());
+        }
+        if (
+            reservationState.statusOne === Status.ERROR &&
+            reservationState.error
+        ) {
+            dispatch(
+                setErrorToast({
+                    message: reservationState.error,
+                    isError: true,
+                })
+            );
+            stopLoader(setIsLoaderOpen);
 
-        //     dispatch(reservationActions.resetStatusOne());
-        // }
+            dispatch(reservationActions.resetStatusOne());
+        }
     }, [
         status,
         error,
