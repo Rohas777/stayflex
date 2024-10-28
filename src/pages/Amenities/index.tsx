@@ -28,6 +28,7 @@ import { startLoader, stopLoader } from "@/utils/customUtils";
 import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
 import { IconType } from "@/vars";
 import ReactDOMServer from "react-dom/server";
+import { errorToastSlice } from "@/stores/errorToastSlice";
 
 window.DateTime = DateTime;
 interface Response {
@@ -253,6 +254,7 @@ function Main() {
         (state) => state.amenity
     );
     const amenityActions = amenitySlice.actions;
+    const { setErrorToast } = errorToastSlice.actions;
     const dispatch = useAppDispatch();
 
     const onDelete = async () => {
@@ -262,6 +264,14 @@ function Main() {
         await dispatch(createAmenity(amenityData));
     };
 
+    useEffect(() => {
+        if (status === Status.ERROR && error) {
+            dispatch(setErrorToast({ message: error, isError: true }));
+            stopLoader(setIsLoaderOpened);
+
+            dispatch(amenityActions.resetStatus());
+        }
+    }, [status, error]);
     useEffect(() => {
         let notificationText = "";
         if (isDeleted) {

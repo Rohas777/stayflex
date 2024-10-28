@@ -34,6 +34,11 @@ import { DateTime } from "luxon";
 import { formatDate, startLoader, stopLoader } from "@/utils/customUtils";
 import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
 import { IReservation } from "@/stores/models/IReservation";
+import {
+    reservationStatus,
+    reservationStatuses,
+    reservationStatusesWithNames,
+} from "@/vars";
 
 interface ReservationFormProps {
     onCreate: (reservation: ReservationCreateType) => void;
@@ -58,6 +63,8 @@ function ReservationForm({
     isLoaderOpen,
 }: ReservationFormProps) {
     const [selectedObject, setSelectedObject] = useState("-1");
+    const [selectedStatus, setSelectedStatus] =
+        useState<reservationStatus>("new");
     const [startDate, setStartDate] = useState("");
     const [endDate, setEndDate] = useState("");
     const [tel, setTel] = useState<string>("");
@@ -104,14 +111,14 @@ function ReservationForm({
                 error: error,
             };
         }
-        if (new Date(startDate) < new Date()) {
+        if (formatDate(new Date(startDate)) < formatDate(new Date())) {
             const error = "Дата заезда не может быть раньше сегодняшней";
             return {
                 isValid: false,
                 error: error,
             };
         }
-        if (new Date(startDate) > new Date(endDate)) {
+        if (formatDate(new Date(startDate)) > formatDate(new Date(endDate))) {
             const error = "Дата заезда не может быть позже даты выезда";
             return {
                 isValid: false,
@@ -138,14 +145,14 @@ function ReservationForm({
                 error: error,
             };
         }
-        if (new Date(endDate) < new Date()) {
+        if (formatDate(new Date(endDate)) < formatDate(new Date())) {
             const error = "Дата выезда не может быть раньше сегодняшней";
             return {
                 isValid: false,
                 error: error,
             };
         }
-        if (new Date(startDate) > new Date(endDate)) {
+        if (formatDate(new Date(startDate)) > formatDate(new Date(endDate))) {
             const error = "Дата выезда не может быть раньше даты заезда";
             return {
                 isValid: false,
@@ -175,9 +182,6 @@ function ReservationForm({
             email: null,
             name: null,
         };
-        if (selectedObject === "-1") {
-            errors.object = "Обязательно выберите объект";
-        }
         if (selectedObject === "-1") {
             errors.object = "Обязательно выберите объект";
         }
@@ -218,6 +222,9 @@ function ReservationForm({
             description: yup
                 .string()
                 .required("'Дополнительная информация' это обязательное поле"),
+            letter: yup
+                .string()
+                .required("'Служебная информация' это обязательное поле"),
         })
         .required();
 
@@ -267,13 +274,14 @@ function ReservationForm({
                 object_id: Number(selectedObject),
                 client_id: clientsState.createdClient?.id!,
                 description: String(formData?.get("description")),
+                letter: String(formData?.get("letter")),
+                status: selectedStatus,
             };
             if (isCreate) {
                 onCreate(reservationData);
             } else {
                 onUpdate({
                     id: reservationState.reservationOne?.id!,
-                    status: reservationState.reservationOne?.status!,
                     ...reservationData,
                 });
             }
@@ -287,13 +295,14 @@ function ReservationForm({
                 object_id: Number(selectedObject),
                 client_id: clientsState.clientByPhone?.id!,
                 description: String(formData?.get("description")),
+                letter: String(formData?.get("letter")),
+                status: selectedStatus,
             };
             if (isCreate) {
                 onCreate(reservationData);
             } else {
                 onUpdate({
                     id: reservationState.reservationOne?.id!,
-                    status: reservationState.reservationOne?.status!,
                     ...reservationData,
                 });
             }
@@ -314,6 +323,7 @@ function ReservationForm({
         setSelectedObject(String(reservationState.reservationOne.object.id));
         setStartDate(reservationState.reservationOne.start_date);
         setEndDate(reservationState.reservationOne.end_date);
+        setSelectedStatus(reservationState.reservationOne.status);
         setTel(reservationState.reservationOne.client.phone);
         dispatch(
             fetchClientByPhone(reservationState.reservationOne.client.phone)
@@ -327,10 +337,12 @@ function ReservationForm({
     }, [clientsState.statusByPhone]);
 
     if (
-        (objectsState.status === Status.LOADING ||
-            reservationState.statusOne === Status.LOADING) &&
+        objectsState.status === Status.LOADING &&
         clientsState.statusByPhone !== Status.LOADING
     ) {
+        return <Loader />;
+    }
+    if (reservationState.statusOne === Status.LOADING) {
         return <Loader />;
     }
     return (
@@ -727,6 +739,64 @@ function ReservationForm({
                                     "string" && errors.description.message}
                             </div>
                         )}
+                    </div>
+                    <div className="input-form mt-3">
+                        <FormLabel
+                            htmlFor="validation-form-letter"
+                            className="flex flex-col w-full sm:flex-row"
+                        >
+                            Служебная информация
+                            <span className="mt-1 text-xs sm:ml-auto sm:mt-0 text-slate-500">
+                                Обязательное
+                            </span>
+                        </FormLabel>
+                        <FormTextarea
+                            {...register("letter")}
+                            id="validation-form-letter"
+                            name="letter"
+                            className={clsx({
+                                "border-danger": errors.letter,
+                            })}
+                            defaultValue={
+                                reservationState.reservationOne?.letter || ""
+                            }
+                            placeholder="Ключи под ковриком"
+                        ></FormTextarea>
+                        {errors.letter && (
+                            <div className="mt-2 text-danger">
+                                {typeof errors.letter.message === "string" &&
+                                    errors.letter.message}
+                            </div>
+                        )}
+                    </div>
+                    <div className="input-form mt-3">
+                        <FormLabel
+                            htmlFor="validation-form-status"
+                            className="flex flex-col w-full sm:flex-row"
+                        >
+                            Статус
+                        </FormLabel>
+                        <TomSelect
+                            id="validation-form-status"
+                            value={selectedStatus}
+                            onChange={(e) => {
+                                setSelectedStatus(e.target.value);
+                                setCustomErrors((prev) => ({
+                                    ...prev,
+                                    status: null,
+                                }));
+                            }}
+                            options={{
+                                placeholder: "Выберите статус",
+                            }}
+                            className="w-full"
+                        >
+                            {reservationStatusesWithNames.map((status) => (
+                                <option key={status.value} value={status.value}>
+                                    {status.label}
+                                </option>
+                            ))}
+                        </TomSelect>
                     </div>
                     <Button
                         type="submit"

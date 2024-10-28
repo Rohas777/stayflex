@@ -419,39 +419,27 @@ function Main() {
     }, []);
 
     useEffect(() => {
-        // if (reservations.length) {
-        // const formattedData = reservations.map((reservation) => ({
-        //     id: reservation.id,
-        //     object: reservation.object.name,
-        //     date:
-        //         convertDateString(reservation.start_date) +
-        //         " - " +
-        //         convertDateString(reservation.end_date),
-        //     name: reservation.client.fullname,
-        //     status: reservation.status,
-        // }));
-
-        const formattedData = [
-            //FIXME -
-            {
-                id: 1,
-                object: "У вокзала",
-                date: "15.11.2024 - 16.11.2024",
-                name: "Петров П.П.",
-                status: "completed",
-            },
-            {
-                id: 2,
-                object: "У вокзала",
-                date: "20.11.2024 - 21.11.2024",
-                name: "Петров П.П.",
-                status: "new",
-            },
-        ];
-        tabulator.current?.setData(formattedData.reverse()).then(function () {
-            reInitTabulator();
-        });
-        // }
+        if (reservations.length) {
+            const formattedData = reservations.map((reservation) => ({
+                id: reservation.id,
+                object: reservation.object.name,
+                date:
+                    convertDateString(reservation.start_date) +
+                    " - " +
+                    convertDateString(reservation.end_date),
+                name: reservation.client.fullname,
+                status: reservation.status,
+            }));
+            tabulator.current
+                ?.setData(formattedData.reverse())
+                .then(function () {
+                    reInitTabulator();
+                });
+        } else {
+            tabulator.current?.setData([]).then(function () {
+                reInitTabulator();
+            });
+        }
     }, [reservations]);
 
     const onCreate = async (reservationData: ReservationCreateType) => {

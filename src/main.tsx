@@ -6,6 +6,7 @@ import { store } from "./stores/store";
 import Router from "./router";
 import "./assets/css/app.css";
 import AuthProvider from "./router/authProvider";
+import ErrorNotification from "./components/Custom/ErrorNotification";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <BrowserRouter>
@@ -13,6 +14,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
             <AuthProvider>
                 <Router />
             </AuthProvider>
+            <ErrorNotification />
         </Provider>
         <ScrollToTop />
     </BrowserRouter>

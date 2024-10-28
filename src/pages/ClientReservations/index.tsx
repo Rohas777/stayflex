@@ -138,7 +138,7 @@ function Main() {
                                 },
                                 {
                                     value: "completed",
-                                    label: "Пройдена",
+                                    label: "Завершена",
                                 },
                             ];
                             const currentStatus = statuses.find(

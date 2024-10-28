@@ -38,6 +38,7 @@ import clsx from "clsx";
 import UserCreateModal from "./createModal";
 import UserUpdateModal from "./updateModal";
 import { fetchTariffs } from "@/stores/reducers/tariffs/actions";
+import { errorToastSlice } from "@/stores/errorToastSlice";
 
 window.DateTime = DateTime;
 interface Response {
@@ -386,6 +387,8 @@ function Main() {
         }
     };
 
+    const { setErrorToast } = errorToastSlice.actions;
+
     const {
         users,
         status,
@@ -417,7 +420,25 @@ function Main() {
     const onUpdateTariff = async (tariffData: UserTariffUpdateType) => {
         await dispatch(updateUserTariff(tariffData));
     };
+
     useEffect(() => {
+        if (status === Status.ERROR && error) {
+            dispatch(setErrorToast({ message: error, isError: true }));
+            stopLoader(setIsLoaderOpen);
+            dispatch(userActions.resetStatus());
+        }
+        if (statusOne === Status.ERROR && error) {
+            dispatch(setErrorToast({ message: error, isError: true }));
+            stopLoader(setIsLoaderOpen);
+            dispatch(userActions.resetStatusOne());
+        }
+    }, [status, statusOne]);
+
+    useEffect(() => {
+        if (statusOne === Status.ERROR || status === Status.ERROR) {
+            dispatch(setErrorToast({ message: error!, isError: true }));
+            stopLoader(setIsLoaderOpen);
+        }
         if (!isCreated && !isUpdated && !isActiveStatusUpdated && !isDeleted) {
             stopLoader(setIsLoaderOpen);
         }
@@ -453,7 +474,14 @@ function Main() {
             dispatch(userActions.resetIsDeleted());
             dispatch(userActions.resetIsActiveStatusUpdated());
         }
-    }, [isCreated, isUpdated, isActiveStatusUpdated, isDeleted]);
+    }, [
+        isCreated,
+        isUpdated,
+        isActiveStatusUpdated,
+        isDeleted,
+        statusOne,
+        status,
+    ]);
 
     useEffect(() => {
         initTabulator();

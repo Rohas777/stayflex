@@ -46,6 +46,14 @@ export const userSlice = createSlice({
             state.userOne = null;
             state.statusOne = Status.LOADING;
         },
+        resetStatus: (state) => {
+            state.status = Status.LOADING;
+            state.error = null;
+        },
+        resetStatusOne: (state) => {
+            state.statusOne = Status.LOADING;
+            state.error = null;
+        },
     },
     extraReducers(builder) {
         builder
@@ -109,16 +117,79 @@ export const userSlice = createSlice({
         builder
             .addCase(updateUserAdmin.fulfilled, (state) => {
                 state.isUpdated = true;
+                state.status = Status.SUCCESS;
+                state.error = null;
             })
+            .addCase(updateUserAdmin.pending, (state, action) => {
+                state.status = Status.LOADING;
+                state.error = null;
+                state.isUpdated = false;
+            })
+            .addCase(
+                updateUserAdmin.rejected,
+                (state, action: PayloadAction<any>) => {
+                    state.error = action.payload;
+                    state.status = Status.ERROR;
+                    state.isUpdated = false;
+                }
+            );
+        builder
             .addCase(updateUserTariff.fulfilled, (state) => {
                 state.isUpdated = true;
+                state.status = Status.SUCCESS;
+                state.error = null;
             })
+            .addCase(updateUserTariff.pending, (state, action) => {
+                state.status = Status.LOADING;
+                state.error = null;
+                state.isUpdated = false;
+            })
+            .addCase(
+                updateUserTariff.rejected,
+                (state, action: PayloadAction<any>) => {
+                    state.error = action.payload;
+                    state.status = Status.ERROR;
+                    state.isUpdated = false;
+                }
+            );
+        builder
             .addCase(updateUserIsActive.fulfilled, (state) => {
                 state.isActiveStatusUpdated = true;
+                state.status = Status.SUCCESS;
+                state.error = null;
             })
+            .addCase(updateUserIsActive.pending, (state, action) => {
+                state.status = Status.LOADING;
+                state.error = null;
+                state.isActiveStatusUpdated = false;
+            })
+            .addCase(
+                updateUserIsActive.rejected,
+                (state, action: PayloadAction<any>) => {
+                    state.error = action.payload;
+                    state.status = Status.ERROR;
+                    state.isActiveStatusUpdated = false;
+                }
+            );
+        builder
             .addCase(deleteUser.fulfilled, (state) => {
                 state.isDeleted = true;
-            });
+                state.status = Status.SUCCESS;
+                state.error = null;
+            })
+            .addCase(deleteUser.pending, (state, action) => {
+                state.status = Status.LOADING;
+                state.error = null;
+                state.isDeleted = false;
+            })
+            .addCase(
+                deleteUser.rejected,
+                (state, action: PayloadAction<any>) => {
+                    state.error = action.payload;
+                    state.status = Status.ERROR;
+                    state.isDeleted = false;
+                }
+            );
         builder
             .addCase(createUser.fulfilled, (state) => {
                 state.isCreated = true;
@@ -133,7 +204,6 @@ export const userSlice = createSlice({
                 createUser.rejected,
                 (state, action: PayloadAction<any>) => {
                     state.isCreated = false;
-                    state.users = [];
                     state.error = action.payload;
                     state.status = Status.ERROR;
                 }
@@ -142,13 +212,3 @@ export const userSlice = createSlice({
 });
 
 export default userSlice.reducer;
-
-const isRejected = (action: AnyAction) => {
-    return action.type.endsWith("rejected");
-};
-const isFulfilled = (action: AnyAction) => {
-    return action.type.endsWith("fulfilled");
-};
-const isPending = (action: AnyAction) => {
-    return action.type.endsWith("pending");
-};

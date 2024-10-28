@@ -21,44 +21,70 @@ export const amenitySlice = createSlice({
         resetIsDeleted: (state) => {
             state.isDeleted = false;
         },
+        resetStatus(state) {
+            state.status = Status.LOADING;
+            state.error = null;
+        },
     },
     extraReducers(builder) {
-        builder.addCase(fetchAmenities.fulfilled, (state, action) => {
-            state.amenities = action.payload.convenience;
-        });
         builder
-            .addCase(createAmenity.fulfilled, (state) => {
-                state.isCreated = true;
-            })
-            .addCase(deleteAmenity.fulfilled, (state) => {
-                state.isDeleted = true;
-            });
-        builder
-            .addMatcher(isPending, (state) => {
-                state.amenities = [];
-                state.status = Status.LOADING;
-                state.error = null;
-            })
-            .addMatcher(isFulfilled, (state) => {
+            .addCase(fetchAmenities.fulfilled, (state, action) => {
+                state.amenities = action.payload.convenience;
                 state.status = Status.SUCCESS;
                 state.error = null;
             })
-            .addMatcher(isRejected, (state, action: PayloadAction<string>) => {
-                state.amenities = [];
-                state.error = action.payload;
-                state.status = Status.ERROR;
-            });
+            .addCase(fetchAmenities.pending, (state) => {
+                state.status = Status.LOADING;
+                state.error = null;
+            })
+            .addCase(
+                fetchAmenities.rejected,
+                (state, action: PayloadAction<any>) => {
+                    state.amenities = [];
+                    state.error = action.payload;
+                    state.status = Status.ERROR;
+                }
+            );
+        builder
+            .addCase(createAmenity.fulfilled, (state, action) => {
+                state.status = Status.SUCCESS;
+                state.error = null;
+                state.isCreated = true;
+            })
+            .addCase(createAmenity.pending, (state) => {
+                state.status = Status.LOADING;
+                state.error = null;
+                state.isCreated = false;
+            })
+            .addCase(
+                createAmenity.rejected,
+                (state, action: PayloadAction<any>) => {
+                    state.error = action.payload;
+                    state.status = Status.ERROR;
+                    state.isCreated = false;
+                }
+            );
+
+        builder
+            .addCase(deleteAmenity.fulfilled, (state, action) => {
+                state.status = Status.SUCCESS;
+                state.error = null;
+                state.isDeleted = true;
+            })
+            .addCase(deleteAmenity.pending, (state) => {
+                state.status = Status.LOADING;
+                state.error = null;
+                state.isDeleted = false;
+            })
+            .addCase(
+                deleteAmenity.rejected,
+                (state, action: PayloadAction<any>) => {
+                    state.error = action.payload;
+                    state.status = Status.ERROR;
+                    state.isDeleted = false;
+                }
+            );
     },
 });
 
 export default amenitySlice.reducer;
-
-const isRejected = (action: AnyAction) => {
-    return action.type.endsWith("rejected");
-};
-const isFulfilled = (action: AnyAction) => {
-    return action.type.endsWith("fulfilled");
-};
-const isPending = (action: AnyAction) => {
-    return action.type.endsWith("pending");
-};

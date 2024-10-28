@@ -22,6 +22,7 @@ import { startLoader, stopLoader } from "@/utils/customUtils";
 import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
 import { fetchAuthorizedUser } from "@/stores/reducers/users/actions";
 import Loader from "@/components/Custom/Loader/Loader";
+import { setErrorToast } from "@/stores/errorToastSlice";
 
 function Main() {
     const dispatch = useAppDispatch();
@@ -41,6 +42,7 @@ function Main() {
     const { authorizedUser, authorizedUserStatus } = useAppSelector(
         (state) => state.user
     );
+    const authActions = authSlice.actions;
 
     const schema = yup
         .object({
@@ -68,7 +70,7 @@ function Main() {
         }
 
         const authData: CodeCredentials = {
-            mail: String(authTempUser[0].mail),
+            mail: String(authTempUser.mail),
             code: String(formData.get("code")),
         };
 
@@ -85,6 +87,11 @@ function Main() {
     }, [codeStatus]);
 
     useEffect(() => {
+        if (codeStatus === Status.ERROR) {
+            stopLoader(setIsLoaderOpen);
+            dispatch(setErrorToast({ message: error!, isError: true }));
+            dispatch(authActions.resetStatus());
+        }
         if ((codeStatus === Status.SUCCESS && isSignUp) || !authTempUser) {
             navigate("/login");
             stopLoader(setIsLoaderOpen);

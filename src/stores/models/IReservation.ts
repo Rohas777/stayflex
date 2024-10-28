@@ -1,9 +1,12 @@
+import { reservationStatus } from "@/vars";
+
 export interface IReservation {
     start_date: string;
     end_date: string;
     id: number;
-    status: string;
+    status: reservationStatus;
     description: string;
+    letter: string;
     client: {
         id: number;
         fullname: string;

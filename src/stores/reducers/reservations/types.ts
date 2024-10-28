@@ -1,3 +1,4 @@
+import { reservationStatus } from "@/vars";
 import { Status } from "../types";
 import { IReservation } from "@/stores/models/IReservation";
 
@@ -18,8 +19,9 @@ export interface ReservationCreateType {
     object_id: number;
     client_id: number;
     description: string;
+    letter: string;
+    status: reservationStatus;
 }
 export interface ReservationUpdateType extends ReservationCreateType {
-    status: string;
     id: number;
 }

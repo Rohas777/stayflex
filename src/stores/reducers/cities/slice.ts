@@ -21,45 +21,69 @@ export const citySlice = createSlice({
         resetIsDeleted: (state) => {
             state.isDeleted = false;
         },
+        resetStatus(state) {
+            state.status = Status.LOADING;
+            state.error = null;
+        },
     },
     extraReducers(builder) {
-        builder.addCase(fetchCities.fulfilled, (state, action) => {
-            state.cities = action.payload.cities;
-        });
-
         builder
-            .addCase(createCity.fulfilled, (state) => {
-                state.isCreated = true;
-            })
-            .addCase(deleteCity.fulfilled, (state) => {
-                state.isDeleted = true;
-            });
-        builder
-            .addMatcher(isPending, (state) => {
-                state.cities = [];
-                state.status = Status.LOADING;
-                state.error = null;
-            })
-            .addMatcher(isFulfilled, (state) => {
+            .addCase(fetchCities.fulfilled, (state, action) => {
+                state.cities = action.payload.cities;
                 state.status = Status.SUCCESS;
                 state.error = null;
             })
-            .addMatcher(isRejected, (state, action: PayloadAction<string>) => {
-                state.cities = [];
-                state.error = action.payload;
-                state.status = Status.ERROR;
-            });
+            .addCase(fetchCities.pending, (state) => {
+                state.status = Status.LOADING;
+                state.error = null;
+            })
+            .addCase(
+                fetchCities.rejected,
+                (state, action: PayloadAction<any>) => {
+                    state.cities = [];
+                    state.error = action.payload;
+                    state.status = Status.ERROR;
+                }
+            );
+        builder
+            .addCase(createCity.fulfilled, (state, action) => {
+                state.status = Status.SUCCESS;
+                state.error = null;
+                state.isCreated = true;
+            })
+            .addCase(createCity.pending, (state) => {
+                state.status = Status.LOADING;
+                state.error = null;
+                state.isCreated = false;
+            })
+            .addCase(
+                createCity.rejected,
+                (state, action: PayloadAction<any>) => {
+                    state.error = action.payload;
+                    state.status = Status.ERROR;
+                    state.isCreated = false;
+                }
+            );
+        builder
+            .addCase(deleteCity.fulfilled, (state, action) => {
+                state.status = Status.SUCCESS;
+                state.error = null;
+                state.isDeleted = true;
+            })
+            .addCase(deleteCity.pending, (state) => {
+                state.status = Status.LOADING;
+                state.error = null;
+                state.isDeleted = false;
+            })
+            .addCase(
+                deleteCity.rejected,
+                (state, action: PayloadAction<any>) => {
+                    state.error = action.payload;
+                    state.status = Status.ERROR;
+                    state.isDeleted = false;
+                }
+            );
     },
 });
 
 export default citySlice.reducer;
-
-const isRejected = (action: AnyAction) => {
-    return action.type.endsWith("rejected");
-};
-const isFulfilled = (action: AnyAction) => {
-    return action.type.endsWith("fulfilled");
-};
-const isPending = (action: AnyAction) => {
-    return action.type.endsWith("pending");
-};

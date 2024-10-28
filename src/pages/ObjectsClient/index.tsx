@@ -18,6 +18,7 @@ import LoadingIcon from "@/components/Base/LoadingIcon";
 import { ListPlus } from "lucide-react";
 import {
     deleteObject,
+    fetchObjectById,
     fetchObjects,
     updateObiectIsActive,
 } from "@/stores/reducers/objects/actions";
@@ -41,6 +42,7 @@ import {
     ReservationUpdateType,
 } from "@/stores/reducers/reservations/types";
 import { clientSlice } from "@/stores/reducers/clients/slice";
+import { errorToastSlice } from "@/stores/errorToastSlice";
 
 window.DateTime = DateTime;
 interface Response {
@@ -194,6 +196,7 @@ function Main() {
                                 dispatch(
                                     fetchReservationsByObject(response.id!)
                                 );
+                                dispatch(fetchObjectById(response.id!));
                                 setCurrentObjectID(response.id!);
                                 setCalendarModal(true);
                             });
@@ -205,7 +208,6 @@ function Main() {
                                     title: "Удалить объект?",
                                     description: `Вы уверены, что хотите удалить объект "${response.name?.trim()}"?<br/>Это действие нельзя будет отменить.`,
                                     onConfirm: () => {
-                                        console.log("first");
                                         onDelete(response.id!);
                                     },
                                     confirmLabel: "Удалить",
@@ -368,11 +370,55 @@ function Main() {
         isActiveStatusUpdated,
         isDeleted,
     } = useAppSelector((state) => state.object);
+    const dispatch = useAppDispatch();
     const objectActions = objectSlice.actions;
     const reservationState = useAppSelector((state) => state.reservation);
     const reservationActions = reservationSlice.actions;
     const clientActions = clientSlice.actions;
-    const dispatch = useAppDispatch();
+    const { setErrorToast } = errorToastSlice.actions;
+
+    useEffect(() => {
+        if (status === Status.ERROR && error) {
+            dispatch(setErrorToast({ message: error, isError: true }));
+            stopLoader(setIsLoaderOpen);
+
+            dispatch(objectActions.resetStatus());
+        }
+        // if (
+        //     reservationState.statusAll === Status.ERROR &&
+        //     reservationState.error
+        // ) {
+        //     dispatch(
+        //         setErrorToast({
+        //             message: reservationState.error,
+        //             isError: true,
+        //         })
+        //     );
+        //     stopLoader(setIsLoaderOpen);
+
+        //     dispatch(reservationActions.resetStatus());
+        // }
+        // if (
+        //     reservationState.statusOne === Status.ERROR &&
+        //     reservationState.error
+        // ) {
+        //     dispatch(
+        //         setErrorToast({
+        //             message: reservationState.error,
+        //             isError: true,
+        //         })
+        //     );
+        //     stopLoader(setIsLoaderOpen);
+
+        //     dispatch(reservationActions.resetStatusOne());
+        // }
+    }, [
+        status,
+        error,
+        reservationState.statusAll,
+        reservationState.error,
+        reservationState.statusOne,
+    ]);
 
     useEffect(() => {
         if (!isCreated && !isUpdated && !isActiveStatusUpdated && !isDeleted) {
@@ -486,7 +532,7 @@ function Main() {
             <div className="flex flex-col items-center mt-8 intro-y sm:flex-row">
                 <h2 className="mr-auto text-lg font-medium">Объекты</h2>
                 <div className="flex w-full mt-4 sm:w-auto sm:mt-0">
-                    <Link to="create">
+                    <Link to="/objects/create">
                         <Button variant="primary" className="mr-2 shadow-md">
                             <ListPlus className="size-5 mr-2" />
                             Добавить

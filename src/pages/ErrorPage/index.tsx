@@ -1,11 +1,12 @@
 import ThemeSwitcher from "@/components/ThemeSwitcher";
 import errorIllustration from "@/assets/images/error-illustration.svg";
 import Button from "@/components/Base/Button";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAppSelector } from "@/stores/hooks";
 
 function Main() {
     const { authorizedUser } = useAppSelector((state) => state.user);
+    const navigate = useNavigate();
 
     return (
         <>
@@ -29,11 +30,15 @@ function Main() {
                                 Упс. Такой стрницы не существует.
                             </div>
                             <div className="mt-3 text-lg intro-x">
-                                Возможно, вы ошиблись в адреса или страница
+                                Возможно, вы ошиблись в адресе или страница
                                 переместилась.
                             </div>
                             <Link
-                                to={authorizedUser?.is_admin ? "/admin" : "/"}
+                                to={".."}
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    navigate(-1);
+                                }}
                             >
                                 <Button className="px-4 py-3 mt-10 text-white border-white intro-x dark:border-darkmode-400 dark:text-slate-200">
                                     Вернуться

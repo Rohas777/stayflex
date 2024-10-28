@@ -21,11 +21,7 @@ export interface SignUpCredentials {
     phone: string;
     mail: string;
     password: string;
-    is_active: boolean;
-    is_verified: boolean;
-    is_admin: boolean;
-    balance: number;
-    date_before: string;
+    tariff_id: number;
 }
 
 export interface CodeCredentials {

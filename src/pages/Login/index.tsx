@@ -18,6 +18,7 @@ import { authSlice } from "@/stores/reducers/auth/slice";
 import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
 import { startLoader, stopLoader } from "@/utils/customUtils";
 import Loader from "@/components/Custom/Loader/Loader";
+import { errorToastSlice } from "@/stores/errorToastSlice";
 
 function Main() {
     const [showPassword, setShowPassword] = useState(false);
@@ -29,6 +30,7 @@ function Main() {
         (state) => state.user
     );
     const authActions = authSlice.actions;
+    const { setErrorToast } = errorToastSlice.actions;
 
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
@@ -84,6 +86,11 @@ function Main() {
         if (signInStatus === Status.SUCCESS) {
             stopLoader(setIsLoaderOpen);
             navigate("/login/auth");
+        }
+        if (signInStatus === Status.ERROR) {
+            stopLoader(setIsLoaderOpen);
+            dispatch(setErrorToast({ message: error!, isError: true }));
+            dispatch(authActions.resetStatus());
         }
     }, [signInStatus]);
 

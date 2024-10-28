@@ -55,6 +55,8 @@ function ReservationsCalendar({
     const { reservations, statusAll } = useAppSelector(
         (state) => state.reservation
     );
+    const { objectOne } = useAppSelector((state) => state.object);
+    const { authorizedUser } = useAppSelector((state) => state.user);
     const reservationActions = reservationSlice.actions;
     const clientActions = clientSlice.actions;
     const dispatch = useAppDispatch();
@@ -87,6 +89,8 @@ function ReservationsCalendar({
             return ["cursor-pointer", "transition", "hover:opacity-80"];
         },
         dayCellClassNames: (props) => {
+            if (formatDate(props.date) < formatDate(new Date()))
+                return ["bg-slate-100 cursor-not-allowed"];
             return ["cursor-pointer"];
         },
         eventClick: (info) => {
@@ -113,6 +117,8 @@ function ReservationsCalendar({
                 setCurrentReservation(foundEvent.extendedProps.reservation);
                 setCurrentUnreservedData(null);
             } else {
+                if (authorizedUser?.id !== objectOne?.author.id) return;
+                if (formatDate(info.date) < formatDate(new Date())) return;
                 setCurrentReservation(null);
                 setCurrentUnreservedData({
                     start_date: info.dateStr,
@@ -152,128 +158,19 @@ function ReservationsCalendar({
     };
 
     useEffect(() => {
-        const tempReservations = [
-            {
-                title: "Завершена",
-                start: "2024-10-01",
-                end: "2024-10-04T12:00:01",
-                extendedProps: {
-                    reservation: {
-                        start_date: "string",
-                        end_date: "string",
-                        id: 1,
-                        status: "completed",
-                        description: "string",
-                        client: {
-                            id: 1,
-                            fullname: "string",
-                            phone: "string",
-                            email: "string",
-                        },
-                        object: {
-                            id: 1,
-                            name: "string",
-                        },
-                    },
-                },
-            },
-            {
-                title: "Отменена",
-                start: "2024-10-05",
-                end: "2024-10-07T12:00:01",
-                extendedProps: {
-                    reservation: {
-                        start_date: "string",
-                        end_date: "string",
-                        id: 1,
-                        status: "rejected",
-                        description: "string",
-                        client: {
-                            id: 1,
-                            fullname: "string",
-                            phone: "string",
-                            email: "string",
-                        },
-                        object: {
-                            id: 1,
-                            name: "string",
-                        },
-                    },
-                },
-            },
-            {
-                title: "Одобрена",
-                start: "2024-10-08",
-                end: "2024-10-10T12:00:01",
-                extendedProps: {
-                    reservation: {
-                        start_date: "string",
-                        end_date: "string",
-                        id: 1,
-                        status: "approved",
-                        description: "string",
-                        client: {
-                            id: 1,
-                            fullname: "string",
-                            phone: "string",
-                            email: "string",
-                        },
-                        object: {
-                            id: 1,
-                            name: "string",
-                        },
-                    },
-                },
-            },
-            {
-                title: "Новая",
-                start: "2024-10-12",
-                end: "2024-10-18T12:00:01",
-                extendedProps: {
-                    reservation: {
-                        start_date: "string",
-                        end_date: "string",
-                        id: 1,
-                        status: "new",
-                        description: "string",
-                        client: {
-                            id: 1,
-                            fullname: "string",
-                            phone: "string",
-                            email: "string",
-                        },
-                        object: {
-                            id: 1,
-                            name: "string",
-                        },
-                    },
-                },
-            },
-        ];
-
         //FIXME -
         setEvents(
-            tempReservations.map((reservation) => {
-                const status = reservationEventType(
-                    reservation.extendedProps.reservation.status as any
-                );
+            reservations.map((reservation) => {
+                const status = reservationEventType(reservation?.status as any);
                 return {
-                    ...reservation,
+                    title: reservation.client.fullname,
+                    start: reservation.start_date,
+                    end: reservation.end_date + "T12:00:01",
+                    extendedProps: { reservation: reservation },
                     classNames: status.classNames,
                     textColor: status.textColor,
                 };
             })
-            // reservations.map((reservation) => {
-            //     const status = reservationEventType(reservation.status);
-            //     return {
-            //         title: reservation.client.fullname,
-            //         start: reservation.start_date,
-            //         end: reservation.end_date + "T12:00:01",
-            //         classNames: status.classNames,
-            //         color: status.color,
-            //         extendedProps: { reservation: reservation },
-            //     };
-            // })
         );
     }, [statusAll]);
 

@@ -16,7 +16,7 @@ const initialState: ReservationState = {
     reservations: [],
     reservationOne: null,
     statusAll: Status.LOADING,
-    statusOne: Status.LOADING,
+    statusOne: Status.IDLE,
     error: null,
     isCreated: false,
     isUpdated: false,
@@ -38,7 +38,15 @@ export const reservationSlice = createSlice({
         },
         resetReservationOne: (state) => {
             state.reservationOne = null;
-            state.statusOne = Status.LOADING;
+            state.statusOne = Status.IDLE;
+        },
+        resetStatus: (state) => {
+            state.statusAll = Status.LOADING;
+            state.error = null;
+        },
+        resetStatusOne: (state) => {
+            state.statusOne = Status.IDLE;
+            state.error = null;
         },
     },
     extraReducers(builder) {

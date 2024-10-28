@@ -27,7 +27,7 @@ const PrivateRoute = ({
     }, [authorizedUserStatus]);
 
     if (isLoading) {
-        return <Loader className="w-full h-screen bg-primary" />;
+        return <Loader className="w-full h-screen bg-secondary" />;
     }
     if (!isAuthenticated) {
         return <Navigate to="/login" replace />;
@@ -37,13 +37,13 @@ const PrivateRoute = ({
         return children;
     }
     if (type === "user" && isAdmin) {
-        return <Navigate to="/not-found" replace />;
+        return <Navigate to="/admin" replace />;
     }
     if (type === "admin" && isAdmin) {
         return children;
     }
     if (type === "admin" && !isAdmin) {
-        return <Navigate to="/not-found" replace />;
+        return <Navigate to="/objects" replace />;
     }
 };
 

@@ -8,6 +8,7 @@ import {
     fetchObjects,
     fetchObjectsByUser,
     updateObiectIsActive,
+    updateObject,
 } from "./actions";
 
 const initialState: ObjectState = {
@@ -42,6 +43,14 @@ export const objectSlice = createSlice({
             state.objectOne = null;
             state.statusOne = Status.LOADING;
         },
+        resetStatus: (state) => {
+            state.status = Status.LOADING;
+            state.error = null;
+        },
+        resetStatusOne: (state) => {
+            state.statusOne = Status.LOADING;
+            state.error = null;
+        },
     },
     extraReducers(builder) {
         builder
@@ -51,7 +60,6 @@ export const objectSlice = createSlice({
                 state.error = null;
             })
             .addCase(fetchObjects.pending, (state) => {
-                state.objects = [];
                 state.status = Status.LOADING;
                 state.error = null;
             })
@@ -69,7 +77,6 @@ export const objectSlice = createSlice({
                 state.error = null;
             })
             .addCase(fetchObjectsByUser.pending, (state) => {
-                state.objects = [];
                 state.status = Status.LOADING;
                 state.error = null;
             })
@@ -100,14 +107,44 @@ export const objectSlice = createSlice({
                     state.statusOne = Status.ERROR;
                 }
             );
-
+        builder
+            .addCase(deleteObject.fulfilled, (state) => {
+                state.isDeleted = true;
+                state.status = Status.SUCCESS;
+                state.error = null;
+            })
+            .addCase(deleteObject.pending, (state, action) => {
+                state.isDeleted = false;
+                state.status = Status.LOADING;
+                state.error = null;
+            })
+            .addCase(
+                deleteObject.rejected,
+                (state, action: PayloadAction<any>) => {
+                    state.isDeleted = false;
+                    state.error = action.payload;
+                    state.status = Status.ERROR;
+                }
+            );
         builder
             .addCase(updateObiectIsActive.fulfilled, (state) => {
                 state.isActiveStatusUpdated = true;
+                state.status = Status.SUCCESS;
+                state.error = null;
             })
-            .addCase(deleteObject.fulfilled, (state) => {
-                state.isDeleted = true;
-            });
+            .addCase(updateObiectIsActive.pending, (state, action) => {
+                state.isActiveStatusUpdated = false;
+                state.status = Status.LOADING;
+                state.error = null;
+            })
+            .addCase(
+                updateObiectIsActive.rejected,
+                (state, action: PayloadAction<any>) => {
+                    state.isActiveStatusUpdated = false;
+                    state.error = action.payload;
+                    state.status = Status.ERROR;
+                }
+            );
         builder
             .addCase(createObject.fulfilled, (state) => {
                 state.isCreated = true;
@@ -122,7 +159,24 @@ export const objectSlice = createSlice({
                 createObject.rejected,
                 (state, action: PayloadAction<any>) => {
                     state.isCreated = false;
-                    state.objects = [];
+                    state.error = action.payload;
+                    state.status = Status.ERROR;
+                }
+            );
+        builder
+            .addCase(updateObject.fulfilled, (state) => {
+                state.isUpdated = true;
+                state.status = Status.SUCCESS;
+                state.error = null;
+            })
+            .addCase(updateObject.pending, (state, action) => {
+                state.status = Status.LOADING;
+                state.error = null;
+            })
+            .addCase(
+                updateObject.rejected,
+                (state, action: PayloadAction<any>) => {
+                    state.isUpdated = false;
                     state.error = action.payload;
                     state.status = Status.ERROR;
                 }

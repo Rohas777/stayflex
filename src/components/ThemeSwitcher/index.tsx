@@ -100,61 +100,7 @@ function Main() {
                         <div className="flex flex-col">
                             <div className="px-8 pt-6 pb-8">
                                 <div className="text-base font-medium">
-                                    Цветовые схемы
-                                </div>
-                                <div className="text-slate-500 mt-0.5">
-                                    Выберите цветовую схему
-                                </div>
-                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-3.5 mt-5">
-                                    {colorSchemes.map(
-                                        (colorScheme, colorKey) => (
-                                            <div key={colorKey}>
-                                                <div
-                                                    onClick={() =>
-                                                        switchColorScheme(
-                                                            colorScheme
-                                                        )
-                                                    }
-                                                    className={clsx([
-                                                        "h-12 cursor-pointer bg-slate-50 box rounded-full p-1 border-slate-300/80",
-                                                        activeColorScheme ==
-                                                            colorScheme &&
-                                                            "border-2 border-theme-1/60",
-                                                    ])}
-                                                >
-                                                    <div className="h-full overflow-hidden rounded-full">
-                                                        <div className="flex items-center h-full gap-1 -mx-2">
-                                                            <div
-                                                                className={clsx(
-                                                                    [
-                                                                        "w-1/2 h-[140%] bg-theme-1 rotate-12",
-                                                                        colorScheme,
-                                                                    ]
-                                                                )}
-                                                            ></div>
-                                                            <div
-                                                                className={clsx(
-                                                                    [
-                                                                        "w-1/2 h-[140%] bg-theme-2 rotate-12",
-                                                                        colorScheme,
-                                                                    ]
-                                                                )}
-                                                            ></div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        )
-                                    )}
-                                </div>
-                            </div>
-                            <div className="border-b border-dashed"></div>
-                            <div className="px-8 pt-6 pb-8">
-                                <div className="text-base font-medium">
-                                    Языки
-                                </div>
-                                <div className="mt-0.5 text-slate-500">
-                                    Выберите язык
+                                    Язык системы
                                 </div>
                                 <div className="mt-5 grid grid-cols-3 gap-3.5">
                                     <div>
@@ -202,10 +148,7 @@ function Main() {
                             <div className="border-b border-dashed"></div>
                             <div className="px-8 pt-6 pb-8">
                                 <div className="text-base font-medium">
-                                    Внешний вид
-                                </div>
-                                <div className="mt-0.5 text-slate-500">
-                                    Выберите тему
+                                    Тема
                                 </div>
                                 <div className="mt-5 grid grid-cols-2 gap-3.5">
                                     <div>
@@ -242,6 +185,54 @@ function Main() {
                                     </div>
                                 </div>
                             </div>
+                            <div className="border-b border-dashed"></div>
+                            <div className="px-8 pt-6 pb-8">
+                                <div className="text-base font-medium">
+                                    Цвета
+                                </div>
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-3.5 mt-5">
+                                    {colorSchemes.map(
+                                        (colorScheme, colorKey) => (
+                                            <div key={colorKey}>
+                                                <div
+                                                    onClick={() =>
+                                                        switchColorScheme(
+                                                            colorScheme
+                                                        )
+                                                    }
+                                                    className={clsx([
+                                                        "h-12 cursor-pointer bg-slate-50 box rounded-full p-1 border-slate-300/80",
+                                                        activeColorScheme ==
+                                                            colorScheme &&
+                                                            "border-2 border-theme-1/60",
+                                                    ])}
+                                                >
+                                                    <div className="h-full overflow-hidden rounded-full">
+                                                        <div className="flex items-center h-full gap-1 -mx-2">
+                                                            <div
+                                                                className={clsx(
+                                                                    [
+                                                                        "w-1/2 h-[140%] bg-theme-1 rotate-12",
+                                                                        colorScheme,
+                                                                    ]
+                                                                )}
+                                                            ></div>
+                                                            <div
+                                                                className={clsx(
+                                                                    [
+                                                                        "w-1/2 h-[140%] bg-theme-2 rotate-12",
+                                                                        colorScheme,
+                                                                    ]
+                                                                )}
+                                                            ></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )
+                                    )}
+                                </div>
+                            </div>
                         </div>
                     </Slideover.Description>
                 </Slideover.Panel>
@@ -251,7 +242,7 @@ function Main() {
                     event.preventDefault();
                     setThemeSwitcherSlideover(true);
                 }}
-                className=" hover:animate-spin fixed bottom-0 right-0 z-50 flex items-center justify-center mb-5 mr-5 text-white rounded-full shadow-lg cursor-pointer w-14 h-14 bg-theme-1"
+                className=" hover:animate-spin fixed bottom-0 right-0 z-[100] flex items-center justify-center mb-5 mr-5 text-white rounded-full shadow-lg cursor-pointer w-14 h-14 bg-theme-1"
             >
                 <Lucide className="w-5 h-5" icon="Settings" />
             </div>

@@ -70,7 +70,6 @@ function Main() {
     const [selectedPrepayment, setSelectedPrepayment] = useState("-1");
     const [isActivated, setIsActivated] = useState(true);
 
-    const [isCreate, setIsCreate] = useState(true);
     const [isLoaderOpen, setIsLoaderOpen] = useState(false);
 
     const [customErrors, setCustomErrors] = useState<CustomErrors>({
@@ -198,18 +197,9 @@ function Main() {
             objectData.append("files", file);
         });
         console.log(objectData);
-        if (isCreate) {
-            dispatch(createObject(objectData));
-        } else {
-            // onUpdate(objectData);
-        }
+        dispatch(createObject(objectData));
     };
     useEffect(() => {
-        if (location.pathname.replace("/objects/", "") === "create") {
-            setIsCreate(true);
-        } else {
-            setIsCreate(false);
-        }
         dispatch(fetchRegions());
         dispatch(fetchAmenities());
         dispatch(fetchPropertyTypes());

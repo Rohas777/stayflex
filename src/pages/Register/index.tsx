@@ -19,6 +19,8 @@ import { signUp } from "@/stores/reducers/auth/actions";
 import { Status } from "@/stores/reducers/types";
 import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
 import Loader from "@/components/Custom/Loader/Loader";
+import { setErrorToast } from "@/stores/errorToastSlice";
+import { authSlice } from "@/stores/reducers/auth/slice";
 
 type CustomErrors = {
     isValid: boolean;
@@ -45,31 +47,14 @@ function Main() {
         confirmPassword: null,
     });
 
-    const { signUpStatus } = useAppSelector((state) => state.auth);
+    const { signUpStatus, error } = useAppSelector((state) => state.auth);
     const { authorizedUser, authorizedUserStatus } = useAppSelector(
         (state) => state.user
     );
+    const authActions = authSlice.actions;
     const dispatch = useAppDispatch();
 
     const navigate = useNavigate();
-
-    // const checkPasswordSecurity = async (password: string) => {
-    //     const goodRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
-    //     const strongRegex =
-    //         /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[a-zA-Z\d@$!%*?&]{12,}$/;
-    //     if (!goodRegex.test(password)) {
-    //         setPasswordSecure("bad");
-    //     }
-    //     if (goodRegex.test(password)) {
-    //         setPasswordSecure("good");
-    //     }
-    //     if (strongRegex.test(password)) {
-    //         setPasswordSecure("strong");
-    //     }
-    //     if (!password.length) {
-    //         setPasswordSecure(null);
-    //     }
-    // };
 
     const vaildateWithoutYup = async (formData: FormData) => {
         const errors: CustomErrors = {
@@ -155,11 +140,7 @@ function Main() {
             password: String(formData.get("password")),
             fullname: String(formData.get("name")),
             phone: tel,
-            is_active: false,
-            is_verified: false,
-            is_admin: false,
-            balance: 0,
-            date_before: new Date().toISOString().split("T")[0],
+            tariff_id: 1, //FIXME -
         };
 
         dispatch(signUp(signUpData));
@@ -178,6 +159,11 @@ function Main() {
     }, [authorizedUserStatus, authorizedUser]);
 
     useEffect(() => {
+        if (signUpStatus === Status.ERROR) {
+            stopLoader(setIsLoaderOpen);
+            dispatch(setErrorToast({ message: error!, isError: true }));
+            dispatch(authActions.resetStatus());
+        }
         if (signUpStatus === Status.SUCCESS) {
             stopLoader(setIsLoaderOpen);
             navigate("/register/activate");

@@ -29,6 +29,7 @@ import PropertyTypeForm from "./form";
 import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
 import { startLoader, stopLoader } from "@/utils/customUtils";
 import Toastify from "toastify-js";
+import { errorToastSlice } from "@/stores/errorToastSlice";
 
 window.DateTime = DateTime;
 interface Response {
@@ -260,6 +261,7 @@ function Main() {
     const { propertyTypes, status, error, isCreated, isDeleted } =
         useAppSelector((state) => state.propertyType);
     const propertyTypeActions = propertyTypeSlice.actions;
+    const { setErrorToast } = errorToastSlice.actions;
     const dispatch = useAppDispatch();
 
     const onDelete = () => {
@@ -268,6 +270,16 @@ function Main() {
     const onCreate = (propertyTypeName: PropertyTypeCreateType) => {
         dispatch(createPropertyType(propertyTypeName));
     };
+
+    useEffect(() => {
+        if (status === Status.ERROR && error) {
+            console.log(status);
+            dispatch(setErrorToast({ message: error, isError: true }));
+            stopLoader(setIsLoaderOpened);
+
+            dispatch(propertyTypeActions.resetStatus());
+        }
+    }, [status, error]);
 
     useEffect(() => {
         let notificationText = "";

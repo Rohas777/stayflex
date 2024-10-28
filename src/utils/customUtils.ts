@@ -1,3 +1,4 @@
+import { GetThunkAPI } from "@reduxjs/toolkit";
 import { useLayoutEffect } from "react";
 import { lock, unlock } from "tua-body-scroll-lock";
 
@@ -26,4 +27,18 @@ export const formatDate = (date: Date) => {
     const month = (date.getMonth() + 1).toString().padStart(2, "0");
     const day = date.getDate().toString().padStart(2, "0");
     return `${year}-${month}-${day}`;
+};
+
+export const checkErrorsBase = (status: number) => {
+    if (status === 500) {
+        return "Внутренняя ошибка сервера";
+    }
+    if (status === 503) {
+        return "Сервис недоступен";
+    }
+    if (status === 504) {
+        return "Время ожидания истекло";
+    }
+
+    return false;
 };

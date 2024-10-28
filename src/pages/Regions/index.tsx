@@ -29,6 +29,7 @@ import Notification from "@/components/Base/Notification";
 import Toastify from "toastify-js";
 import { startLoader, stopLoader } from "@/utils/customUtils";
 import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
+import { errorToastSlice } from "@/stores/errorToastSlice";
 
 window.DateTime = DateTime;
 interface Response {
@@ -263,6 +264,7 @@ function Main() {
         (state) => state.region
     );
     const regionsActions = regionSlice.actions;
+    const { setErrorToast } = errorToastSlice.actions;
     const dispatch = useAppDispatch();
 
     const onDelete = () => {
@@ -272,6 +274,14 @@ function Main() {
     const onCreate = (region: RegionCreateType) => {
         dispatch(createRegion(region));
     };
+
+    useEffect(() => {
+        if (status === Status.ERROR) {
+            dispatch(setErrorToast({ message: error!, isError: true }));
+            dispatch(regionsActions.resetStatus());
+            stopLoader(setIsLoaderOpened);
+        }
+    }, [status]);
 
     useEffect(() => {
         let notificationText = "";

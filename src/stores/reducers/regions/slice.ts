@@ -21,49 +21,69 @@ export const regionSlice = createSlice({
         resetIsDeleted: (state) => {
             state.isDeleted = false;
         },
+        resetStatus: (state) => {
+            state.status = Status.LOADING;
+            state.error = null;
+        },
     },
     extraReducers(builder) {
-        builder.addCase(fetchRegions.fulfilled, (state, action) => {
-            state.regions = action.payload.regions;
-        });
         builder
-            .addCase(createRegion.fulfilled, (state) => {
-                state.isCreated = true;
-            })
-            .addCase(deleteRegion.fulfilled, (state) => {
-                state.isDeleted = true;
-            });
-        // .addCase(deletUser.fulfilled, (state, action) => {
-        //     state.users = state.users.filter(
-        //         (user) => user.id !== Number(action.payload)
-        //     );
-        // });
-        builder
-            .addMatcher(isPending, (state) => {
-                state.regions = [];
-                state.status = Status.LOADING;
-                state.error = null;
-            })
-            .addMatcher(isFulfilled, (state) => {
+            .addCase(fetchRegions.fulfilled, (state, action) => {
+                state.regions = action.payload.regions;
                 state.status = Status.SUCCESS;
                 state.error = null;
             })
-            .addMatcher(isRejected, (state, action: PayloadAction<string>) => {
-                state.regions = [];
-                state.error = action.payload;
-                state.status = Status.ERROR;
-            });
+            .addCase(fetchRegions.pending, (state) => {
+                state.status = Status.LOADING;
+                state.error = null;
+            })
+            .addCase(
+                fetchRegions.rejected,
+                (state, action: PayloadAction<any>) => {
+                    state.regions = [];
+                    state.error = action.payload;
+                    state.status = Status.ERROR;
+                }
+            );
+        builder
+            .addCase(createRegion.fulfilled, (state, action) => {
+                state.status = Status.SUCCESS;
+                state.error = null;
+                state.isCreated = true;
+            })
+            .addCase(createRegion.pending, (state) => {
+                state.status = Status.LOADING;
+                state.error = null;
+                state.isCreated = false;
+            })
+            .addCase(
+                createRegion.rejected,
+                (state, action: PayloadAction<any>) => {
+                    state.error = action.payload;
+                    state.status = Status.ERROR;
+                    state.isCreated = false;
+                }
+            );
+        builder
+            .addCase(deleteRegion.fulfilled, (state, action) => {
+                state.status = Status.SUCCESS;
+                state.error = null;
+                state.isDeleted = true;
+            })
+            .addCase(deleteRegion.pending, (state) => {
+                state.status = Status.LOADING;
+                state.error = null;
+                state.isDeleted = false;
+            })
+            .addCase(
+                deleteRegion.rejected,
+                (state, action: PayloadAction<any>) => {
+                    state.error = action.payload;
+                    state.status = Status.ERROR;
+                    state.isDeleted = false;
+                }
+            );
     },
 });
 
 export default regionSlice.reducer;
-
-const isRejected = (action: AnyAction) => {
-    return action.type.endsWith("rejected");
-};
-const isFulfilled = (action: AnyAction) => {
-    return action.type.endsWith("fulfilled");
-};
-const isPending = (action: AnyAction) => {
-    return action.type.endsWith("pending");
-};

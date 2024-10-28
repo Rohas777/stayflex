@@ -55,6 +55,8 @@ function ReservationsCalendar({
     const { reservations, statusAll } = useAppSelector(
         (state) => state.reservation
     );
+    const { authorizedUser } = useAppSelector((state) => state.user);
+    const { objectOne } = useAppSelector((state) => state.object);
     const reservationActions = reservationSlice.actions;
     const clientActions = clientSlice.actions;
     const dispatch = useAppDispatch();
@@ -87,6 +89,8 @@ function ReservationsCalendar({
             return ["cursor-pointer", "transition", "hover:opacity-80"];
         },
         dayCellClassNames: (props) => {
+            if (formatDate(props.date) < formatDate(new Date()))
+                return ["bg-slate-100 cursor-not-allowed"];
             return ["cursor-pointer"];
         },
         eventClick: (info) => {
@@ -113,6 +117,8 @@ function ReservationsCalendar({
                 setCurrentReservation(foundEvent.extendedProps.reservation);
                 setCurrentUnreservedData(null);
             } else {
+                if (authorizedUser?.id !== objectOne?.author.id) return;
+                if (formatDate(info.date) < formatDate(new Date())) return;
                 setCurrentReservation(null);
                 setCurrentUnreservedData({
                     start_date: info.dateStr,
@@ -124,14 +130,47 @@ function ReservationsCalendar({
         },
     };
 
+    const reservationEventType = (
+        status: "new" | "completed" | "approved" | "rejected"
+    ) => {
+        switch (status) {
+            case "new":
+                return {
+                    textColor: "white",
+                    classNames: ["!bg-warning", "!border-warning"],
+                };
+            case "completed":
+                return {
+                    textColor: "black",
+                    classNames: ["!bg-slate-200", "!border-slate-200"],
+                };
+            case "approved":
+                return {
+                    textColor: "white",
+                    classNames: ["!bg-success", "!border-success"],
+                };
+            case "rejected":
+                return {
+                    textColor: "white",
+                    classNames: ["!bg-danger", "!border-danger"],
+                };
+        }
+    };
+
     useEffect(() => {
+        //FIXME -
         setEvents(
-            reservations.map((reservation) => ({
-                title: reservation.client.fullname,
-                start: reservation.start_date,
-                end: reservation.end_date + "T12:00:01",
-                extendedProps: { reservation: reservation },
-            }))
+            reservations.map((reservation) => {
+                const status = reservationEventType(reservation?.status as any);
+                return {
+                    title: reservation.client.fullname,
+                    start: reservation.start_date,
+                    end: reservation.end_date + "T12:00:01",
+                    extendedProps: { reservation: reservation },
+                    classNames: status.classNames,
+                    textColor: status.textColor,
+                };
+            })
         );
     }, [statusAll]);
 

@@ -30,6 +30,8 @@ import { fetchRegions } from "@/stores/reducers/regions/actions";
 import Toastify from "toastify-js";
 import { startLoader, stopLoader } from "@/utils/customUtils";
 import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
+import { errorToastSlice } from "@/stores/errorToastSlice";
+import { regionSlice } from "@/stores/reducers/regions/slice";
 
 window.DateTime = DateTime;
 interface Response {
@@ -299,7 +301,10 @@ function Main() {
     const { cities, status, error, isCreated, isDeleted } = useAppSelector(
         (state) => state.city
     );
+    const regionsState = useAppSelector((state) => state.region);
     const cityActions = citySlice.actions;
+    const regionActions = regionSlice.actions;
+    const { setErrorToast } = errorToastSlice.actions;
     const dispatch = useAppDispatch();
 
     const onDelete = () => {
@@ -308,6 +313,23 @@ function Main() {
     const onCreate = (city: CityCreateType) => {
         dispatch(createCity(city));
     };
+
+    useEffect(() => {
+        if (status === Status.ERROR && error) {
+            dispatch(setErrorToast({ message: error, isError: true }));
+            stopLoader(setIsLoaderOpened);
+
+            dispatch(cityActions.resetStatus());
+        }
+        if (regionsState.status === Status.ERROR && regionsState.error) {
+            dispatch(
+                setErrorToast({ message: regionsState.error, isError: true })
+            );
+            stopLoader(setIsLoaderOpened);
+
+            dispatch(regionActions.resetStatus());
+        }
+    }, [status, error, regionsState.status, regionsState.error]);
 
     useEffect(() => {
         let notificationText = "";

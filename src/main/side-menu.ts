@@ -6,14 +6,14 @@ newReservationsIndicator.textContent = "1";
 
 const menu: Array<Menu | "divider"> = [
     {
-        icon: "Gem",
-        pathname: "/tariffs",
-        title: "Тарифы",
-    },
-    {
         icon: "Home",
         pathname: "/objects",
         title: "Объекты",
+    },
+    {
+        icon: "Gem",
+        pathname: "/tariffs",
+        title: "Тарифы",
     },
     {
         icon: "Link",

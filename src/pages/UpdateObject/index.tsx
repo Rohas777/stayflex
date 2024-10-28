@@ -19,10 +19,14 @@ import { fetchPropertyTypes } from "@/stores/reducers/property-types/actions";
 import Notification from "@/components/Base/Notification";
 import Lucide from "@/components/Base/Lucide";
 import Toastify from "toastify-js";
-import { ObjectCreateType } from "@/stores/reducers/objects/types";
+import {
+    ObjectCreateType,
+    ObjectUpdateType,
+} from "@/stores/reducers/objects/types";
 import {
     createObject,
     fetchObjectById,
+    updateObject,
 } from "@/stores/reducers/objects/actions";
 import CustomTomSelect, {
     TomSelectElement,
@@ -33,6 +37,7 @@ import { DropzoneFile } from "dropzone";
 import { objectSlice } from "@/stores/reducers/objects/slice";
 import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
 import Tippy from "@/components/Base/Tippy";
+import ImageZoom from "@/components/Base/ImageZoom";
 
 window.DateTime = DateTime;
 
@@ -61,7 +66,7 @@ function Main() {
         (state) => state.object
     );
     const objectState = useAppSelector((state) => state.object);
-    const { resetIsCreated } = objectSlice.actions;
+    const { resetIsUpdated } = objectSlice.actions;
 
     const dispatch = useAppDispatch();
 
@@ -73,8 +78,9 @@ function Main() {
     const [selectedPropertyType, setSelectedPropertyType] = useState("-1");
     const [selectedPrepayment, setSelectedPrepayment] = useState("-1");
     const [isObjectActivated, setIsObjectActivated] = useState(true);
+    const [photos, setPhotos] = useState<string[]>([]);
+    const [maxFiles, setMaxFiles] = useState(10);
 
-    const [isCreate, setIsCreate] = useState(true);
     const [isLoaderOpen, setIsLoaderOpen] = useState(false);
 
     const [customErrors, setCustomErrors] = useState<CustomErrors>({
@@ -103,7 +109,7 @@ function Main() {
     const addDangerBorder = (ref?: HTMLDivElement | null) => {
         ref?.classList.add("border-danger-important");
     };
-    const vaildateWithoutYup = (photos: DropzoneFile[]) => {
+    const vaildateWithoutYup = (gallery: DropzoneFile[]) => {
         const errors: CustomErrors = {
             isValid: true,
             region: null,
@@ -115,7 +121,7 @@ function Main() {
             description: null,
             gallery: null,
         };
-        if (!photos?.length) {
+        if (!gallery?.length && !photos?.length) {
             addDangerBorder(dropzoneValidationRef.current);
             errors.gallery = "Обязательно загрузите фотографии вашего объекта";
         }
@@ -165,14 +171,14 @@ function Main() {
         event.preventDefault();
         startLoader(setIsLoaderOpen);
         const result = await trigger();
-        const photos = dropzoneValidationRef.current!.dropzone.files;
-        const customResult = vaildateWithoutYup(photos);
+        const gallery = dropzoneValidationRef.current!.dropzone.files;
+        const customResult = vaildateWithoutYup(gallery);
         if (!result || !customResult.isValid) {
             stopLoader(setIsLoaderOpen);
             return;
         }
         const formData = new FormData(event.target);
-        const object: ObjectCreateType = {
+        const object: ObjectUpdateType = {
             name: String(formData.get("name")),
             city_id: Number(selectedCity),
             address: String(formData.get("address")),
@@ -183,30 +189,51 @@ function Main() {
             floor: String(formData.get("floor")),
             apartment_id: Number(selectedPropertyType),
             description: editorData,
-            convenience: selectedAmenities.map(Number),
+            id: Number(objectState.objectOne?.id),
             price: Number(formData.get("price")),
             prepayment_percentage: Number(selectedPrepayment),
             min_ded: Number(formData.get("min_ded")),
             active: isObjectActivated,
         };
-        let formDataTest = new FormData();
+        function filterDeletedPhotos(remaining: string[], initial: string[]) {
+            const dictFromReamining = new Map();
+            remaining.forEach((item, index) => {
+                dictFromReamining.set(item, index);
+            });
+            const filteredInitial = initial.filter(
+                (item) => !dictFromReamining.has(item)
+            );
 
-        // Добавляем каждый файл в объект FormData
-        for (let i = 0; i < photos.length; i++) {
-            let file = photos[i];
-            formDataTest.append("files[]", file, file.name);
+            return filteredInitial;
         }
+
+        const convenience_and_removed_photos = {
+            convenience: selectedAmenities.map(Number),
+            removed_photos: filterDeletedPhotos(
+                photos,
+                objectState.objectOne?.photos!
+            ),
+        };
+
         const objectData = new FormData();
-        objectData.append("object_data", JSON.stringify(object));
-        photos.forEach((file) => {
+        objectData.append(
+            "convenience_and_removed_photos",
+            JSON.stringify(convenience_and_removed_photos)
+        );
+        objectData.append("update_object", JSON.stringify(object));
+        gallery.forEach((file) => {
             objectData.append("files", file);
         });
-        // onUpdate(objectData);
+        dispatch(updateObject(objectData));
     };
     useEffect(() => {
         dispatch(
             fetchObjectById(
-                Number(location.pathname.replace("/admin/objects/update/", ""))
+                Number(
+                    location.pathname
+                        .replace("/admin", "")
+                        .replace("/objects/update/", "")
+                )
             )
         );
         dispatch(fetchRegions());
@@ -233,6 +260,10 @@ function Main() {
             setIsObjectActivated(
                 objectState.objectOne ? objectState.objectOne.active : true
             );
+            setPhotos(
+                objectState.objectOne ? objectState.objectOne.photos : []
+            );
+            setMaxFiles(10 - objectState.objectOne?.photos.length!);
         }
     }, [objectState.statusOne]);
 
@@ -290,7 +321,7 @@ function Main() {
                 stopOnFocus: true,
             }).showToast();
             stopLoader(setIsLoaderOpen);
-            dispatch(resetIsCreated());
+            dispatch(resetIsUpdated());
             navigate("/objects");
         }
     }, [isUpdated, objectState.statusOne, error]);
@@ -332,7 +363,7 @@ function Main() {
             <div className="w-full h-fit relative">
                 <div className="flex flex-col items-center mt-8 intro-y sm:flex-row">
                     <h2 className="mr-auto text-xl font-medium">
-                        Добавить объект
+                        Редактировать объект
                     </h2>
                 </div>
                 <form className="validate-form" onSubmit={onSubmit}>
@@ -360,11 +391,7 @@ function Main() {
                                 className={clsx({
                                     "border-danger": errors.name,
                                 })}
-                                defaultValue={
-                                    objectState.objectOne
-                                        ? objectState.objectOne.name
-                                        : undefined
-                                }
+                                defaultValue={objectState.objectOne?.name}
                                 placeholder="Название"
                             />
                             {errors.name && (
@@ -944,6 +971,30 @@ function Main() {
                                 Галерея
                             </h2>
                         </div>
+                        <div className="my-3">
+                            {photos.map((photo) => (
+                                <div
+                                    key={photo}
+                                    className="float-left size-20 mr-3 image-fit relative group"
+                                >
+                                    <Lucide
+                                        icon="X"
+                                        className="absolute transition z-10 -top-2 -right-2 p-1 cursor-pointer rounded-full bg-danger text-white group-hover:opacity-100 opacity-0"
+                                        onClick={() => {
+                                            setPhotos(
+                                                photos.filter(
+                                                    (item) => item !== photo
+                                                )
+                                            );
+                                        }}
+                                    />
+                                    <ImageZoom
+                                        src={photo}
+                                        className="w-full rounded-md hover:scale-120 cursor-zoom-in"
+                                    />
+                                </div>
+                            ))}
+                        </div>
                         <div className="mt-3">
                             <FormLabel className="flex flex-col w-full sm:flex-row">
                                 Фотографии вашего объекта
@@ -951,7 +1002,6 @@ function Main() {
                                     Обязательное
                                 </span>
                             </FormLabel>
-
                             <Dropzone
                                 getRef={(el) => {
                                     dropzoneValidationRef.current = el;
@@ -964,7 +1014,7 @@ function Main() {
                                     url: "https://httpbin.org/post",
                                     thumbnailWidth: 150,
                                     maxFilesize: 10,
-                                    maxFiles: 2,
+                                    maxFiles: maxFiles,
                                     resizeHeight: 40,
                                     resizeWidth: 40,
                                     acceptedFiles: "image/*",
@@ -1070,7 +1120,7 @@ function Main() {
                                 </Button>
                             </Link>
                             <Button type="submit" variant="primary">
-                                Добавить
+                                Обновить
                             </Button>
                         </div>
                     </div>
@@ -1095,7 +1145,7 @@ function Main() {
                     <Lucide icon="CheckCircle" className="text-success" />
                     <div className="ml-4 mr-4">
                         <div className="font-medium">
-                            Объект успешно добавлен
+                            Объект успешно обновлён
                         </div>
                     </div>
                 </Notification>

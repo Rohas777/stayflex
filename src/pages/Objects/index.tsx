@@ -18,6 +18,7 @@ import LoadingIcon from "@/components/Base/LoadingIcon";
 import { ListPlus } from "lucide-react";
 import {
     deleteObject,
+    fetchObjectById,
     fetchObjects,
     updateObiectIsActive,
 } from "@/stores/reducers/objects/actions";
@@ -41,6 +42,7 @@ import {
     ReservationUpdateType,
 } from "@/stores/reducers/reservations/types";
 import { clientSlice } from "@/stores/reducers/clients/slice";
+import { errorToastSlice } from "@/stores/errorToastSlice";
 
 window.DateTime = DateTime;
 interface Response {
@@ -211,6 +213,7 @@ function Main() {
                                 dispatch(
                                     fetchReservationsByObject(response.id!)
                                 );
+                                dispatch(fetchObjectById(response.id!));
                                 setCurrentObjectID(response.id!);
                                 setCalendarModal(true);
                             });
@@ -399,6 +402,50 @@ function Main() {
     const reservationActions = reservationSlice.actions;
     const clientActions = clientSlice.actions;
     const dispatch = useAppDispatch();
+    const { setErrorToast } = errorToastSlice.actions;
+
+    useEffect(() => {
+        if (status === Status.ERROR && error) {
+            dispatch(setErrorToast({ message: error, isError: true }));
+            stopLoader(setIsLoaderOpen);
+
+            dispatch(objectActions.resetStatus());
+        }
+        // if (
+        //     reservationState.statusAll === Status.ERROR &&
+        //     reservationState.error
+        // ) {
+        //     dispatch(
+        //         setErrorToast({
+        //             message: reservationState.error,
+        //             isError: true,
+        //         })
+        //     );
+        //     stopLoader(setIsLoaderOpen);
+
+        //     dispatch(reservationActions.resetStatus());
+        // }
+        // if (
+        //     reservationState.statusOne === Status.ERROR &&
+        //     reservationState.error
+        // ) {
+        //     dispatch(
+        //         setErrorToast({
+        //             message: reservationState.error,
+        //             isError: true,
+        //         })
+        //     );
+        //     stopLoader(setIsLoaderOpen);
+
+        //     dispatch(reservationActions.resetStatusOne());
+        // }
+    }, [
+        status,
+        error,
+        reservationState.statusAll,
+        reservationState.error,
+        reservationState.statusOne,
+    ]);
 
     useEffect(() => {
         if (!isCreated && !isUpdated && !isActiveStatusUpdated && !isDeleted) {

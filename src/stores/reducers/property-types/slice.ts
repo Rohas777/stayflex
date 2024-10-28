@@ -25,45 +25,69 @@ export const propertyTypeSlice = createSlice({
         resetIsDeleted: (state) => {
             state.isDeleted = false;
         },
+        resetStatus: (state) => {
+            state.status = Status.LOADING;
+            state.error = null;
+        },
     },
     extraReducers(builder) {
-        builder.addCase(fetchPropertyTypes.fulfilled, (state, action) => {
-            state.propertyTypes = action.payload.apartments;
-        });
-
         builder
-            .addCase(createPropertyType.fulfilled, (state) => {
-                state.isCreated = true;
-            })
-            .addCase(deletePropertyType.fulfilled, (state) => {
-                state.isDeleted = true;
-            });
-        builder
-            .addMatcher(isPending, (state) => {
-                state.propertyTypes = [];
-                state.status = Status.LOADING;
-                state.error = null;
-            })
-            .addMatcher(isFulfilled, (state) => {
+            .addCase(fetchPropertyTypes.fulfilled, (state, action) => {
+                state.propertyTypes = action.payload.apartments;
                 state.status = Status.SUCCESS;
                 state.error = null;
             })
-            .addMatcher(isRejected, (state, action: PayloadAction<string>) => {
-                state.propertyTypes = [];
-                state.error = action.payload;
-                state.status = Status.ERROR;
-            });
+            .addCase(fetchPropertyTypes.pending, (state) => {
+                state.status = Status.LOADING;
+                state.error = null;
+            })
+            .addCase(
+                fetchPropertyTypes.rejected,
+                (state, action: PayloadAction<any>) => {
+                    state.propertyTypes = [];
+                    state.error = action.payload;
+                    state.status = Status.ERROR;
+                }
+            );
+        builder
+            .addCase(createPropertyType.fulfilled, (state, action) => {
+                state.status = Status.SUCCESS;
+                state.error = null;
+                state.isCreated = true;
+            })
+            .addCase(createPropertyType.pending, (state) => {
+                state.status = Status.LOADING;
+                state.error = null;
+                state.isCreated = false;
+            })
+            .addCase(
+                createPropertyType.rejected,
+                (state, action: PayloadAction<any>) => {
+                    state.error = action.payload;
+                    state.status = Status.ERROR;
+                    state.isCreated = false;
+                }
+            );
+        builder
+            .addCase(deletePropertyType.fulfilled, (state, action) => {
+                state.status = Status.SUCCESS;
+                state.error = null;
+                state.isDeleted = true;
+            })
+            .addCase(deletePropertyType.pending, (state) => {
+                state.status = Status.LOADING;
+                state.error = null;
+                state.isDeleted = false;
+            })
+            .addCase(
+                deletePropertyType.rejected,
+                (state, action: PayloadAction<any>) => {
+                    state.error = action.payload;
+                    state.status = Status.ERROR;
+                    state.isDeleted = false;
+                }
+            );
     },
 });
 
 export default propertyTypeSlice.reducer;
-
-const isRejected = (action: AnyAction) => {
-    return action.type.endsWith("rejected");
-};
-const isFulfilled = (action: AnyAction) => {
-    return action.type.endsWith("fulfilled");
-};
-const isPending = (action: AnyAction) => {
-    return action.type.endsWith("pending");
-};
