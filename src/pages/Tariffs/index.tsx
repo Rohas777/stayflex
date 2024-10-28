@@ -41,7 +41,6 @@ function Main() {
     );
     const { resetIsCreated, resetStatus, resetStatusByID } =
         tariffSlice.actions;
-    const { setErrorToast } = errorToastSlice.actions;
     const dispatch = useAppDispatch();
 
     const onCreate = async (tariffData: TariffCreateType) => {
@@ -51,6 +50,7 @@ function Main() {
         await dispatch(updateTariff(tariffData));
     };
 
+    const { setErrorToast } = errorToastSlice.actions;
     useEffect(() => {
         if (statusAll === Status.ERROR && error) {
             dispatch(setErrorToast({ message: error, isError: true }));

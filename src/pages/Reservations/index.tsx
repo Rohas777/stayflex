@@ -41,6 +41,7 @@ import { clientSlice } from "@/stores/reducers/clients/slice";
 import { di } from "@fullcalendar/core/internal-common";
 import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
 import clsx from "clsx";
+import { errorToastSlice } from "@/stores/errorToastSlice";
 
 window.DateTime = DateTime;
 interface Response {
@@ -257,6 +258,7 @@ function Main() {
                             });
                             editA.addEventListener("click", function () {
                                 dispatch(fetchReservationById(response.id!));
+                                dispatch(fetchObjects());
                                 setButtonModalCreate(true);
                             });
                             deleteA.addEventListener("click", function () {
@@ -404,11 +406,16 @@ function Main() {
         isDeleted,
         error,
     } = useAppSelector((state) => state.reservation);
-    const { resetIsCreated, resetIsUpdated, resetReservationOne } =
-        reservationSlice.actions;
+    const {
+        resetIsCreated,
+        resetIsUpdated,
+        resetIsDeleted,
+        resetReservationOne,
+        resetStatus,
+        resetStatusOne,
+    } = reservationSlice.actions;
 
     const { resetClientByPhone } = clientSlice.actions;
-
     const dispatch = useAppDispatch();
 
     useEffect(() => {
@@ -458,11 +465,22 @@ function Main() {
     }) => {
         await dispatch(updateReservationStatus(reservationData));
     };
+    const { setErrorToast } = errorToastSlice.actions;
     useEffect(() => {
-        if (statusOne === Status.ERROR) {
+        if (statusAll === Status.ERROR && error) {
+            dispatch(setErrorToast({ message: error, isError: true }));
             stopLoader(setIsLoaderOpen);
-            console.log(error);
+
+            dispatch(resetStatus());
         }
+        if (statusOne === Status.ERROR && error) {
+            dispatch(setErrorToast({ message: error, isError: true }));
+            stopLoader(setIsLoaderOpen);
+
+            dispatch(resetStatusOne());
+        }
+    }, [statusAll, error, statusOne]);
+    useEffect(() => {
         if (isCreated || isUpdated || isDeleted) {
             dispatch(fetchReservations());
             setButtonModalCreate(false);
@@ -489,9 +507,10 @@ function Main() {
             dispatch(resetReservationOne());
             dispatch(resetIsCreated());
             dispatch(resetIsUpdated());
+            dispatch(resetIsDeleted());
             dispatch(resetClientByPhone());
         }
-    }, [isCreated, statusOne, isUpdated, isDeleted]);
+    }, [isCreated, isUpdated, isDeleted]);
 
     return (
         <>

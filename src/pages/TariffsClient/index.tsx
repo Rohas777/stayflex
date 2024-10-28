@@ -10,6 +10,8 @@ import { Status } from "@/stores/reducers/types";
 import LoadingIcon from "@/components/Base/LoadingIcon";
 import { ITariff } from "@/stores/models/ITariff";
 import * as lucideIcons from "lucide-react";
+import { tariffSlice } from "@/stores/reducers/tariffs/slice";
+import { errorToastSlice } from "@/stores/errorToastSlice";
 
 type IconType = keyof typeof lucideIcons.icons;
 function Main() {
@@ -19,10 +21,24 @@ function Main() {
     const icons = lucideIcons.icons;
 
     const location = useLocation();
-    const { tariffs, statusAll, error } = useAppSelector(
+    const { tariffs, statusAll, error, statusByID } = useAppSelector(
         (state) => state.tariff
     );
+    const { resetStatusByID, resetStatus } = tariffSlice.actions;
     const dispatch = useAppDispatch();
+    const { setErrorToast } = errorToastSlice.actions;
+    useEffect(() => {
+        if (statusAll === Status.ERROR && error) {
+            dispatch(setErrorToast({ message: error, isError: true }));
+
+            dispatch(resetStatus());
+        }
+        if (statusByID === Status.ERROR && error) {
+            dispatch(setErrorToast({ message: error, isError: true }));
+
+            dispatch(resetStatusByID());
+        }
+    }, [statusAll, error, statusByID]);
     const chunkTariffs = (array: ITariff[], size: number) =>
         Array.from({ length: Math.ceil(array.length / size) }, (_, index) =>
             array.slice(index * size, index * size + size)

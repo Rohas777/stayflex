@@ -22,6 +22,7 @@ import {
 import { Status } from "@/stores/reducers/types";
 import LoadingIcon from "@/components/Base/LoadingIcon";
 import { convertDateString } from "@/utils/customUtils";
+import { errorToastSlice } from "@/stores/errorToastSlice";
 
 window.DateTime = DateTime;
 interface Response {
@@ -296,11 +297,24 @@ function Main() {
         }
     };
 
-    const { reservations, statusAll, error } = useAppSelector(
+    const { reservations, statusAll, error, statusOne } = useAppSelector(
         (state) => state.reservation
     );
-    const {} = reservationSlice.actions;
+    const { resetStatus, resetStatusOne } = reservationSlice.actions;
     const dispatch = useAppDispatch();
+    const { setErrorToast } = errorToastSlice.actions;
+    useEffect(() => {
+        if (statusAll === Status.ERROR && error) {
+            dispatch(setErrorToast({ message: error, isError: true }));
+
+            dispatch(resetStatus());
+        }
+        if (statusOne === Status.ERROR && error) {
+            dispatch(setErrorToast({ message: error, isError: true }));
+
+            dispatch(resetStatusOne());
+        }
+    }, [statusAll, error, statusOne]);
 
     const params = useParams();
 
