@@ -34,7 +34,9 @@ interface Response {
 
 function Main() {
     const [buttonModalPreview, setButtonModalPreview] = useState(false);
-    const [rowAcionFocus, setRowAcionFocus] = useState<Response | null>(null);
+    const [currentReservation, setCurrentReservation] =
+        useState<Response | null>(null);
+
     const tableRef = createRef<HTMLDivElement>();
     const tabulator = useRef<Tabulator>();
     const [filter, setFilter] = useState({
@@ -178,10 +180,7 @@ function Main() {
                             a.addEventListener("hover", function () {});
                             info.addEventListener("click", function (event) {
                                 event.preventDefault();
-                                const row = tableData.find(
-                                    (row) => row.id === response.id
-                                );
-                                setRowAcionFocus(row ? row : null);
+                                setCurrentReservation(response);
                                 setButtonModalPreview(true);
                             });
                             return a;
@@ -482,14 +481,14 @@ function Main() {
                     </a>
                     <div className="p-5">
                         <div className="mt-5 text-lg font-bold text-center">
-                            Booking information
+                            Информация о брони
                         </div>
                         <ul className="mt-7">
                             <li>
                                 <strong className="inline-block w-20">
                                     Объект:
                                 </strong>
-                                {rowAcionFocus?.object}
+                                {currentReservation?.object}
                             </li>
                             <li>
                                 <strong className="inline-block mt-3 w-20">
@@ -513,7 +512,7 @@ function Main() {
                                 <strong className="inline-block mt-3 mb-10 w-20">
                                     Дата:
                                 </strong>
-                                {rowAcionFocus?.date}
+                                {currentReservation?.date}
                             </li>
                         </ul>
                     </div>
