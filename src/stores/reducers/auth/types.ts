@@ -7,6 +7,7 @@ export interface AuthState {
     status: Status;
     signInStatus: Status;
     signUpStatus: Status;
+    logoutStatus: Status;
     codeStatus: Status;
     error: string | null;
 }

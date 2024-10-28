@@ -10,6 +10,7 @@ export interface ClientState {
     errorByPhone: string | null;
     isCreated: boolean;
     createdClient: IClient | null;
+    isFound: boolean | null;
 }
 
 export interface ClientCreateType {

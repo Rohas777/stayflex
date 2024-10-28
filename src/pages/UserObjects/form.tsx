@@ -220,7 +220,7 @@ function ReservationForm({
         if (!tel) {
             errors.tel = "Обязательно введите телефон клиента";
         }
-        if (clientsState.statusByPhone === Status.ERROR) {
+        if (!clientsState.isFound && clientsState.isFound !== null) {
             await nameValidation.validate(formData.get("name")).catch((err) => {
                 errors.name = err.message;
             });
@@ -273,7 +273,7 @@ function ReservationForm({
         }
         setFormData(form);
 
-        if (clientsState.statusByPhone === Status.ERROR) {
+        if (!clientsState.isFound && clientsState.isFound !== null) {
             await dispatch(
                 createClient({
                     fullname: String(form.get("name")),
@@ -308,7 +308,7 @@ function ReservationForm({
             dispatch(clientActions.resetIsCreated());
             setIsSubmitting(false);
         }
-        if (clientsState.statusByPhone === Status.SUCCESS) {
+        if (clientsState.isFound) {
             const reservationData: ReservationCreateType = {
                 start_date: formatDate(new Date(startDate)),
                 end_date: formatDate(new Date(endDate)),
@@ -329,12 +329,7 @@ function ReservationForm({
             dispatch(clientActions.resetIsCreated());
             setIsSubmitting(false);
         }
-    }, [
-        clientsState.statusByPhone,
-        clientsState.isCreated,
-        isSubmitting,
-        formData,
-    ]);
+    }, [clientsState.isFound, clientsState.isCreated, isSubmitting, formData]);
 
     useEffect(() => {
         if (!currentReservation) return;
@@ -623,7 +618,7 @@ function ReservationForm({
                         )}
                     </div>
 
-                    {clientsState.statusByPhone === Status.ERROR && (
+                    {!clientsState.isFound && clientsState.isFound !== null && (
                         <>
                             <div className="input-form mt-3">
                                 <FormLabel
@@ -691,7 +686,7 @@ function ReservationForm({
                             </div>
                         </>
                     )}
-                    {clientsState.statusByPhone === Status.SUCCESS && (
+                    {clientsState.isFound && (
                         <>
                             <ul className="mt-3 ml-2">
                                 <li className="mt-1">

@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Status } from "../types";
 import { AuthState } from "./types";
-import { activate, auth, signIn, signUp } from "./actions";
+import { activate, auth, logout, signIn, signUp } from "./actions";
 
 const initialState: AuthState = {
     user: null,
@@ -9,6 +9,7 @@ const initialState: AuthState = {
     status: Status.LOADING,
     signInStatus: Status.LOADING,
     signUpStatus: Status.LOADING,
+    logoutStatus: Status.LOADING,
     codeStatus: Status.LOADING,
     error: null,
 };
@@ -94,6 +95,19 @@ export const authSlice = createSlice({
                 state.error = action.payload;
                 state.codeStatus = Status.ERROR;
                 state.status = Status.ERROR;
+            });
+        builder
+            .addCase(logout.fulfilled, (state, action) => {
+                state.logoutStatus = Status.SUCCESS;
+                state.error = null;
+            })
+            .addCase(logout.pending, (state) => {
+                state.logoutStatus = Status.LOADING;
+                state.error = null;
+            })
+            .addCase(logout.rejected, (state, action: PayloadAction<any>) => {
+                state.error = action.payload;
+                state.logoutStatus = Status.ERROR;
             });
     },
 });

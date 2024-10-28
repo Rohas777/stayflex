@@ -2,6 +2,7 @@ import { AnyAction, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Status } from "../types";
 import { ClientState } from "./types";
 import { createClient, fetchClientByPhone, fetchClients } from "./actions";
+import { error } from "console";
 
 const initialState: ClientState = {
     clients: [],
@@ -12,6 +13,7 @@ const initialState: ClientState = {
     errorByPhone: null,
     isCreated: false,
     createdClient: null,
+    isFound: null,
 };
 
 export const clientSlice = createSlice({
@@ -22,10 +24,15 @@ export const clientSlice = createSlice({
             state.clientByPhone = null;
             state.statusByPhone = Status.LOADING;
             state.errorByPhone = null;
+            state.isFound = null;
         },
         resetIsCreated: (state) => {
             state.isCreated = false;
             state.createdClient = null;
+        },
+        resetStatus: (state) => {
+            state.status = Status.LOADING;
+            state.error = null;
         },
     },
     extraReducers(builder) {
@@ -50,8 +57,14 @@ export const clientSlice = createSlice({
             );
         builder
             .addCase(fetchClientByPhone.fulfilled, (state, action) => {
-                state.clientByPhone = action.payload;
                 state.statusByPhone = Status.SUCCESS;
+                if (action.payload.status === 404) {
+                    state.clientByPhone = null;
+                    state.isFound = false;
+                    return;
+                }
+                state.clientByPhone = action.payload;
+                state.isFound = true;
             })
             .addCase(fetchClientByPhone.pending, (state, action) => {
                 state.clientByPhone = null;

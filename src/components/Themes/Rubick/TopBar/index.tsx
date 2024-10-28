@@ -7,11 +7,12 @@ import fakerData from "@/utils/faker";
 import _ from "lodash";
 import clsx from "clsx";
 import { Transition } from "@headlessui/react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "@/stores/hooks";
 import { startLoader } from "@/utils/customUtils";
 import { logout } from "@/stores/reducers/auth/actions";
 import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
+import { Status } from "@/stores/reducers/types";
 
 function Main() {
     const [searchDropdown, setSearchDropdown] = useState(false);
@@ -27,11 +28,21 @@ function Main() {
     const dispatch = useAppDispatch();
 
     const { authorizedUser } = useAppSelector((state) => state.user);
+    const { logoutStatus } = useAppSelector((state) => state.auth);
+
+    const navigate = useNavigate();
 
     const onLogout = () => {
         startLoader(setIsLoaderOpen);
         dispatch(logout());
     };
+
+    useEffect(() => {
+        if (logoutStatus === Status.SUCCESS) {
+            navigate("/login");
+            setIsLoaderOpen(false);
+        }
+    }, [logoutStatus]);
 
     useEffect(() => {
         if (location.pathname !== "/") {

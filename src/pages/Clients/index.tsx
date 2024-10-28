@@ -19,6 +19,8 @@ import { fetchClients } from "@/stores/reducers/clients/actions";
 import { Status } from "@/stores/reducers/types";
 import LoadingIcon from "@/components/Base/LoadingIcon";
 import { ListPlus } from "lucide-react";
+import { errorToastSlice } from "@/stores/errorToastSlice";
+import { stopLoader } from "@/utils/customUtils";
 
 window.DateTime = DateTime;
 interface Response {
@@ -337,8 +339,17 @@ function Main() {
     };
 
     const { clients, status, error } = useAppSelector((state) => state.client);
-    const {} = clientSlice.actions;
+    const clientActions = clientSlice.actions;
     const dispatch = useAppDispatch();
+    const { setErrorToast } = errorToastSlice.actions;
+
+    useEffect(() => {
+        if (status === Status.ERROR && error) {
+            dispatch(setErrorToast({ message: error, isError: true }));
+
+            dispatch(clientActions.resetStatus());
+        }
+    }, [status, error]);
 
     useEffect(() => {
         initTabulator();
