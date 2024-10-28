@@ -42,6 +42,8 @@ import {
     ReservationUpdateType,
 } from "@/stores/reducers/reservations/types";
 import { clientSlice } from "@/stores/reducers/clients/slice";
+import { errorToastSlice } from "@/stores/errorToastSlice";
+import { userSlice } from "@/stores/reducers/users/slice";
 
 window.DateTime = DateTime;
 interface Response {
@@ -371,8 +373,84 @@ function Main() {
     const reservationState = useAppSelector((state) => state.reservation);
     const reservationActions = reservationSlice.actions;
     const clientActions = clientSlice.actions;
+    const userActions = userSlice.actions;
     const userOne = useAppSelector((state) => state.user.userOne);
+    const userState = useAppSelector((state) => state.user);
     const dispatch = useAppDispatch();
+    const clientsState = useAppSelector((state) => state.client);
+    const { setErrorToast } = errorToastSlice.actions;
+
+    useEffect(() => {
+        if (status === Status.ERROR && error) {
+            dispatch(setErrorToast({ message: error, isError: true }));
+            stopLoader(setIsLoaderOpen);
+
+            dispatch(objectActions.resetStatus());
+        }
+        if (
+            reservationState.statusAll === Status.ERROR &&
+            reservationState.error
+        ) {
+            dispatch(
+                setErrorToast({
+                    message: reservationState.error,
+                    isError: true,
+                })
+            );
+            stopLoader(setIsLoaderOpen);
+
+            dispatch(reservationActions.resetStatus());
+        }
+        if (
+            reservationState.statusOne === Status.ERROR &&
+            reservationState.error
+        ) {
+            dispatch(
+                setErrorToast({
+                    message: reservationState.error,
+                    isError: true,
+                })
+            );
+            stopLoader(setIsLoaderOpen);
+
+            dispatch(reservationActions.resetStatusOne());
+        }
+        if (
+            clientsState.statusByPhone === Status.ERROR &&
+            clientsState.errorByPhone
+        ) {
+            dispatch(
+                setErrorToast({
+                    message: clientsState.errorByPhone,
+                    isError: true,
+                })
+            );
+            stopLoader(setIsLoaderOpen);
+
+            dispatch(clientActions.resetClientByPhone());
+        }
+        if (userState.statusOne === Status.ERROR && userState.error) {
+            dispatch(
+                setErrorToast({
+                    message: userState.error,
+                    isError: true,
+                })
+            );
+            stopLoader(setIsLoaderOpen);
+
+            dispatch(userActions.resetStatusOne());
+        }
+    }, [
+        status,
+        error,
+        reservationState.statusAll,
+        reservationState.error,
+        reservationState.statusOne,
+        clientsState.statusByPhone,
+        clientsState.errorByPhone,
+        userState.statusOne,
+        userState.error,
+    ]);
 
     useEffect(() => {
         if (!isCreated && !isUpdated && !isActiveStatusUpdated && !isDeleted) {

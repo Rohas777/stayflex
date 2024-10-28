@@ -278,7 +278,7 @@ function ReservationForm({
                     fullname: String(form.get("name")),
                     email: String(form.get("email")),
                     phone: tel!,
-                    reiting: 0, //FIXME
+                    reiting: 0,
                 })
             );
         }

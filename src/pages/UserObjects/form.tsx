@@ -35,6 +35,8 @@ import { formatDate, startLoader, stopLoader } from "@/utils/customUtils";
 import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
 import { IReservation } from "@/stores/models/IReservation";
 import { reservationStatus, reservationStatusesWithNames } from "@/vars";
+import { reservationSlice } from "@/stores/reducers/reservations/slice";
+import { errorToastSlice } from "@/stores/errorToastSlice";
 
 interface ReservationFormProps {
     onCreate: (reservation: ReservationCreateType) => void;
@@ -94,7 +96,6 @@ function ReservationForm({
 
     const objectsState = useAppSelector((state) => state.object);
     const clientsState = useAppSelector((state) => state.client);
-    const objectActions = objectSlice.actions;
     const clientActions = clientSlice.actions;
 
     const dispatch = useAppDispatch();

@@ -13,7 +13,7 @@ export const signIn = createAsyncThunk(
             if (error.response.status === 400) {
                 return thunkAPI.rejectWithValue("Пользователь не активирован");
             }
-            if (error.response.status === 401) {
+            if (error.response.status === 406) {
                 return thunkAPI.rejectWithValue("Неверный email или пароль");
             }
             if (error.response.status === 403) {

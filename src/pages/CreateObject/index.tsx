@@ -30,6 +30,9 @@ import { DropzoneFile } from "dropzone";
 import { objectSlice } from "@/stores/reducers/objects/slice";
 import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
 import Tippy from "@/components/Base/Tippy";
+import { amenitySlice } from "@/stores/reducers/amenities/slice";
+import { propertyTypeSlice } from "@/stores/reducers/property-types/slice";
+import { errorToastSlice } from "@/stores/errorToastSlice";
 
 window.DateTime = DateTime;
 
@@ -51,15 +54,62 @@ type CustomErrors = {
 };
 
 function Main() {
-    const regionsSelector = useAppSelector((state) => state.region);
-    const amenitiesSelector = useAppSelector((state) => state.amenity);
-    const propertyTypesSelector = useAppSelector((state) => state.propertyType);
+    const regionsState = useAppSelector((state) => state.region);
+    const amenitiesState = useAppSelector((state) => state.amenity);
+    const propertyTypesState = useAppSelector((state) => state.propertyType);
     const { isCreated, status, error } = useAppSelector(
         (state) => state.object
     );
     const { resetIsCreated } = objectSlice.actions;
 
     const dispatch = useAppDispatch();
+    const amenityActions = amenitySlice.actions;
+    const propertyTypeActions = propertyTypeSlice.actions;
+    const objectActions = objectSlice.actions;
+    const { setErrorToast } = errorToastSlice.actions;
+
+    useEffect(() => {
+        if (status === Status.ERROR && error) {
+            dispatch(setErrorToast({ message: error, isError: true }));
+            stopLoader(setIsLoaderOpen);
+
+            dispatch(objectActions.resetStatus());
+        }
+        if (amenitiesState.status === Status.ERROR && amenitiesState.error) {
+            dispatch(
+                setErrorToast({
+                    message: amenitiesState.error,
+                    isError: true,
+                })
+            );
+            stopLoader(setIsLoaderOpen);
+
+            dispatch(amenityActions.resetStatus());
+        }
+        if (
+            propertyTypesState.status === Status.ERROR &&
+            propertyTypesState.error
+        ) {
+            dispatch(
+                setErrorToast({
+                    message: propertyTypesState.error,
+                    isError: true,
+                })
+            );
+            stopLoader(setIsLoaderOpen);
+
+            dispatch(propertyTypeActions.resetStatus());
+        }
+    }, [
+        status,
+        error,
+        regionsState.status,
+        regionsState.error,
+        amenitiesState.status,
+        amenitiesState.error,
+        propertyTypesState.status,
+        propertyTypesState.error,
+    ]);
 
     const [selectedRegion, setSelectedRegion] = useState("-1");
     const [citiesByRegion, setCitiesByRegion] = useState<City[]>([]);
@@ -267,7 +317,7 @@ function Main() {
     useEffect(() => {
         const regionID = Number(selectedRegion);
         if (regionID) {
-            const currentRegion = regionsSelector.regions.find(
+            const currentRegion = regionsState.regions.find(
                 (region) => region.id == regionID
             );
             const cities = currentRegion?.cities;
@@ -275,7 +325,7 @@ function Main() {
         }
     }, [selectedRegion]);
 
-    if (regionsSelector.status === Status.LOADING && !isLoaderOpen) {
+    if (regionsState.status === Status.LOADING && !isLoaderOpen) {
         return (
             <>
                 <div className="w-full h-screen relative">
@@ -372,7 +422,7 @@ function Main() {
                                     }}
                                     className="w-full"
                                 >
-                                    {regionsSelector.regions.map((region) => {
+                                    {regionsState.regions.map((region) => {
                                         if (!region.cities.length) return;
                                         return (
                                             <option
@@ -655,7 +705,7 @@ function Main() {
                                     }}
                                     className="w-full"
                                 >
-                                    {propertyTypesSelector.propertyTypes.map(
+                                    {propertyTypesState.propertyTypes.map(
                                         (propertyType) => (
                                             <option
                                                 key={propertyType.id}
@@ -743,7 +793,7 @@ function Main() {
                                 className="w-full"
                                 multiple
                             >
-                                {amenitiesSelector.amenities.map((amenity) => (
+                                {amenitiesState.amenities.map((amenity) => (
                                     <option key={amenity.id} value={amenity.id}>
                                         {amenity.name}
                                     </option>
