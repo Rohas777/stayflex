@@ -24,67 +24,95 @@ export const tariffSlice = createSlice({
         resetIsCreated: (state) => {
             state.isCreated = false;
         },
+        resetStatus: (state) => {
+            state.statusAll = Status.LOADING;
+            state.error = null;
+        },
+        resetStatusByID: (state) => {
+            state.statusByID = Status.LOADING;
+            state.error = null;
+        },
     },
     extraReducers(builder) {
         builder
             .addCase(fetchTariffs.fulfilled, (state, action) => {
-                state.statusAll = Status.SUCCESS;
                 state.tariffs = action.payload;
+                state.statusAll = Status.SUCCESS;
+                state.error = null;
             })
             .addCase(fetchTariffs.pending, (state) => {
                 state.statusAll = Status.LOADING;
-                state.tariffs = [];
+                state.error = null;
             })
-            .addCase(fetchTariffs.rejected, (state) => {
-                state.statusByID = Status.ERROR;
-                state.tariffs = [];
-            });
+            .addCase(
+                fetchTariffs.rejected,
+                (state, action: PayloadAction<any>) => {
+                    state.tariffs = [];
+                    state.error = action.payload;
+                    state.statusAll = Status.ERROR;
+                }
+            );
         builder
             .addCase(fetchTariffById.fulfilled, (state, action) => {
-                state.statusByID = Status.SUCCESS;
                 state.tariffById = action.payload;
+                state.statusByID = Status.SUCCESS;
+                state.error = null;
             })
             .addCase(fetchTariffById.pending, (state) => {
                 state.statusByID = Status.LOADING;
-                state.tariffById = null;
-            })
-            .addCase(fetchTariffById.rejected, (state) => {
-                state.tariffById = null;
-                state.statusByID = Status.ERROR;
-            });
-        builder
-            .addCase(createTariff.fulfilled, (state) => {
-                state.isCreated = true;
-            })
-            .addCase(updateTariff.fulfilled, (state) => {
-                state.isCreated = true;
-            });
-        // .addCase(deletUser.fulfilled, (state, action) => {
-        //     state.users = state.users.filter(
-        //         (user) => user.id !== Number(action.payload)
-        //     );
-        // });
-        builder
-            .addMatcher(isPending, (state) => {
                 state.error = null;
             })
-            .addMatcher(isFulfilled, (state) => {
+            .addCase(
+                fetchTariffById.rejected,
+                (state, action: PayloadAction<any>) => {
+                    state.tariffById = null;
+                    state.error = action.payload;
+                    state.statusByID = Status.ERROR;
+                }
+            );
+        builder
+            .addCase(createTariff.fulfilled, (state, action) => {
+                state.tariffById = action.payload;
+                state.statusAll = Status.SUCCESS;
                 state.error = null;
+                state.isCreated = true;
             })
-            .addMatcher(isRejected, (state, action: PayloadAction<string>) => {
-                state.error = action.payload;
-            });
+            .addCase(createTariff.pending, (state) => {
+                state.statusAll = Status.LOADING;
+                state.error = null;
+                state.isCreated = false;
+            })
+            .addCase(
+                createTariff.rejected,
+                (state, action: PayloadAction<any>) => {
+                    state.tariffById = null;
+                    state.error = action.payload;
+                    state.statusAll = Status.ERROR;
+                    state.isCreated = false;
+                }
+            );
+        builder
+            .addCase(updateTariff.fulfilled, (state, action) => {
+                state.tariffById = action.payload;
+                state.statusAll = Status.SUCCESS;
+                state.error = null;
+                state.isCreated = true;
+            })
+            .addCase(updateTariff.pending, (state) => {
+                state.statusAll = Status.LOADING;
+                state.error = null;
+                state.isCreated = false;
+            })
+            .addCase(
+                updateTariff.rejected,
+                (state, action: PayloadAction<any>) => {
+                    state.tariffById = null;
+                    state.error = action.payload;
+                    state.statusAll = Status.ERROR;
+                    state.isCreated = false;
+                }
+            );
     },
 });
 
 export default tariffSlice.reducer;
-
-const isRejected = (action: AnyAction) => {
-    return action.type.endsWith("rejected");
-};
-const isFulfilled = (action: AnyAction) => {
-    return action.type.endsWith("fulfilled");
-};
-const isPending = (action: AnyAction) => {
-    return action.type.endsWith("pending");
-};

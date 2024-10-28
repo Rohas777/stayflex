@@ -26,6 +26,7 @@ import { stopLoader } from "@/utils/customUtils";
 import { tariffSlice } from "@/stores/reducers/tariffs/slice";
 import { IconType } from "@/vars";
 import * as lucideIcons from "lucide-react";
+import { errorToastSlice } from "@/stores/errorToastSlice";
 
 function Main() {
     const [buttonModalPreview, setButtonModalPreview] = useState(false);
@@ -38,7 +39,9 @@ function Main() {
     const { tariffs, statusAll, isCreated, statusByID, error } = useAppSelector(
         (state) => state.tariff
     );
-    const { resetIsCreated } = tariffSlice.actions;
+    const { resetIsCreated, resetStatus, resetStatusByID } =
+        tariffSlice.actions;
+    const { setErrorToast } = errorToastSlice.actions;
     const dispatch = useAppDispatch();
 
     const onCreate = async (tariffData: TariffCreateType) => {
@@ -47,11 +50,23 @@ function Main() {
     const onUpdate = async (tariffData: TariffUpdateType) => {
         await dispatch(updateTariff(tariffData));
     };
+
     useEffect(() => {
-        if (statusByID === Status.ERROR) {
+        if (statusAll === Status.ERROR && error) {
+            dispatch(setErrorToast({ message: error, isError: true }));
             stopLoader(setIsLoaderOpen);
-            console.log(error);
+
+            dispatch(resetStatus());
         }
+        if (statusByID === Status.ERROR && error) {
+            dispatch(setErrorToast({ message: error, isError: true }));
+            stopLoader(setIsLoaderOpen);
+
+            dispatch(resetStatusByID());
+        }
+    }, [statusAll, error, statusByID]);
+
+    useEffect(() => {
         if (isCreated) {
             dispatch(fetchTariffs());
             setButtonModalPreview(false);
@@ -75,7 +90,7 @@ function Main() {
             stopLoader(setIsLoaderOpen);
             dispatch(resetIsCreated());
         }
-    }, [isCreated, statusByID]);
+    }, [isCreated]);
 
     const chunkTariffs = (array: ITariff[], size: number) =>
         Array.from({ length: Math.ceil(array.length / size) }, (_, index) =>
