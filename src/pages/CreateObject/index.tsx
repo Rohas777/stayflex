@@ -534,7 +534,7 @@ function Main() {
                                 htmlFor="validation-form-area"
                                 className="flex flex-col w-full sm:flex-row"
                             >
-                                Площадь
+                                Площадь, м2
                                 <span className="mt-1 text-xs sm:ml-auto sm:mt-0 text-slate-500">
                                     Обязательное
                                 </span>
@@ -542,13 +542,13 @@ function Main() {
                             <FormInput
                                 {...register("area")}
                                 id="validation-form-area"
-                                type="text"
+                                type="number"
                                 name="area"
                                 className={clsx({
                                     "border-danger": errors.area,
                                 })}
                                 defaultValue={undefined}
-                                placeholder="100 м2"
+                                placeholder="100"
                             />
                             {errors.area && (
                                 <div className="mt-2 text-danger">

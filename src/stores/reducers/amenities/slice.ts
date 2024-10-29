@@ -5,7 +5,7 @@ import { createAmenity, deleteAmenity, fetchAmenities } from "./actions";
 
 const initialState: AmenityState = {
     amenities: [],
-    status: Status.LOADING,
+    status: Status.IDLE,
     error: null,
     isCreated: false,
     isDeleted: false,
@@ -22,7 +22,7 @@ export const amenitySlice = createSlice({
             state.isDeleted = false;
         },
         resetStatus(state) {
-            state.status = Status.LOADING;
+            state.status = Status.IDLE;
             state.error = null;
         },
     },

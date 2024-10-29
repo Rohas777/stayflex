@@ -11,8 +11,8 @@ import {
 const initialState: TariffState = {
     tariffs: [],
     tariffById: null,
-    statusAll: Status.LOADING,
-    statusByID: Status.LOADING,
+    statusAll: Status.IDLE,
+    statusByID: Status.IDLE,
     error: null,
     isCreated: false,
 };
@@ -25,11 +25,11 @@ export const tariffSlice = createSlice({
             state.isCreated = false;
         },
         resetStatus: (state) => {
-            state.statusAll = Status.LOADING;
+            state.statusAll = Status.IDLE;
             state.error = null;
         },
         resetStatusByID: (state) => {
-            state.statusByID = Status.LOADING;
+            state.statusByID = Status.IDLE;
             state.error = null;
         },
     },

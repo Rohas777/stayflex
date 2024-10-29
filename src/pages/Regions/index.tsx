@@ -36,6 +36,7 @@ interface Response {
     id?: number;
     name?: string;
     objects?: number;
+    server?: string;
 }
 
 function Main() {
@@ -118,6 +119,23 @@ function Main() {
                             const response: Response = cell.getData();
                             return `<div class="flex lg:justify-center">
                                         <div class="font-medium whitespace-nowrap">${response.objects}</div>
+                                    </div>`;
+                        },
+                    },
+                    {
+                        title: "Сервер",
+                        minWidth: 200,
+                        field: "server",
+                        hozAlign: "center",
+                        headerHozAlign: "center",
+                        vertAlign: "middle",
+                        print: false,
+                        download: false,
+                        sorter: "number",
+                        formatter(cell) {
+                            const response: Response = cell.getData();
+                            return `<div class="flex lg:justify-center">
+                                        <div class="font-medium whitespace-nowrap">${response.server}</div>
                                     </div>`;
                         },
                     },
@@ -332,6 +350,7 @@ function Main() {
                 id: region.id,
                 name: region.name,
                 objects: Math.floor(Math.random() * 101),
+                server: "Server-1",
             }));
             tabulator.current
                 ?.setData(formattedData.reverse())

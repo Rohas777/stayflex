@@ -13,13 +13,13 @@ import {
 
 const initialState: ObjectState = {
     objects: [],
-    status: Status.LOADING,
+    status: Status.IDLE,
     error: null,
     isCreated: false,
     isUpdated: false,
     isDeleted: false,
     objectOne: null,
-    statusOne: Status.LOADING,
+    statusOne: Status.IDLE,
     isActiveStatusUpdated: false,
 };
 
@@ -41,14 +41,14 @@ export const objectSlice = createSlice({
         },
         resetObjectOne: (state) => {
             state.objectOne = null;
-            state.statusOne = Status.LOADING;
+            state.statusOne = Status.IDLE;
         },
         resetStatus: (state) => {
-            state.status = Status.LOADING;
+            state.status = Status.IDLE;
             state.error = null;
         },
         resetStatusOne: (state) => {
-            state.statusOne = Status.LOADING;
+            state.statusOne = Status.IDLE;
             state.error = null;
         },
     },

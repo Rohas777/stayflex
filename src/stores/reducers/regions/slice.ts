@@ -5,7 +5,7 @@ import { createRegion, deleteRegion, fetchRegions } from "./actions";
 
 const initialState: RegionState = {
     regions: [],
-    status: Status.LOADING,
+    status: Status.IDLE,
     error: null,
     isCreated: false,
     isDeleted: false,
@@ -22,7 +22,7 @@ export const regionSlice = createSlice({
             state.isDeleted = false;
         },
         resetStatus: (state) => {
-            state.status = Status.LOADING;
+            state.status = Status.IDLE;
             state.error = null;
         },
     },

@@ -1,5 +1,5 @@
-import enFlag from "/src/assets/images/flags/en.png";
-import ruFlag from "/src/assets/images/flags/ru.png";
+import enFlag from "/src/assets/images/flags/gb.svg";
+import ruFlag from "/src/assets/images/flags/ru.svg";
 import { useAppDispatch, useAppSelector } from "@/stores/hooks";
 import {
     selectColorScheme,
@@ -10,8 +10,10 @@ import { selectTheme, setTheme, setLayout, Themes } from "@/stores/themeSlice";
 import { selectDarkMode, setDarkMode } from "@/stores/darkModeSlice";
 import { Slideover } from "@/components/Base/Headless";
 import Lucide from "@/components/Base/Lucide";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import clsx from "clsx";
+import Tippy from "@/components/Base/Tippy";
+import TippyContent from "@/components/Base/TippyContent";
 
 function Main() {
     const dispatch = useAppDispatch();
@@ -102,19 +104,19 @@ function Main() {
                                 <div className="text-base font-medium">
                                     Язык системы
                                 </div>
-                                <div className="mt-5 grid grid-cols-3 gap-3.5">
+                                <div className="mt-5 grid grid-cols-5 gap-3.5">
                                     <div>
                                         <a
                                             // onClick={() =>
                                             //     switchDarkMode(false)
                                             // }
                                             className={clsx([
-                                                "aspect-square overflow-hidden rounded-full cursor-pointer bg-slate-200 box p-1 border-slate-300/80 block",
+                                                "aspect-square overflow-hidden rounded-md cursor-pointer bg-slate-200 box p-1 border-slate-300/80 block",
                                                 "[&.active]:border-2 [&.active]:border-theme-1/60",
                                                 !activeDarkMode ? "active" : "",
                                             ])}
                                         >
-                                            <div className="h-full">
+                                            <div className="h-full image-fit">
                                                 <img src={ruFlag} alt="Ru" />
                                             </div>
                                         </a>
@@ -123,22 +125,26 @@ function Main() {
                                         </div>
                                     </div>
                                     <div>
-                                        <a
-                                            // onClick={() => switchDarkMode(true)}
-                                            className={clsx([
-                                                "aspect-square rounded-full overflow-hidden cursor-not-allowed bg-slate-200 box p-1 border-slate-300/80 block",
-                                                "[&.active]:border-2 [&.active]:border-theme-1/60",
-                                                activeDarkMode ? "active" : "",
-                                            ])}
-                                        >
-                                            <div className="h-full">
-                                                <img src={enFlag} alt="En" />
-                                                <span className="absolute inset-0 size-full bg-slate-200 bg-opacity-70"></span>
-                                                <span className="absolute inset-0 text-black size-full flex items-center justify-center text-center text-sm font-bold">
-                                                    В разработке
-                                                </span>
-                                            </div>
-                                        </a>
+                                        <Tippy content="В разработке">
+                                            <a
+                                                // onClick={() => switchDarkMode(true)}
+                                                className={clsx([
+                                                    "aspect-square rounded-md overflow-hidden cursor-not-allowed bg-slate-200 box p-1 border-slate-300/80 block",
+                                                    "[&.active]:border-2 [&.active]:border-theme-1/60",
+                                                    activeDarkMode
+                                                        ? "active"
+                                                        : "",
+                                                ])}
+                                            >
+                                                <div className="h-full image-fit">
+                                                    <img
+                                                        src={enFlag}
+                                                        alt="En"
+                                                    />
+                                                    <span className="absolute inset-0 size-full bg-slate-200 bg-opacity-70"></span>
+                                                </div>
+                                            </a>
+                                        </Tippy>
                                         <div className="mt-2.5 text-center text-xs capitalize">
                                             Английский
                                         </div>

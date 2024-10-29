@@ -6,11 +6,11 @@ import { activate, auth, logout, signIn, signUp } from "./actions";
 const initialState: AuthState = {
     user: null,
     authTempUser: null,
-    status: Status.LOADING,
-    signInStatus: Status.LOADING,
-    signUpStatus: Status.LOADING,
-    logoutStatus: Status.LOADING,
-    codeStatus: Status.LOADING,
+    status: Status.IDLE,
+    signInStatus: Status.IDLE,
+    signUpStatus: Status.IDLE,
+    logoutStatus: Status.IDLE,
+    codeStatus: Status.IDLE,
     error: null,
 };
 
@@ -19,7 +19,7 @@ export const authSlice = createSlice({
     initialState,
     reducers: {
         resetStatus: (state) => {
-            state.status = Status.LOADING;
+            state.status = Status.IDLE;
             state.error = null;
         },
     },

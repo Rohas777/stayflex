@@ -3,7 +3,14 @@ export const schema = yup
     .object({
         name: yup.string().required("'Название' это обязательное поле"),
         address: yup.string().required("'Адрес' это обязательное поле"),
-        area: yup.string().required("'Площадь' это обязательное поле"),
+        area: yup
+            .number()
+            .lessThan(2147483647, "Превышено максимальное число")
+            .typeError("Площадь должна быть числовым значением")
+            .positive("Площадь не может быть отрицательной")
+            .integer("Площадь должна быть целым числом")
+            .moreThan(0, "Минимальная площадь: 1")
+            .required("'Площадь' это обязательное поле"),
         floor: yup.string().required("'Этаж' это обязательное поле"),
         room_count: yup
             .number()

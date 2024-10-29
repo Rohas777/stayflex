@@ -5,7 +5,7 @@ import { createCity, deleteCity, fetchCities } from "./actions";
 
 const initialState: CityState = {
     cities: [],
-    status: Status.LOADING,
+    status: Status.IDLE,
     error: null,
     isCreated: false,
     isDeleted: false,
@@ -22,7 +22,7 @@ export const citySlice = createSlice({
             state.isDeleted = false;
         },
         resetStatus(state) {
-            state.status = Status.LOADING;
+            state.status = Status.IDLE;
             state.error = null;
         },
     },

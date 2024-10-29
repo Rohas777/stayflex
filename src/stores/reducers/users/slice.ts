@@ -15,9 +15,9 @@ import { Status } from "../types";
 const initialState: UserState = {
     users: [],
     authorizedUser: null,
-    status: Status.LOADING,
-    statusOne: Status.LOADING,
-    authorizedUserStatus: Status.LOADING,
+    status: Status.IDLE,
+    statusOne: Status.IDLE,
+    authorizedUserStatus: Status.IDLE,
     userOne: null,
     isActiveStatusUpdated: false,
     error: null,
@@ -44,14 +44,14 @@ export const userSlice = createSlice({
         },
         resetUserOne: (state) => {
             state.userOne = null;
-            state.statusOne = Status.LOADING;
+            state.statusOne = Status.IDLE;
         },
         resetStatus: (state) => {
-            state.status = Status.LOADING;
+            state.status = Status.IDLE;
             state.error = null;
         },
         resetStatusOne: (state) => {
-            state.statusOne = Status.LOADING;
+            state.statusOne = Status.IDLE;
             state.error = null;
         },
     },

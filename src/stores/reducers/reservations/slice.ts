@@ -15,7 +15,7 @@ import {
 const initialState: ReservationState = {
     reservations: [],
     reservationOne: null,
-    statusAll: Status.LOADING,
+    statusAll: Status.IDLE,
     statusOne: Status.IDLE,
     error: null,
     isCreated: false,
@@ -41,7 +41,7 @@ export const reservationSlice = createSlice({
             state.statusOne = Status.IDLE;
         },
         resetStatus: (state) => {
-            state.statusAll = Status.LOADING;
+            state.statusAll = Status.IDLE;
             state.error = null;
         },
         resetStatusOne: (state) => {
