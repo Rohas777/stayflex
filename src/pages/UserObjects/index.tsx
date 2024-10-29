@@ -135,6 +135,23 @@ function Main() {
                         },
                     },
                     {
+                        title: "Сслыка",
+                        minWidth: 200,
+                        field: "id",
+                        hozAlign: "center",
+                        headerHozAlign: "center",
+                        vertAlign: "middle",
+                        print: false,
+                        download: false,
+                        sorter: "number",
+                        formatter(cell) {
+                            const response: Response = cell.getData();
+                            return `<div class="flex lg:justify-center">
+                                        <a href="/object/${response.id}" target="_blank" class="flex items-center font-medium whitespace-nowrap hover:text-primary">../object/${response.id} <i data-lucide="external-link" class="size-4 ml-1"></i></a>
+                                    </div>`;
+                        },
+                    },
+                    {
                         title: "Действия",
                         minWidth: 30,
                         field: "id",

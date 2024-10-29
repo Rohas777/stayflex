@@ -23,6 +23,10 @@ interface CityFormProps {
     isLoaderOpened: boolean;
 }
 
+type CustomErrors = {
+    isValid: boolean;
+    region: string | null;
+};
 function CityForm({
     onCreate,
     setIsLoaderOpened,
@@ -48,10 +52,32 @@ function CityForm({
             name: "Server-4",
         },
     ]);
+    const [customErrors, setCustomErrors] = useState<CustomErrors>({
+        isValid: true,
+        region: null,
+    });
 
     const { regions, status, error } = useAppSelector((state) => state.region);
     const dispatch = useAppDispatch();
 
+    const vaildateWithoutYup = async () => {
+        const errors: CustomErrors = {
+            isValid: true,
+            region: null,
+        };
+        if (selectRegion === "-1") {
+            errors.region = "Обязательно выберите регион";
+        }
+
+        Object.keys(errors).forEach((key) => {
+            if (errors[key as keyof CustomErrors] && key != "isValid") {
+                errors.isValid = false;
+                return;
+            }
+        });
+        setCustomErrors(errors);
+        return errors;
+    };
     const schema = yup
         .object({
             name: yup.string().required("'Название' это обязательное поле"),
@@ -68,8 +94,9 @@ function CityForm({
     const onSubmit = async (event: React.ChangeEvent<HTMLFormElement>) => {
         event.preventDefault();
         const result = await trigger();
+        const customResult = await vaildateWithoutYup();
         startLoader(setIsLoaderOpened);
-        if (!result) {
+        if (!result || !customResult.isValid) {
             stopLoader(setIsLoaderOpened);
             return;
         }
@@ -145,24 +172,44 @@ function CityForm({
                                 Обязательное
                             </span>
                         </FormLabel>
-                        <TomSelect
-                            id="validation-form-region"
-                            value={selectRegion}
-                            name="region"
-                            onChange={(e) => {
-                                setSelectRegion(e.target.value);
-                            }}
-                            options={{
-                                placeholder: "Выберите регион",
-                            }}
-                            className="w-full"
+                        <div
+                            className={clsx(
+                                "border rounded-md border-transparent",
+                                {
+                                    "border-danger-important":
+                                        customErrors.region,
+                                }
+                            )}
                         >
-                            {regions.map((region) => (
-                                <option key={region.id} value={region.id}>
-                                    {region.name}
-                                </option>
-                            ))}
-                        </TomSelect>
+                            <TomSelect
+                                id="validation-form-region"
+                                value={selectRegion}
+                                name="region"
+                                onChange={(e) => {
+                                    setSelectRegion(e.target.value);
+                                    setCustomErrors((prev) => ({
+                                        ...prev,
+                                        region: null,
+                                    }));
+                                }}
+                                options={{
+                                    placeholder: "Выберите регион",
+                                }}
+                                className="w-full"
+                            >
+                                {regions.map((region) => (
+                                    <option key={region.id} value={region.id}>
+                                        {region.name}
+                                    </option>
+                                ))}
+                            </TomSelect>
+                        </div>
+                        {customErrors.region && (
+                            <div className="mt-2 text-danger">
+                                {typeof customErrors.region === "string" &&
+                                    customErrors.region}
+                            </div>
+                        )}
                     </div>
                     <div className="mt-3">
                         <FormLabel

@@ -132,6 +132,7 @@ function UserCreateModal({
             balance: Number(formData.get("balance")),
             is_active: isUserActive,
             is_verified: isUserVerified,
+            tariff_id: 1, //FIXME -
         };
         onCreate(userData);
     };

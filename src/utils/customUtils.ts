@@ -22,6 +22,27 @@ export const convertDateString = (str: string) => {
     return `${day}.${month}.${year}`;
 };
 
+export const formatDatePretty = (date: Date) => {
+    const months = [
+        "янв",
+        "фев",
+        "мар",
+        "апр",
+        "май",
+        "июн",
+        "июл",
+        "авг",
+        "сен",
+        "окт",
+        "ноя",
+        "дек",
+    ];
+    const day = date.getDate();
+    const month = months[date.getMonth()];
+    const year = date.getFullYear();
+    return `${day} ${month}., ${year}`;
+};
+
 export const formatDate = (date: Date) => {
     const year = date.getFullYear();
     const month = (date.getMonth() + 1).toString().padStart(2, "0");

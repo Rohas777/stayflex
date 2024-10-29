@@ -387,6 +387,8 @@ function Main() {
         }
     }, [selectedRegion, regionsState.status, regionsState.regions]);
 
+    useEffect(() => {}, [objectState.statusOne]);
+
     if (
         (regionsState.status === Status.LOADING ||
             objectState.statusOne === Status.LOADING) &&
@@ -623,7 +625,7 @@ function Main() {
                                         ? Number(objectState.objectOne.area)
                                         : undefined
                                 }
-                                placeholder="100 м2"
+                                placeholder="100"
                             />
                             {errors.area && (
                                 <div className="mt-2 text-danger">

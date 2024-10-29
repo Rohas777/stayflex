@@ -7,7 +7,6 @@ import ActivateCode from "../pages/ActivateCode";
 import ErrorPage from "../pages/ErrorPage";
 
 import Layout from "../themes";
-import AdminLayout from "../themes/adminLayout";
 
 import Users from "../pages/Users";
 import CreateUser from "../pages/CreateUser";
@@ -17,6 +16,7 @@ import Cities from "../pages/Cities";
 import PropertyTypes from "../pages/PropertyTypes";
 import Amenities from "../pages/Amenities";
 import Objects from "../pages/Objects";
+import Object from "../pages/Object";
 import UserObjects from "../pages/UserObjects";
 import ObjectsClient from "../pages/ObjectsClient";
 import CreateObject from "../pages/CreateObject";
@@ -178,6 +178,16 @@ function Router() {
                 {
                     path: "/admin/reservations/client/:id",
                     element: <ClientReservations />,
+                },
+            ],
+        },
+        {
+            path: "/",
+            element: <Layout guest />,
+            children: [
+                {
+                    path: "/object/:id",
+                    element: <Object />,
                 },
             ],
         },

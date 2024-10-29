@@ -34,6 +34,6 @@ export interface IObject {
     conveniences: {
         id: number;
         name: string;
-        photo: string;
+        icon: string;
     }[];
 }

@@ -42,6 +42,14 @@ function Main({
         }
     }, []);
 
+    if (guest) {
+        return (
+            <div>
+                <ThemeSwitcher />
+                <Component />
+            </div>
+        );
+    }
     return (
         <PrivateRoute type={admin ? "admin" : "user"}>
             <div>

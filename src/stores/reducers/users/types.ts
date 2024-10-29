@@ -23,6 +23,7 @@ export interface UserCreateType {
     balance: number;
     is_active: boolean;
     is_verified: boolean;
+    tariff_id: number;
 }
 export interface UserUpdateType {
     mail: string;
