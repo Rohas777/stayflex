@@ -12,4 +12,5 @@ export interface IUser {
     is_admin: boolean;
     balance: number;
     date_before: string;
+    object_count: number;
 }

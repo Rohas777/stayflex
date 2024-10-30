@@ -349,7 +349,7 @@ function Main() {
             const formattedData = regions.map((region) => ({
                 id: region.id,
                 name: region.name,
-                objects: Math.floor(Math.random() * 101),
+                objects: region.object_count,
                 server: "Stayflex",
             }));
             tabulator.current

@@ -1,6 +1,4 @@
-import _ from "lodash";
 import Lucide from "@/components/Base/Lucide";
-// import { appleCore } from "@lucide/lab";
 import { useAppDispatch, useAppSelector } from "@/stores/hooks";
 import React, { useEffect, useState } from "react";
 import { fetchObjectById } from "@/stores/reducers/objects/actions";
@@ -20,7 +18,6 @@ function Main() {
     const dispatch = useAppDispatch();
 
     const location = useLocation();
-
     useEffect(() => {
         dispatch(
             fetchObjectById(Number(location.pathname.replace("/object/", "")))

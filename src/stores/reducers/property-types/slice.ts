@@ -33,7 +33,7 @@ export const propertyTypeSlice = createSlice({
     extraReducers(builder) {
         builder
             .addCase(fetchPropertyTypes.fulfilled, (state, action) => {
-                state.propertyTypes = action.payload.apartments;
+                state.propertyTypes = action.payload;
                 state.status = Status.SUCCESS;
                 state.error = null;
             })

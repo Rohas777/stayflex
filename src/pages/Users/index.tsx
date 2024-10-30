@@ -495,7 +495,7 @@ function Main() {
                 id: user.id,
                 name: user.fullname,
                 active: user.is_active,
-                objects: Math.floor(Math.random() * 101),
+                objects: user.object_count,
                 subscription: DateTime.fromISO(user.date_before),
             }));
             tabulator.current

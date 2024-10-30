@@ -403,7 +403,7 @@ function Main() {
                     name: city.region.name,
                     id: city.region.id,
                 },
-                objects: Math.floor(Math.random() * 101),
+                objects: city.object_count,
                 server: "Stayflex",
             }));
             tabulator.current

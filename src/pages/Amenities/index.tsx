@@ -316,7 +316,6 @@ function Main() {
     }, []);
     useEffect(() => {
         if (amenities && amenities.length) {
-            console.log(amenities);
             const formattedData = amenities.map((amenity) => ({
                 id: amenity.id,
                 name: amenity.name,

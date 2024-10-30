@@ -41,9 +41,12 @@ function ErrorNotification() {
                 getRef={(el) => {
                     notificationRef.current = el;
                 }}
-                className="flex hidden"
+                className="flex items-center hidden"
             >
-                <Lucide icon="XCircle" className="text-danger" />
+                <Lucide
+                    icon="XCircle"
+                    className="text-danger size-10 xl:size-5"
+                />
                 <div className="ml-4 mr-4">
                     <div className="font-medium text-content"></div>
                 </div>

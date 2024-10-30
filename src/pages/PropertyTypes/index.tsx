@@ -329,7 +329,7 @@ function Main() {
             const formattedData = propertyTypes.map((propertyType) => ({
                 id: propertyType.id,
                 name: propertyType.name,
-                objects: Math.floor(Math.random() * 101),
+                objects: propertyType.object_count,
             }));
             tabulator.current
                 ?.setData(formattedData.reverse())
