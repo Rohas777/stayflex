@@ -82,10 +82,7 @@ function Main() {
             >
                 <Lucide icon="CheckCircle" className="text-success" />
                 <div className="ml-4 mr-4">
-                    <div className="font-medium">Saving success!</div>
-                    <div className="mt-1 text-slate-500">
-                        Please check your e-mail for further info!
-                    </div>
+                    <div className="font-medium">Сервер успешно сохранён</div>
                 </div>
             </Notification>
             {/* END: Success Notification Content */}
@@ -96,9 +93,11 @@ function Main() {
             >
                 <Lucide icon="XCircle" className="text-danger" />
                 <div className="ml-4 mr-4">
-                    <div className="font-medium">Saving failed!</div>
+                    <div className="font-medium">
+                        Произошла ошибка при сохранении
+                    </div>
                     <div className="mt-1 text-slate-500">
-                        Please check the fileld form.
+                        Пожалуйста, проверьте поля формы
                     </div>
                 </div>
             </Notification>

@@ -134,7 +134,7 @@ function Main() {
                         },
                     },
                     {
-                        title: "Сслыка",
+                        title: "Ссылка",
                         minWidth: 200,
                         field: "id",
                         hozAlign: "center",

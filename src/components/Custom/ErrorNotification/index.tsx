@@ -1,8 +1,10 @@
 import Lucide from "@/components/Base/Lucide";
-import Notification from "@/components/Base/Notification";
+import Notification, {
+    NotificationElement,
+} from "@/components/Base/Notification";
 import { errorToastSlice } from "@/stores/errorToastSlice";
 import { useAppDispatch, useAppSelector } from "@/stores/hooks";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import Toastify from "toastify-js";
 
 function ErrorNotification() {
@@ -10,11 +12,13 @@ function ErrorNotification() {
     const { message, isError } = useAppSelector((state) => state.error);
     const { setErrorToast } = errorToastSlice.actions;
 
+    const notificationRef = useRef<NotificationElement>();
+
     useEffect(() => {
         if (isError && !!message) {
-            const globalErrorEl = document
-                .querySelectorAll("#global-error-notification")[0]
-                .cloneNode(true) as HTMLElement;
+            const globalErrorEl = notificationRef.current!.cloneNode(
+                true
+            ) as HTMLElement;
             globalErrorEl.classList.remove("hidden");
             globalErrorEl.querySelector(".text-content")!.textContent = message;
             Toastify({
@@ -34,7 +38,9 @@ function ErrorNotification() {
         <>
             {/* BEGIN: Error Notification Content */}
             <Notification
-                id="global-error-notification"
+                getRef={(el) => {
+                    notificationRef.current = el;
+                }}
                 className="flex hidden"
             >
                 <Lucide icon="XCircle" className="text-danger" />

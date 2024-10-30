@@ -1,5 +1,6 @@
 import _ from "lodash";
 import Lucide from "@/components/Base/Lucide";
+// import { appleCore } from "@lucide/lab";
 import { useAppDispatch, useAppSelector } from "@/stores/hooks";
 import React, { useEffect, useState } from "react";
 import { fetchObjectById } from "@/stores/reducers/objects/actions";
@@ -90,10 +91,15 @@ function Main() {
                             <p className="text-slate-600 dark:text-slate-300">
                                 Этаж: {objectOne?.floor}
                             </p>
-                            <p className="text-slate-600 dark:text-slate-300">
-                                Спальных мест: {objectOne?.adult_places} x{" "}
-                                {objectOne?.child_places}
-                            </p>
+                            <ul className="text-slate-600 dark:text-slate-300">
+                                Спальных мест:
+                                <li className="before:content-['•'] before:text-xl/3 before:text-slate-500 before:mr-1">
+                                    Взрослых: {objectOne?.adult_places}
+                                </li>
+                                <li className="before:content-['•'] before:text-xl/3 before:text-slate-500 before:mr-1">
+                                    Детских: {objectOne?.child_places}
+                                </li>
+                            </ul>
                         </div>
                     </div>
                     <div className="mb-5">
