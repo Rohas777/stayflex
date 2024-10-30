@@ -27,7 +27,7 @@ function RegionForm({
     const [serversData, setServersData] = useState([
         {
             id: 1,
-            name: "Server-1",
+            name: "Stayflex",
         },
         {
             id: 2,

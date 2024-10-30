@@ -37,19 +37,7 @@ function CityForm({
     const [serversData, setServersData] = useState([
         {
             id: 1,
-            name: "Server-1",
-        },
-        {
-            id: 2,
-            name: "Server-2",
-        },
-        {
-            id: 3,
-            name: "Server-3",
-        },
-        {
-            id: 4,
-            name: "Server-4",
+            name: "Stayflex",
         },
     ]);
     const [customErrors, setCustomErrors] = useState<CustomErrors>({

@@ -61,5 +61,5 @@ export const checkErrorsBase = (status: number) => {
         return "Время ожидания истекло";
     }
 
-    return false;
+    return "Внутренняя ошибка сервера";
 };

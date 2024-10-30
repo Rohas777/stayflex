@@ -350,7 +350,7 @@ function Main() {
                 id: region.id,
                 name: region.name,
                 objects: Math.floor(Math.random() * 101),
-                server: "Server-1",
+                server: "Stayflex",
             }));
             tabulator.current
                 ?.setData(formattedData.reverse())

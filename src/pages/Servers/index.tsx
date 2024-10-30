@@ -12,29 +12,8 @@ function Main() {
     const [serversData, setServersData] = useState([
         {
             id: 1,
-            name: "Server-1",
+            name: "Stayflex",
             ip: "192.128.1.1",
-            login: "login",
-            password: "111222",
-        },
-        {
-            id: 2,
-            name: "Server-2",
-            ip: "192.128.2.1",
-            login: "login",
-            password: "111222",
-        },
-        {
-            id: 3,
-            name: "Server-3",
-            ip: "192.128.3.1",
-            login: "login",
-            password: "111222",
-        },
-        {
-            id: 4,
-            name: "Server-4",
-            ip: "192.128.4.1",
             login: "login",
             password: "111222",
         },
