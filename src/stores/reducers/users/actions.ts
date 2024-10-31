@@ -115,7 +115,7 @@ export const fetchUserById = createAsyncThunk(
     "user/fetch",
     async (id: number, thunkAPI) => {
         try {
-            //FIXME - переделать вывод админа по айди
+            //FIXME - переделать вывод админа по айди (на беке)
             const response = await instance.get(`/admin/user/id/${id}`);
             return response.data;
         } catch (error: any) {
