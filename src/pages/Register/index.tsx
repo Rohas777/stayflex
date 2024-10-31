@@ -188,6 +188,11 @@ function Main() {
                 <div className="container relative z-10 sm:px-10">
                     <div className="block grid-cols-2 gap-4 xl:grid">
                         {/* BEGIN: Register Info */}
+                        <img
+                            alt="Stayflex"
+                            className="mx-auto mt-4 w-32 xl:hidden"
+                            src={logoUrl}
+                        />
                         <div className="flex-col hidden min-h-screen xl:flex">
                             <a
                                 href=""
@@ -215,7 +220,7 @@ function Main() {
                         {/* BEGIN: Register Form */}
                         <form
                             onSubmit={onSignUp}
-                            className="flex h-auto py-5 my-10 xl:py-0 xl:my-0"
+                            className="flex h-auto py-5 xl:py-0 xl:my-0"
                         >
                             <div className="w-full px-5 py-8 mx-auto my-auto bg-white rounded-md shadow-md xl:ml-20 dark:bg-darkmode-600 xl:bg-transparent sm:px-8 xl:p-0 xl:shadow-none sm:w-3/4 lg:w-2/4 xl:w-auto">
                                 <h2 className="text-2xl font-bold text-center intro-x xl:text-3xl xl:text-left">
