@@ -10,14 +10,13 @@ export const fetchObjects = createAsyncThunk(
             const response = await instance.get("/object/all");
             return response.data;
         } catch (error: any) {
+            if (!!checkErrorsBase(error)) {
+                return thunkAPI.rejectWithValue(checkErrorsBase(error));
+            }
             if (error.response.status === 404) {
                 return thunkAPI.rejectWithValue("Объекты не найдены");
             }
-            if (!!checkErrorsBase(error.response.status)) {
-                return thunkAPI.rejectWithValue(
-                    checkErrorsBase(error.response.status)
-                );
-            }
+
             return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
         }
     }
@@ -32,17 +31,15 @@ export const createObject = createAsyncThunk(
                 },
             });
         } catch (error: any) {
+            if (!!checkErrorsBase(error)) {
+                return thunkAPI.rejectWithValue(checkErrorsBase(error));
+            }
             if (error.response.status === 404) {
                 return thunkAPI.rejectWithValue(
                     "Регион для привязки не найден" //TODO -
                 );
             }
 
-            if (!!checkErrorsBase(error.response.status)) {
-                return thunkAPI.rejectWithValue(
-                    checkErrorsBase(error.response.status)
-                );
-            }
             return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
         }
     }
@@ -57,16 +54,15 @@ export const updateObject = createAsyncThunk(
                 },
             });
         } catch (error: any) {
+            if (!!checkErrorsBase(error)) {
+                return thunkAPI.rejectWithValue(checkErrorsBase(error));
+            }
             if (error.response.status === 404) {
                 return thunkAPI.rejectWithValue(
                     "Регион для привязки не найден" //TODO
                 );
             }
-            if (!!checkErrorsBase(error.response.status)) {
-                return thunkAPI.rejectWithValue(
-                    checkErrorsBase(error.response.status)
-                );
-            }
+
             return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
         }
     }
@@ -82,6 +78,9 @@ export const updateObiectIsActive = createAsyncThunk(
             });
             return response.data;
         } catch (error: any) {
+            if (!!checkErrorsBase(error)) {
+                return thunkAPI.rejectWithValue(checkErrorsBase(error));
+            }
             if (error.response.status === 404) {
                 return thunkAPI.rejectWithValue("Объект не найден");
             }
@@ -90,11 +89,7 @@ export const updateObiectIsActive = createAsyncThunk(
                     "Объект не может быть деактивирован, так как к нему привязаны активные брони"
                 );
             }
-            if (!!checkErrorsBase(error.response.status)) {
-                return thunkAPI.rejectWithValue(
-                    checkErrorsBase(error.response.status)
-                );
-            }
+
             return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
         }
     }
@@ -107,6 +102,9 @@ export const deleteObject = createAsyncThunk<string, number>(
             const response = await instance.delete(`/object/delete/${id}`);
             return response.data.id;
         } catch (error: any) {
+            if (!!checkErrorsBase(error)) {
+                return thunkAPI.rejectWithValue(checkErrorsBase(error));
+            }
             if (error.response.status === 404) {
                 return thunkAPI.rejectWithValue("Объект не найден");
             }
@@ -115,11 +113,7 @@ export const deleteObject = createAsyncThunk<string, number>(
                     "Объект не может быть удален, так как к нему привязаны активные брони"
                 );
             }
-            if (!!checkErrorsBase(error.response.status)) {
-                return thunkAPI.rejectWithValue(
-                    checkErrorsBase(error.response.status)
-                );
-            }
+
             return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
         }
     }
@@ -132,14 +126,13 @@ export const fetchObjectById = createAsyncThunk(
             const response = await instance.get(`/object/id/${id}`);
             return response.data;
         } catch (error: any) {
+            if (!!checkErrorsBase(error)) {
+                return thunkAPI.rejectWithValue(checkErrorsBase(error));
+            }
             if (error.response.status === 404) {
                 return thunkAPI.rejectWithValue("Объект не найден");
             }
-            if (!!checkErrorsBase(error.response.status)) {
-                return thunkAPI.rejectWithValue(
-                    checkErrorsBase(error.response.status)
-                );
-            }
+
             return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
         }
     }
@@ -151,14 +144,13 @@ export const fetchObjectsByUser = createAsyncThunk(
             const response = await instance.get(`/admin/object/userid/${id}`);
             return response.data;
         } catch (error: any) {
+            if (!!checkErrorsBase(error)) {
+                return thunkAPI.rejectWithValue(checkErrorsBase(error));
+            }
             if (error.response.status === 404) {
                 return thunkAPI.rejectWithValue("Объекты не найдены"); //TODO -
             }
-            if (!!checkErrorsBase(error.response.status)) {
-                return thunkAPI.rejectWithValue(
-                    checkErrorsBase(error.response.status)
-                );
-            }
+
             return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
         }
     }

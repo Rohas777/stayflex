@@ -10,14 +10,13 @@ export const fetchClients = createAsyncThunk(
             const response = await instance.get("/client/all");
             return response.data;
         } catch (error: any) {
+            if (!!checkErrorsBase(error)) {
+                return thunkAPI.rejectWithValue(checkErrorsBase(error));
+            }
             if (error.response.status === 404) {
                 return thunkAPI.rejectWithValue("Клиенты не найдены");
             }
-            if (!!checkErrorsBase(error.response.status)) {
-                return thunkAPI.rejectWithValue(
-                    checkErrorsBase(error.response.status)
-                );
-            }
+
             return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
         }
     }
@@ -30,14 +29,13 @@ export const fetchClientByPhone = createAsyncThunk(
             const response = await instance.get(`/client/phone/${phone}`);
             return response.data;
         } catch (error: any) {
+            if (!!checkErrorsBase(error)) {
+                return thunkAPI.rejectWithValue(checkErrorsBase(error));
+            }
             if (error.response.status === 404) {
                 return { type: "fulfill", status: error.response.status };
             }
-            if (!!checkErrorsBase(error.response.status)) {
-                return thunkAPI.rejectWithValue(
-                    checkErrorsBase(error.response.status)
-                );
-            }
+
             return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
         }
     }
@@ -54,17 +52,16 @@ export const createClient = createAsyncThunk(
             });
             return response.data;
         } catch (error: any) {
+            if (!!checkErrorsBase(error)) {
+                return thunkAPI.rejectWithValue(checkErrorsBase(error));
+            }
             if (error.response.status === 404) {
                 return thunkAPI.rejectWithValue("Email не найден");
             }
             if (error.response.status === 406) {
                 return thunkAPI.rejectWithValue("Email уже существует");
             }
-            if (!!checkErrorsBase(error.response.status)) {
-                return thunkAPI.rejectWithValue(
-                    checkErrorsBase(error.response.status)
-                );
-            }
+
             return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
         }
     }

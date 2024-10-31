@@ -10,14 +10,13 @@ export const fetchCities = createAsyncThunk(
             const response = await instance.get("/city/all");
             return response.data;
         } catch (error: any) {
+            if (!!checkErrorsBase(error)) {
+                return thunkAPI.rejectWithValue(checkErrorsBase(error));
+            }
             if (error.response.status === 404) {
                 return thunkAPI.rejectWithValue("Города не найдены");
             }
-            if (!!checkErrorsBase(error.response.status)) {
-                return thunkAPI.rejectWithValue(
-                    checkErrorsBase(error.response.status)
-                );
-            }
+
             return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
         }
     }
@@ -33,16 +32,15 @@ export const createCity = createAsyncThunk(
             });
             return response.data;
         } catch (error: any) {
+            if (!!checkErrorsBase(error)) {
+                return thunkAPI.rejectWithValue(checkErrorsBase(error));
+            }
             if (error.response.status === 404) {
                 return thunkAPI.rejectWithValue(
                     "Регион для привязки не найден"
                 );
             }
-            if (!!checkErrorsBase(error.response.status)) {
-                return thunkAPI.rejectWithValue(
-                    checkErrorsBase(error.response.status)
-                );
-            }
+
             return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
         }
     }
@@ -54,6 +52,9 @@ export const deleteCity = createAsyncThunk<string, string>(
             const response = await instance.delete(`/admin/city/delete/${id}`);
             return response.data.id;
         } catch (error: any) {
+            if (!!checkErrorsBase(error)) {
+                return thunkAPI.rejectWithValue(checkErrorsBase(error));
+            }
             if (error.response.status === 404) {
                 return thunkAPI.rejectWithValue("Город не найден");
             }
@@ -62,11 +63,7 @@ export const deleteCity = createAsyncThunk<string, string>(
                     "Город не может быть удален, так как к нему уже привязаны объекты"
                 );
             }
-            if (!!checkErrorsBase(error.response.status)) {
-                return thunkAPI.rejectWithValue(
-                    checkErrorsBase(error.response.status)
-                );
-            }
+
             return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
         }
     }

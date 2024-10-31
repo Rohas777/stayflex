@@ -11,14 +11,13 @@ export const fetchUsers = createAsyncThunk(
             const response = await instance.get("/admin/user/all");
             return response.data;
         } catch (error: any) {
+            if (!!checkErrorsBase(error)) {
+                return thunkAPI.rejectWithValue(checkErrorsBase(error));
+            }
             if (error.response.status === 404) {
                 return thunkAPI.rejectWithValue("Пользователи не найдены");
             }
-            if (!!checkErrorsBase(error.response.status)) {
-                return thunkAPI.rejectWithValue(
-                    checkErrorsBase(error.response.status)
-                );
-            }
+
             return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
         }
     }
@@ -34,17 +33,16 @@ export const createUser = createAsyncThunk(
             });
             return response.data;
         } catch (error: any) {
+            if (!!checkErrorsBase(error)) {
+                return thunkAPI.rejectWithValue(checkErrorsBase(error));
+            }
             if (error.response.status === 409) {
                 return thunkAPI.rejectWithValue("Пользователь уже существует");
             }
             if (error.response.status === 404) {
                 return thunkAPI.rejectWithValue("Email не найден");
             }
-            if (!!checkErrorsBase(error.response.status)) {
-                return thunkAPI.rejectWithValue(
-                    checkErrorsBase(error.response.status)
-                );
-            }
+
             return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
         }
     }
@@ -57,6 +55,9 @@ export const deleteUser = createAsyncThunk<string, string>(
             const response = await instance.delete(`/admin/user/delete/${id}`);
             return response.data.id;
         } catch (error: any) {
+            if (!!checkErrorsBase(error)) {
+                return thunkAPI.rejectWithValue(checkErrorsBase(error));
+            }
             if (error.response.status === 404) {
                 return thunkAPI.rejectWithValue("Пользователь не найден");
             }
@@ -65,11 +66,7 @@ export const deleteUser = createAsyncThunk<string, string>(
                     "Пользователь не может быть удален"
                 );
             }
-            if (!!checkErrorsBase(error.response.status)) {
-                return thunkAPI.rejectWithValue(
-                    checkErrorsBase(error.response.status)
-                );
-            }
+
             return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
         }
     }
@@ -86,14 +83,13 @@ export const updateUserIsActive = createAsyncThunk(
             });
             return response.data;
         } catch (error: any) {
+            if (!!checkErrorsBase(error)) {
+                return thunkAPI.rejectWithValue(checkErrorsBase(error));
+            }
             if (error.response.status === 404) {
                 return thunkAPI.rejectWithValue("Пользователь не найден");
             }
-            if (!!checkErrorsBase(error.response.status)) {
-                return thunkAPI.rejectWithValue(
-                    checkErrorsBase(error.response.status)
-                );
-            }
+
             return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
         }
     }
@@ -105,14 +101,13 @@ export const fetchUserById = createAsyncThunk(
             const response = await instance.get(`/admin/user/id/${id}`);
             return response.data;
         } catch (error: any) {
+            if (!!checkErrorsBase(error)) {
+                return thunkAPI.rejectWithValue(checkErrorsBase(error));
+            }
             if (error.response.status === 404) {
                 return thunkAPI.rejectWithValue("Пользователь не найден");
             }
-            if (!!checkErrorsBase(error.response.status)) {
-                return thunkAPI.rejectWithValue(
-                    checkErrorsBase(error.response.status)
-                );
-            }
+
             return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
         }
     }
@@ -132,14 +127,13 @@ export const updateUserAdmin = createAsyncThunk(
             );
             return response.data;
         } catch (error: any) {
+            if (!!checkErrorsBase(error)) {
+                return thunkAPI.rejectWithValue(checkErrorsBase(error));
+            }
             if (error.response.status === 404) {
                 return thunkAPI.rejectWithValue("Пользователь не найден"); //TODO - или email
             }
-            if (!!checkErrorsBase(error.response.status)) {
-                return thunkAPI.rejectWithValue(
-                    checkErrorsBase(error.response.status)
-                );
-            }
+
             return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
         }
     }
@@ -159,14 +153,13 @@ export const updateUserTariff = createAsyncThunk(
             );
             return response.data;
         } catch (error: any) {
+            if (!!checkErrorsBase(error)) {
+                return thunkAPI.rejectWithValue(checkErrorsBase(error));
+            }
             if (error.response.status === 404) {
                 return thunkAPI.rejectWithValue("Пользователь не найден"); //TODO - или тариф
             }
-            if (!!checkErrorsBase(error.response.status)) {
-                return thunkAPI.rejectWithValue(
-                    checkErrorsBase(error.response.status)
-                );
-            }
+
             return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
         }
     }
@@ -179,10 +172,8 @@ export const fetchAuthorizedUser = createAsyncThunk(
             const response = await instance.get("/user/profile");
             return response.data;
         } catch (error: any) {
-            if (!!checkErrorsBase(error.response.status)) {
-                return thunkAPI.rejectWithValue(
-                    checkErrorsBase(error.response.status)
-                );
+            if (!!checkErrorsBase(error)) {
+                return thunkAPI.rejectWithValue(checkErrorsBase(error));
             }
             return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
         }

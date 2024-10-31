@@ -10,14 +10,13 @@ export const fetchPropertyTypes = createAsyncThunk(
             const response = await instance.get("/property-type/all");
             return response.data;
         } catch (error: any) {
+            if (!!checkErrorsBase(error)) {
+                return thunkAPI.rejectWithValue(checkErrorsBase(error));
+            }
             if (error.response.status === 404) {
                 return thunkAPI.rejectWithValue("Типы недвижимости не найдены");
             }
-            if (!!checkErrorsBase(error.response.status)) {
-                return thunkAPI.rejectWithValue(
-                    checkErrorsBase(error.response.status)
-                );
-            }
+
             return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
         }
     }
@@ -37,10 +36,8 @@ export const createPropertyType = createAsyncThunk(
             );
             return response.data;
         } catch (error: any) {
-            if (!!checkErrorsBase(error.response.status)) {
-                return thunkAPI.rejectWithValue(
-                    checkErrorsBase(error.response.status)
-                );
+            if (!!checkErrorsBase(error)) {
+                return thunkAPI.rejectWithValue(checkErrorsBase(error));
             }
             return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
         }
@@ -55,6 +52,9 @@ export const deletePropertyType = createAsyncThunk<string, string>(
             );
             return response.data.id;
         } catch (error: any) {
+            if (!!checkErrorsBase(error)) {
+                return thunkAPI.rejectWithValue(checkErrorsBase(error));
+            }
             if (error.response.status === 404) {
                 return thunkAPI.rejectWithValue("Тип недвижимости не найден");
             }
@@ -63,11 +63,7 @@ export const deletePropertyType = createAsyncThunk<string, string>(
                     "Тип недвижимости не может быть удален, так как к нему уже привязаны объекты"
                 );
             }
-            if (!!checkErrorsBase(error.response.status)) {
-                return thunkAPI.rejectWithValue(
-                    checkErrorsBase(error.response.status)
-                );
-            }
+
             return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
         }
     }

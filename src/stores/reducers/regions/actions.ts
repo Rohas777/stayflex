@@ -10,14 +10,13 @@ export const fetchRegions = createAsyncThunk(
             const response = await instance.get("/region/all");
             return response.data;
         } catch (error: any) {
+            if (!!checkErrorsBase(error)) {
+                return thunkAPI.rejectWithValue(checkErrorsBase(error));
+            }
             if (error.response.status === 404) {
                 return thunkAPI.rejectWithValue("Регионы не найдены");
             }
-            if (!!checkErrorsBase(error.response.status)) {
-                return thunkAPI.rejectWithValue(
-                    checkErrorsBase(error.response.status)
-                );
-            }
+
             return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
         }
     }
@@ -38,10 +37,8 @@ export const createRegion = createAsyncThunk(
             );
             return response.data;
         } catch (error: any) {
-            if (!!checkErrorsBase(error.response.status)) {
-                return thunkAPI.rejectWithValue(
-                    checkErrorsBase(error.response.status)
-                );
+            if (!!checkErrorsBase(error)) {
+                return thunkAPI.rejectWithValue(checkErrorsBase(error));
             }
             return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
         }
@@ -57,6 +54,9 @@ export const deleteRegion = createAsyncThunk<string, string>(
             );
             return response.data.id;
         } catch (error: any) {
+            if (!!checkErrorsBase(error)) {
+                return thunkAPI.rejectWithValue(checkErrorsBase(error));
+            }
             if (error.response.status === 404) {
                 return thunkAPI.rejectWithValue("Регион не найден");
             }
@@ -65,11 +65,7 @@ export const deleteRegion = createAsyncThunk<string, string>(
                     "Регион не может быть удален, так как к нему уже привязаны города"
                 );
             }
-            if (!!checkErrorsBase(error.response.status)) {
-                return thunkAPI.rejectWithValue(
-                    checkErrorsBase(error.response.status)
-                );
-            }
+
             return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
         }
     }

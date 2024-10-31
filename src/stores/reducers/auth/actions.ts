@@ -10,6 +10,9 @@ export const signIn = createAsyncThunk(
             const response = await instance.post("/auth/login", credentials);
             return response.data;
         } catch (error: any) {
+            if (!!checkErrorsBase(error)) {
+                return thunkAPI.rejectWithValue(checkErrorsBase(error));
+            }
             if (error.response.status === 400) {
                 return thunkAPI.rejectWithValue("Пользователь не активирован");
             }
@@ -24,11 +27,7 @@ export const signIn = createAsyncThunk(
             if (error.response.status === 404) {
                 return thunkAPI.rejectWithValue("Пользователь не найден");
             }
-            if (!!checkErrorsBase(error.response.status)) {
-                return thunkAPI.rejectWithValue(
-                    checkErrorsBase(error.response.status)
-                );
-            }
+
             return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
         }
     }
@@ -43,17 +42,16 @@ export const auth = createAsyncThunk(
             );
             return response.data;
         } catch (error: any) {
+            if (!!checkErrorsBase(error)) {
+                return thunkAPI.rejectWithValue(checkErrorsBase(error));
+            }
             if (error.response.status === 403) {
                 return thunkAPI.rejectWithValue("Код авторизации устарел");
             }
             if (error.response.status === 404) {
                 return thunkAPI.rejectWithValue("Код авторизации не найден");
             }
-            if (!!checkErrorsBase(error.response.status)) {
-                return thunkAPI.rejectWithValue(
-                    checkErrorsBase(error.response.status)
-                );
-            }
+
             return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
         }
     }
@@ -65,17 +63,16 @@ export const signUp = createAsyncThunk(
             const response = await instance.post("/auth/register", userData);
             return response.data;
         } catch (error: any) {
+            if (!!checkErrorsBase(error)) {
+                return thunkAPI.rejectWithValue(checkErrorsBase(error));
+            }
             if (error.response.status === 409) {
                 return thunkAPI.rejectWithValue("Пользователь уже существует"); //TODO - добавить уточнение почта или телефон
             }
             if (error.response.status === 404) {
                 return thunkAPI.rejectWithValue("Email не найден");
             }
-            if (!!checkErrorsBase(error.response.status)) {
-                return thunkAPI.rejectWithValue(
-                    checkErrorsBase(error.response.status)
-                );
-            }
+
             return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
         }
     }
@@ -87,6 +84,9 @@ export const activate = createAsyncThunk(
             const response = await instance.post("/auth/activate", credentials);
             return response.data;
         } catch (error: any) {
+            if (!!checkErrorsBase(error)) {
+                return thunkAPI.rejectWithValue(checkErrorsBase(error));
+            }
             if (error.response.status === 400) {
                 return thunkAPI.rejectWithValue(
                     "Пользователь уже верифицирован"
@@ -98,11 +98,7 @@ export const activate = createAsyncThunk(
             if (error.response.status === 403) {
                 return thunkAPI.rejectWithValue("Код верификации устарел");
             }
-            if (!!checkErrorsBase(error.response.status)) {
-                return thunkAPI.rejectWithValue(
-                    checkErrorsBase(error.response.status)
-                );
-            }
+
             return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
         }
     }
@@ -112,10 +108,14 @@ export const logout = createAsyncThunk("auth/logout", async (_, thunkAPI) => {
         await instance.post("/auth/logout");
         return {};
     } catch (error: any) {
-        if (!!checkErrorsBase(error.response.status)) {
-            return thunkAPI.rejectWithValue(
-                checkErrorsBase(error.response.status)
-            );
+        if (!!checkErrorsBase(error)) {
+            return thunkAPI.rejectWithValue(checkErrorsBase(error));
+        }
+        if (error.code === "ERR_NETWORK") {
+            return thunkAPI.rejectWithValue("Ошибка сети");
+        }
+        if (!!checkErrorsBase(error)) {
+            return thunkAPI.rejectWithValue(checkErrorsBase(error));
         }
         return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
     }

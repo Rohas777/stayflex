@@ -50,16 +50,19 @@ export const formatDate = (date: Date) => {
     return `${year}-${month}-${day}`;
 };
 
-export const checkErrorsBase = (status: number) => {
-    if (status === 500) {
+export const checkErrorsBase = (error: any) => {
+    if (error.code === "ERR_NETWORK") {
+        return "Ошибка сети";
+    }
+    if (error.response.status === 500) {
         return "Внутренняя ошибка сервера";
     }
-    if (status === 503) {
+    if (error.response.status === 503) {
         return "Сервис недоступен";
     }
-    if (status === 504) {
+    if (error.response.status === 504) {
         return "Время ожидания истекло";
     }
 
-    return "Внутренняя ошибка сервера";
+    return false;
 };

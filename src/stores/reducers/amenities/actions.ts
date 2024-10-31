@@ -10,14 +10,13 @@ export const fetchAmenities = createAsyncThunk(
             const response = await instance.get("/convenience/all");
             return response.data;
         } catch (error: any) {
+            if (!!checkErrorsBase(error)) {
+                return thunkAPI.rejectWithValue(checkErrorsBase(error));
+            }
             if (error.response.status === 404) {
                 return thunkAPI.rejectWithValue("Удобства не найдены");
             }
-            if (!!checkErrorsBase(error.response.status)) {
-                return thunkAPI.rejectWithValue(
-                    checkErrorsBase(error.response.status)
-                );
-            }
+
             return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
         }
     }
@@ -37,10 +36,8 @@ export const createAmenity = createAsyncThunk(
             );
             return response.data;
         } catch (error: any) {
-            if (!!checkErrorsBase(error.response.status)) {
-                return thunkAPI.rejectWithValue(
-                    checkErrorsBase(error.response.status)
-                );
+            if (!!checkErrorsBase(error)) {
+                return thunkAPI.rejectWithValue(checkErrorsBase(error));
             }
             return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
         }
@@ -56,6 +53,9 @@ export const deleteAmenity = createAsyncThunk<string, string>(
             );
             return response.data.id;
         } catch (error: any) {
+            if (!!checkErrorsBase(error)) {
+                return thunkAPI.rejectWithValue(checkErrorsBase(error));
+            }
             if (error.response.status === 404) {
                 return thunkAPI.rejectWithValue("Удобство не найдено");
             }
@@ -64,11 +64,7 @@ export const deleteAmenity = createAsyncThunk<string, string>(
                     "Удобство не может быть удалено, так как к нему уже привязаны объекты"
                 );
             }
-            if (!!checkErrorsBase(error.response.status)) {
-                return thunkAPI.rejectWithValue(
-                    checkErrorsBase(error.response.status)
-                );
-            }
+
             return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
         }
     }
