@@ -92,10 +92,10 @@ function Main() {
             dispatch(setErrorToast({ message: error!, isError: true }));
             dispatch(authActions.resetStatus());
         }
-        // if ((codeStatus === Status.SUCCESS && isSignUp) || !authTempUser) {
-        //     navigate("/login");
-        //     stopLoader(setIsLoaderOpen);
-        // }
+        if ((codeStatus === Status.SUCCESS && isSignUp) || !authTempUser) {
+            navigate("/login");
+            stopLoader(setIsLoaderOpen);
+        }
         if (
             codeStatus === Status.SUCCESS &&
             !isSignUp &&
