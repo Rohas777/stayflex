@@ -18,7 +18,7 @@ export const fetchRegions = createAsyncThunk(
                     checkErrorsBase(error.response.status)
                 );
             }
-            return thunkAPI.rejectWithValue(error.message);
+            return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
         }
     }
 );
@@ -43,7 +43,7 @@ export const createRegion = createAsyncThunk(
                     checkErrorsBase(error.response.status)
                 );
             }
-            return thunkAPI.rejectWithValue(error.message);
+            return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
         }
     }
 );
@@ -70,7 +70,7 @@ export const deleteRegion = createAsyncThunk<string, string>(
                     checkErrorsBase(error.response.status)
                 );
             }
-            return thunkAPI.rejectWithValue(error.message);
+            return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
         }
     }
 );

@@ -18,7 +18,7 @@ export const fetchReservations = createAsyncThunk(
                     checkErrorsBase(error.response.status)
                 );
             }
-            return thunkAPI.rejectWithValue(error.message);
+            return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
         }
     }
 );
@@ -37,7 +37,7 @@ export const fetchReservationById = createAsyncThunk(
                     checkErrorsBase(error.response.status)
                 );
             }
-            return thunkAPI.rejectWithValue(error.message);
+            return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
         }
     }
 );
@@ -58,7 +58,7 @@ export const fetchReservationsByClient = createAsyncThunk(
                     checkErrorsBase(error.response.status)
                 );
             }
-            return thunkAPI.rejectWithValue(error.message);
+            return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
         }
     }
 );
@@ -79,7 +79,7 @@ export const fetchReservationsByObject = createAsyncThunk(
                     checkErrorsBase(error.response.status)
                 );
             }
-            return thunkAPI.rejectWithValue(error.message);
+            return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
         }
     }
 );
@@ -107,7 +107,7 @@ export const createReservation = createAsyncThunk(
                     checkErrorsBase(error.response.status)
                 );
             }
-            return thunkAPI.rejectWithValue(error.message);
+            return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
         }
     }
 );
@@ -135,7 +135,7 @@ export const updateReservationStatus = createAsyncThunk(
                     checkErrorsBase(error.response.status)
                 );
             }
-            return thunkAPI.rejectWithValue(error.message);
+            return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
         }
     }
 );
@@ -163,7 +163,7 @@ export const updateReservation = createAsyncThunk(
                     checkErrorsBase(error.response.status)
                 );
             }
-            return thunkAPI.rejectWithValue(error.message);
+            return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
         }
     }
 );
@@ -182,7 +182,7 @@ export const deleteReservation = createAsyncThunk<string, string>(
                     checkErrorsBase(error.response.status)
                 );
             }
-            return thunkAPI.rejectWithValue(error.message);
+            return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
         }
     }
 );

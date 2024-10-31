@@ -18,7 +18,7 @@ export const fetchPropertyTypes = createAsyncThunk(
                     checkErrorsBase(error.response.status)
                 );
             }
-            return thunkAPI.rejectWithValue(error.message);
+            return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
         }
     }
 );
@@ -42,7 +42,7 @@ export const createPropertyType = createAsyncThunk(
                     checkErrorsBase(error.response.status)
                 );
             }
-            return thunkAPI.rejectWithValue(error.message);
+            return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
         }
     }
 );
@@ -68,7 +68,7 @@ export const deletePropertyType = createAsyncThunk<string, string>(
                     checkErrorsBase(error.response.status)
                 );
             }
-            return thunkAPI.rejectWithValue(error.message);
+            return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
         }
     }
 );

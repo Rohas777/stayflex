@@ -18,7 +18,7 @@ export const fetchCities = createAsyncThunk(
                     checkErrorsBase(error.response.status)
                 );
             }
-            return thunkAPI.rejectWithValue(error.message);
+            return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
         }
     }
 );
@@ -43,7 +43,7 @@ export const createCity = createAsyncThunk(
                     checkErrorsBase(error.response.status)
                 );
             }
-            return thunkAPI.rejectWithValue(error.message);
+            return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
         }
     }
 );
@@ -67,7 +67,7 @@ export const deleteCity = createAsyncThunk<string, string>(
                     checkErrorsBase(error.response.status)
                 );
             }
-            return thunkAPI.rejectWithValue(error.message);
+            return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
         }
     }
 );

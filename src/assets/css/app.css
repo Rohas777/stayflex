@@ -54,3 +54,13 @@
     background-color: var(--litepicker-is-in-range-color) !important;
     border-radius: 0;
 }
+
+.ck-insert-data {
+    h2 {
+        font-size: 1.25rem;
+        line-height: 1.75rem;
+        margin-bottom: 0.5rem;
+        color: rgb(71 85 105 / var(--tw-text-opacity));
+        font-weight: 500;
+    }
+}

@@ -18,7 +18,7 @@ export const fetchClients = createAsyncThunk(
                     checkErrorsBase(error.response.status)
                 );
             }
-            return thunkAPI.rejectWithValue(error.message);
+            return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
         }
     }
 );
@@ -38,7 +38,7 @@ export const fetchClientByPhone = createAsyncThunk(
                     checkErrorsBase(error.response.status)
                 );
             }
-            return thunkAPI.rejectWithValue(error.message);
+            return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
         }
     }
 );
@@ -65,7 +65,7 @@ export const createClient = createAsyncThunk(
                     checkErrorsBase(error.response.status)
                 );
             }
-            return thunkAPI.rejectWithValue(error.message);
+            return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
         }
     }
 );

@@ -6,8 +6,6 @@ import { Navigate, useLocation } from "react-router-dom";
 import { Status } from "@/stores/reducers/types";
 import Loader from "@/components/Custom/Loader/Loader";
 import TinySlider from "@/components/Base/TinySlider";
-import object1 from "/src/assets/images/fakers/object-1.jpg";
-import object2 from "/src/assets/images/fakers/object-2.jpg";
 import { IconType } from "@/vars";
 
 function Main() {
@@ -35,8 +33,8 @@ function Main() {
                 </h2>
             </div>
             {/* BEGIN: Profile Info */}
-            <div className="grid grid-cols-2 px-5 pt-5 mt-5 intro-y box">
-                <div className="col-span-1 pb-14 mx-6 border-b border-slate-200/60 dark:border-darkmode-400">
+            <div className="grid lg:grid-cols-3 xl:grid-cols-2 px-5 pt-5 mt-5 intro-y box">
+                <div className="col-span-2 xl:col-span-1 pb-14 mx-6 border-b border-slate-200/60 dark:border-darkmode-400">
                     <TinySlider
                         options={{
                             mode: "gallery",
@@ -46,7 +44,7 @@ function Main() {
                         }}
                     >
                         {objectOne?.photos.map((image) => (
-                            <div className="h-64 px-2">
+                            <div className="h-80 xl:h-64 px-2">
                                 <div className="h-full overflow-hidden rounded-md image-fit">
                                     <img src={image} />
                                 </div>
@@ -55,8 +53,8 @@ function Main() {
                     </TinySlider>
                 </div>
                 <div className="col-span-1 flex flex-col pt-8 mx-6 border-b border-slate-200/60 dark:border-darkmode-400">
-                    <div className="mb-5 grid grid-cols-2 gap-1">
-                        <div className="col-span-1">
+                    <div className="mb-5 grid grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-4">
+                        <div className="col-span-1 mb-5 xl:mb-0">
                             <div className="flex items-center mb-2 font-medium text-slate-600 dark:text-slate-300">
                                 <Lucide
                                     icon="DollarSign"
@@ -111,21 +109,39 @@ function Main() {
                     </div>
                 </div>
             </div>
-            <div className="grid grid-cols-2 px-5 pt-5 mt-5 intro-y box">
+            <div className="lg:hidden flex col-span-1 flex-col box intro-y px-5 py-5 mt-5">
+                <div className="mx-6">
+                    <div className="flex items-center mb-4 font-medium text-slate-600 dark:text-slate-300">
+                        Удобства:
+                    </div>
+                    <div className="flex flex-wrap gap-5">
+                        {objectOne?.conveniences.map((amenity) => (
+                            <p className="flex-auto flex items-center text-slate-600 dark:text-slate-300">
+                                <Lucide
+                                    icon={amenity.icon as IconType}
+                                    className="size-5 mr-1"
+                                />
+                                {amenity.name}
+                            </p>
+                        ))}
+                    </div>
+                </div>
+            </div>
+            <div className="grid lg:grid-cols-3 xl:grid-cols-2 px-5 pt-5 mt-5 intro-y box">
                 <div
-                    className="col-span-1 pb-8 mx-6 border-b border-slate-200/60 dark:border-darkmode-400"
+                    className="ck-insert-data lg:col-span-2 xl:col-span-1 pb-8 mx-6" //TODO -
                     dangerouslySetInnerHTML={
                         objectOne?.description
                             ? { __html: objectOne?.description }
                             : { __html: "" }
                     }
                 ></div>
-                <div className="col-span-1 flex flex-col mx-6 border-b border-slate-200/60 dark:border-darkmode-400">
+                <div className="hidden lg:flex col-span-1 flex-col mx-6 border-b border-slate-200/60 dark:border-darkmode-400">
                     <div className="mb-5">
                         <div className="flex items-center mb-2 font-medium text-slate-600 dark:text-slate-300">
                             Удобства:
                         </div>
-                        <div className="grid grid-cols-2 gap-1">
+                        <div className="grid  lg:grid-cols-1 xl:grid-cols-2 gap-1">
                             {objectOne?.conveniences.map((amenity) => (
                                 <p className="col-span-1 flex items-center text-slate-600 dark:text-slate-300">
                                     <Lucide

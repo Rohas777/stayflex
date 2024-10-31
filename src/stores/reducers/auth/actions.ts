@@ -29,7 +29,7 @@ export const signIn = createAsyncThunk(
                     checkErrorsBase(error.response.status)
                 );
             }
-            return thunkAPI.rejectWithValue(error.message);
+            return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
         }
     }
 );
@@ -54,7 +54,7 @@ export const auth = createAsyncThunk(
                     checkErrorsBase(error.response.status)
                 );
             }
-            return thunkAPI.rejectWithValue(error.message);
+            return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
         }
     }
 );
@@ -76,7 +76,7 @@ export const signUp = createAsyncThunk(
                     checkErrorsBase(error.response.status)
                 );
             }
-            return thunkAPI.rejectWithValue(error.message);
+            return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
         }
     }
 );
@@ -103,7 +103,7 @@ export const activate = createAsyncThunk(
                     checkErrorsBase(error.response.status)
                 );
             }
-            return thunkAPI.rejectWithValue(error.message);
+            return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
         }
     }
 );
@@ -117,6 +117,6 @@ export const logout = createAsyncThunk("auth/logout", async (_, thunkAPI) => {
                 checkErrorsBase(error.response.status)
             );
         }
-        return thunkAPI.rejectWithValue(error.message);
+        return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
     }
 });
