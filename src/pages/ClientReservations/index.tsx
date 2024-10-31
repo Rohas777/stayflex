@@ -18,6 +18,7 @@ import {
     deleteReservation,
     fetchReservationById,
     fetchReservations,
+    fetchReservationsByClient,
     updateReservation,
     updateReservationStatus,
 } from "@/stores/reducers/reservations/actions";
@@ -389,7 +390,7 @@ function Main() {
         initTabulator();
         reInitOnResizeWindow();
 
-        dispatch(fetchReservations());
+        dispatch(fetchReservationsByClient(Number(params.id!)));
         dispatch(fetchClientByID(Number(params.id!)));
     }, []);
 
