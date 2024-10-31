@@ -39,6 +39,7 @@ import UserCreateModal from "./createModal";
 import UserUpdateModal from "./updateModal";
 import { fetchTariffs } from "@/stores/reducers/tariffs/actions";
 import { errorToastSlice } from "@/stores/errorToastSlice";
+import { tariffSlice } from "@/stores/reducers/tariffs/slice";
 
 window.DateTime = DateTime;
 interface Response {
@@ -399,7 +400,9 @@ function Main() {
         isActiveStatusUpdated,
         statusOne,
     } = useAppSelector((state) => state.user);
+    const tariffState = useAppSelector((state) => state.tariff);
     const userActions = userSlice.actions;
+    const tariffActions = tariffSlice.actions;
     const dispatch = useAppDispatch();
 
     const onDelete = async (id: number) => {
@@ -432,14 +435,18 @@ function Main() {
             stopLoader(setIsLoaderOpen);
             dispatch(userActions.resetStatusOne());
         }
-    }, [status, statusOne]);
+        if (tariffState.statusAll === Status.ERROR && tariffState.error) {
+            dispatch(
+                setErrorToast({ message: tariffState.error, isError: true })
+            );
+            stopLoader(setIsLoaderOpen);
+            dispatch(tariffActions.resetStatus());
+        }
+    }, [status, statusOne, error, tariffState.statusAll, tariffState.error]);
 
     useEffect(() => {
         if (statusOne === Status.ERROR || status === Status.ERROR) {
             dispatch(setErrorToast({ message: error!, isError: true }));
-            stopLoader(setIsLoaderOpen);
-        }
-        if (!isCreated && !isUpdated && !isActiveStatusUpdated && !isDeleted) {
             stopLoader(setIsLoaderOpen);
         }
         if (isActiveStatusUpdated) {
@@ -468,11 +475,11 @@ function Main() {
                 position: "right",
                 stopOnFocus: true,
             }).showToast();
-            stopLoader(setIsLoaderOpen);
             dispatch(userActions.resetIsCreated());
             dispatch(userActions.resetIsUpdated());
             dispatch(userActions.resetIsDeleted());
             dispatch(userActions.resetIsActiveStatusUpdated());
+            stopLoader(setIsLoaderOpen);
         }
     }, [
         isCreated,
@@ -506,12 +513,6 @@ function Main() {
         }
     }, [users]);
 
-    useEffect(() => {
-        if (error === "Ошибка авторизации") {
-            navigate("/login");
-        }
-    }, [error]);
-
     return (
         <>
             <div className="flex flex-col items-center mt-8 intro-y sm:flex-row">
@@ -524,6 +525,7 @@ function Main() {
                         className="mr-2 shadow-md"
                         onClick={(event: React.MouseEvent) => {
                             event.preventDefault();
+                            dispatch(fetchTariffs());
                             setCreateModalPreview(true);
                         }}
                     >

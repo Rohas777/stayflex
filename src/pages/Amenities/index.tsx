@@ -35,6 +35,7 @@ interface Response {
     id?: number;
     name?: string;
     icon?: string;
+    object_count?: number;
 }
 
 function Main() {
@@ -111,6 +112,24 @@ function Main() {
                                         <div class="font-medium whitespace-nowrap">${
                                             response.name
                                         }</div>
+                                    </div>`;
+                        },
+                    },
+                    {
+                        title: "Объекты",
+                        minWidth: 200,
+                        responsive: 0,
+                        field: "object_count",
+                        vertAlign: "middle",
+                        hozAlign: "center",
+                        headerHozAlign: "center",
+                        print: false,
+                        download: false,
+                        sorter: "string",
+                        formatter(cell) {
+                            const response: Response = cell.getData();
+                            return `<div class="flex lg:justify-center">
+                                        <div class="font-medium whitespace-nowrap">${response.object_count}</div>
                                     </div>`;
                         },
                     },
@@ -320,6 +339,7 @@ function Main() {
                 id: amenity.id,
                 name: amenity.name,
                 icon: amenity.icon,
+                object_count: amenity.object_count,
             }));
             tabulator.current
                 ?.setData(formattedData.reverse())

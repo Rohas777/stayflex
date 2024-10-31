@@ -194,10 +194,6 @@ function Router() {
             element: <Register />,
         },
         {
-            path: "/register/activate",
-            element: <ActivateCode />,
-        },
-        {
             path: "/not-found",
             element: <ErrorPage />,
         },

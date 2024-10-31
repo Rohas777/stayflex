@@ -1,12 +1,19 @@
 import { AnyAction, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Status } from "../types";
 import { ClientState } from "./types";
-import { createClient, fetchClientByPhone, fetchClients } from "./actions";
+import {
+    createClient,
+    fetchClientByID,
+    fetchClientByPhone,
+    fetchClients,
+} from "./actions";
 import { error } from "console";
 
 const initialState: ClientState = {
     clients: [],
     clientByPhone: null,
+    clientOne: null,
+    statusOne: Status.IDLE,
     status: Status.LOADING,
     statusByPhone: Status.LOADING,
     error: null,
@@ -32,6 +39,10 @@ export const clientSlice = createSlice({
         },
         resetStatus: (state) => {
             state.status = Status.LOADING;
+            state.error = null;
+        },
+        resetStatusOne: (state) => {
+            state.statusOne = Status.LOADING;
             state.error = null;
         },
     },
@@ -75,7 +86,24 @@ export const clientSlice = createSlice({
                 (state, action: PayloadAction<any>) => {
                     state.clientByPhone = null;
                     state.statusByPhone = Status.ERROR;
-                    state.errorByPhone = action.payload;
+                    state.error = action.payload;
+                }
+            );
+        builder
+            .addCase(fetchClientByID.fulfilled, (state, action) => {
+                state.statusOne = Status.SUCCESS;
+                state.clientOne = action.payload;
+            })
+            .addCase(fetchClientByID.pending, (state, action) => {
+                state.clientOne = null;
+                state.statusOne = Status.LOADING;
+            })
+            .addCase(
+                fetchClientByID.rejected,
+                (state, action: PayloadAction<any>) => {
+                    state.clientOne = null;
+                    state.statusOne = Status.ERROR;
+                    state.error = action.payload;
                 }
             );
 

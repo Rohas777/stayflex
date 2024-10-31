@@ -166,7 +166,7 @@ function Main() {
         }
         if (signUpStatus === Status.SUCCESS) {
             stopLoader(setIsLoaderOpen);
-            navigate("/register/activate");
+            navigate("/login");
         }
     }, [signUpStatus]);
 

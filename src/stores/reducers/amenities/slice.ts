@@ -29,7 +29,7 @@ export const amenitySlice = createSlice({
     extraReducers(builder) {
         builder
             .addCase(fetchAmenities.fulfilled, (state, action) => {
-                state.amenities = action.payload.convenience;
+                state.amenities = action.payload;
                 state.status = Status.SUCCESS;
                 state.error = null;
             })

@@ -16,6 +16,9 @@ import PhoneInput from "react-phone-input-2";
 import ru from "react-phone-input-2/lang/ru.json";
 import Lucide from "@/components/Base/Lucide";
 import Tippy from "@/components/Base/Tippy";
+import { useAppSelector } from "@/stores/hooks";
+import { Status } from "@/stores/reducers/types";
+import Loader from "@/components/Custom/Loader/Loader";
 
 interface UserCreateModalProps {
     onCreate: (userData: UserCreateType) => void;
@@ -25,6 +28,7 @@ interface UserCreateModalProps {
 type CustomErrors = {
     isValid: boolean;
     tel: string | null;
+    tariff: string | null;
 };
 
 function UserCreateModal({
@@ -37,16 +41,21 @@ function UserCreateModal({
     const [isUserActive, setIsUserActive] = useState(false);
     const [isUserVerified, setIsUserVerified] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
+    const [selectedTariff, setSelectedTariff] = useState<string>("1");
 
     const [customErrors, setCustomErrors] = useState<CustomErrors>({
         isValid: true,
         tel: null,
+        tariff: null,
     });
+
+    const { tariffs, statusAll } = useAppSelector((state) => state.tariff);
 
     const vaildateWithoutYup = async () => {
         const errors: CustomErrors = {
             isValid: true,
             tel: null,
+            tariff: null,
         };
 
         if (maskLengthValidation) {
@@ -54,6 +63,9 @@ function UserCreateModal({
         }
         if (!tel) {
             errors.tel = "Обязательно введите телефон пользователя";
+        }
+        if (selectedTariff === "-1") {
+            errors.tariff = "Выберите тариф";
         }
 
         Object.keys(errors).forEach((key) => {
@@ -132,10 +144,12 @@ function UserCreateModal({
             balance: Number(formData.get("balance")),
             is_active: isUserActive,
             is_verified: isUserVerified,
-            tariff_id: 1, //FIXME -
+            tariff_id: Number(selectedTariff),
         };
         onCreate(userData);
     };
+
+    if (statusAll === Status.LOADING) return <Loader />;
 
     return (
         <>
@@ -297,6 +311,55 @@ function UserCreateModal({
                         )}
                     </div>
                     <div className="input-form mt-3">
+                        <FormLabel className="flex flex-col w-full sm:flex-row">
+                            Регион
+                            <span className="mt-1 text-xs sm:ml-auto sm:mt-0 text-slate-500">
+                                Обязательное
+                            </span>
+                        </FormLabel>
+                        <div
+                            className={clsx(
+                                "border rounded-md border-transparent",
+                                {
+                                    "border-danger-important":
+                                        customErrors.tariff,
+                                }
+                            )}
+                        >
+                            <TomSelect
+                                value={selectedTariff}
+                                onChange={(e) => {
+                                    setSelectedTariff(e.target.value);
+                                    setCustomErrors((prev) => ({
+                                        ...prev,
+                                        tariff: null,
+                                    }));
+                                }}
+                                options={{
+                                    placeholder: "Выберите регион",
+                                }}
+                                className="w-full"
+                            >
+                                {tariffs.map((tariffs) => {
+                                    return (
+                                        <option
+                                            key={tariffs.id}
+                                            value={tariffs.id}
+                                        >
+                                            {tariffs.name}
+                                        </option>
+                                    );
+                                })}
+                            </TomSelect>
+                        </div>
+                        {customErrors.tariff && (
+                            <div className="mt-2 text-danger">
+                                {typeof customErrors.tariff === "string" &&
+                                    customErrors.tariff}
+                            </div>
+                        )}
+                    </div>
+                    <div className="input-form mt-3">
                         <FormLabel
                             htmlFor="validation-form-balance"
                             className="flex flex-col w-full sm:flex-row"
@@ -338,30 +401,9 @@ function UserCreateModal({
                                 className="sr-only peer"
                             />
                             <div className="mr-3 relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-                            Активировать сразу?
+                            Активировать пользователя?
                         </label>
                         <Tippy content="Определяет будет ли пользователен активирован сразу">
-                            <Lucide icon="Info" className="cursor-help" />
-                        </Tippy>
-                    </div>
-                    <div className="flex items-center gap-3 mt-5">
-                        <label
-                            onChange={(e) =>
-                                setIsUserVerified(
-                                    (e.target as HTMLInputElement).checked
-                                )
-                            }
-                            className="inline-flex items-center cursor-pointer"
-                        >
-                            <input
-                                type="checkbox"
-                                checked={isUserVerified}
-                                className="sr-only peer"
-                            />
-                            <div className="mr-3 relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-                            Верифицировать сразу?
-                        </label>
-                        <Tippy content="Определяет будет ли пользователен верифицирован сразу">
                             <Lucide icon="Info" className="cursor-help" />
                         </Tippy>
                     </div>

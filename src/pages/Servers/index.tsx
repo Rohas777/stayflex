@@ -23,14 +23,14 @@ function Main() {
         <>
             <div className="flex flex-wrap items-center mt-8 intro-y">
                 <h2 className="mr-auto text-lg font-medium">Серверы</h2>
-                <div className="flex w-full mt-4 sm:w-auto sm:mt-0">
+                {/* <div className="flex w-full mt-4 sm:w-auto sm:mt-0">
                     <Link to="create">
                         <Button variant="primary" className="mr-2 shadow-md">
                             <ListPlus className="size-5 mr-2" />
                             Добавить
                         </Button>
                     </Link>
-                </div>
+                </div> */}
             </div>
             <div className="mt-5 intro-y box p-5">
                 {serversData.map((server) => (

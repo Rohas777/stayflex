@@ -37,6 +37,7 @@ interface Response {
     name?: string;
     objects?: number;
     server?: string;
+    city_count?: number;
 }
 
 function Main() {
@@ -102,6 +103,23 @@ function Main() {
                             const response: Response = cell.getData();
                             return `<div>
                                         <div class="font-medium whitespace-nowrap">${response.name}</div>
+                                    </div>`;
+                        },
+                    },
+                    {
+                        title: "Города",
+                        minWidth: 200,
+                        field: "city_count",
+                        hozAlign: "center",
+                        headerHozAlign: "center",
+                        vertAlign: "middle",
+                        print: false,
+                        download: false,
+                        sorter: "number",
+                        formatter(cell) {
+                            const response: Response = cell.getData();
+                            return `<div class="flex lg:justify-center">
+                                        <div class="font-medium whitespace-nowrap">${response.city_count}</div>
                                     </div>`;
                         },
                     },
@@ -351,6 +369,7 @@ function Main() {
                 name: region.name,
                 objects: region.object_count,
                 server: "Stayflex",
+                city_count: region.cities.length,
             }));
             tabulator.current
                 ?.setData(formattedData.reverse())

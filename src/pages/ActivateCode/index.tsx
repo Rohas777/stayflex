@@ -32,10 +32,6 @@ function Main() {
     const [isLoaderOpen, setIsLoaderOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
 
-    const [isSignUp, setIsSignUp] = useState(
-        location.pathname === "/register/activate"
-    );
-
     const { codeStatus, signInStatus, signUpStatus, authTempUser, error } =
         useAppSelector((state) => state.auth);
 
@@ -74,14 +70,10 @@ function Main() {
             code: String(formData.get("code")),
         };
 
-        if (!isSignUp) {
-            dispatch(auth(authData));
-        } else {
-            dispatch(activate(authData));
-        }
+        dispatch(auth(authData));
     };
     useEffect(() => {
-        if (codeStatus === Status.SUCCESS && !isSignUp) {
+        if (codeStatus === Status.SUCCESS) {
             dispatch(fetchAuthorizedUser());
         }
     }, [codeStatus]);
@@ -92,25 +84,21 @@ function Main() {
             dispatch(setErrorToast({ message: error!, isError: true }));
             dispatch(authActions.resetStatus());
         }
-        if ((codeStatus === Status.SUCCESS && isSignUp) || !authTempUser) {
+        if (!authTempUser) {
             navigate("/login");
             stopLoader(setIsLoaderOpen);
         }
-        if (
-            codeStatus === Status.SUCCESS &&
-            !isSignUp &&
-            authorizedUser?.is_admin
-        ) {
+        if (codeStatus === Status.SUCCESS && authorizedUser?.is_admin) {
             navigate("/admin/");
             dispatch(authActions.resetStatusOnAuth());
             stopLoader(setIsLoaderOpen);
         }
-        if (codeStatus === Status.SUCCESS && !isSignUp && !!authorizedUser) {
+        if (codeStatus === Status.SUCCESS && !!authorizedUser) {
             navigate("/");
             dispatch(authActions.resetStatusOnAuth());
             stopLoader(setIsLoaderOpen);
         }
-    }, [codeStatus, signInStatus, signUpStatus, isSignUp, authorizedUser]);
+    }, [codeStatus, signInStatus, signUpStatus, authorizedUser]);
 
     useEffect(() => {
         if (authorizedUserStatus !== Status.LOADING) {
