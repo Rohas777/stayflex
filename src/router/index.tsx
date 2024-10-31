@@ -9,6 +9,7 @@ import ErrorPage from "../pages/ErrorPage";
 import Layout from "../themes";
 
 import Users from "../pages/Users";
+import Admins from "../pages/Admins";
 import CreateUser from "../pages/CreateUser";
 import Servers from "../pages/Servers";
 import Regions from "../pages/Regions";
@@ -99,6 +100,10 @@ function Router() {
             children: [
                 {
                     path: "/admin/",
+                    element: <Admins />,
+                },
+                {
+                    path: "/admin/users",
                     element: <Users />,
                 },
                 {

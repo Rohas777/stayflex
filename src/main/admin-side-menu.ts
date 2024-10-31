@@ -7,13 +7,33 @@ newReservationsIndicator.textContent = "1";
 
 const menu: Array<Menu | "divider"> = [
     {
-        icon: "Users",
+        icon: "UserCog",
         pathname: "/admin/",
+        title: "Администраторы",
+    },
+    {
+        icon: "Users",
+        pathname: "/admin/users",
         title: "Пользователи",
     },
     {
         icon: "Home",
-        title: "Недвижимость",
+        pathname: "/admin/objects",
+        title: "Объекты",
+    },
+    {
+        icon: "UserCheck",
+        pathname: "/admin/clients",
+        title: "Клиенты",
+    },
+    {
+        icon: "Calendar",
+        pathname: "/admin/reservations",
+        title: "Брони",
+    },
+    {
+        icon: "Wrench",
+        title: "Настройки",
         subMenu: [
             {
                 icon: "Map",
@@ -36,36 +56,15 @@ const menu: Array<Menu | "divider"> = [
                 title: "Удобства",
             },
             {
-                icon: "Home",
-                pathname: "/admin/objects",
-                title: "Объекты",
+                icon: "Server",
+                pathname: "/admin/servers",
+                title: "Серверы",
             },
-        ],
-    },
-    {
-        icon: "Server",
-        pathname: "/admin/servers",
-        title: "Серверы",
-    },
-    {
-        icon: "UserCheck",
-        pathname: "/admin/clients",
-        title: "Клиенты",
-    },
-    {
-        icon: "Gem",
-        pathname: "/admin/tariffs",
-        title: "Тарифы",
-    },
-    {
-        icon: "Calendar",
-        pathname: "/admin/reservations",
-        title: "Брони",
-    },
-    {
-        icon: "Wrench",
-        title: "Служебное",
-        subMenu: [
+            {
+                icon: "Gem",
+                pathname: "/admin/tariffs",
+                title: "Тарифы",
+            },
             {
                 icon: "Activity",
                 pathname: "/admin/icon",

@@ -1,5 +1,5 @@
-import enFlag from "/src/assets/images/flags/gb.svg";
-import ruFlag from "/src/assets/images/flags/ru.svg";
+import enFlag from "/src/assets/images/flags/eng.svg";
+import ruFlag from "/src/assets/images/flags/rus.svg";
 import { useAppDispatch, useAppSelector } from "@/stores/hooks";
 import {
     selectColorScheme,
