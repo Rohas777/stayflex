@@ -220,9 +220,9 @@ function Main() {
                         {/* BEGIN: Register Form */}
                         <form
                             onSubmit={onSignUp}
-                            className="flex h-auto py-5 xl:py-0 xl:my-0"
+                            className="flex min-h-screen xl:h-screen py-5 xl:py-0 xl:my-0"
                         >
-                            <div className="w-full px-5 py-8 mx-auto my-auto bg-white rounded-md shadow-md xl:ml-20 dark:bg-darkmode-600 xl:bg-transparent sm:px-8 xl:p-0 xl:shadow-none sm:w-3/4 lg:w-2/4 xl:w-auto">
+                            <div className="w-full px-5 py-8 mx-auto mb-auto xl:my-auto bg-white rounded-md shadow-md xl:ml-20 dark:bg-darkmode-600 xl:bg-transparent sm:px-8 xl:p-0 xl:shadow-none sm:w-3/4 lg:w-2/4 xl:w-auto">
                                 <h2 className="text-2xl font-bold text-center intro-x xl:text-3xl xl:text-left">
                                     Зарегистрироваться
                                 </h2>
