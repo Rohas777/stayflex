@@ -41,6 +41,8 @@ import ImageZoom from "@/components/Base/ImageZoom";
 import { errorToastSlice } from "@/stores/errorToastSlice";
 import { amenitySlice } from "@/stores/reducers/amenities/slice";
 import { propertyTypeSlice } from "@/stores/reducers/property-types/slice";
+import Loader from "@/components/Custom/Loader/Loader";
+import { IObject } from "@/stores/models/IObject";
 
 window.DateTime = DateTime;
 
@@ -128,6 +130,7 @@ function Main() {
     const [isObjectActivated, setIsObjectActivated] = useState(true);
     const [photos, setPhotos] = useState<string[]>([]);
     const [maxFiles, setMaxFiles] = useState(10);
+    const [data, setData] = useState<IObject | null>(null);
 
     const [isLoaderOpen, setIsLoaderOpen] = useState(false);
 
@@ -290,30 +293,25 @@ function Main() {
     }, []);
 
     useEffect(() => {
-        if (objectState.statusOne === Status.SUCCESS) {
-            setSelectedRegion(String(objectState.objectOne?.city.region.id));
-            setSelectedCity(String(objectState.objectOne?.city.id));
-            setSelectedPropertyType(
-                String(objectState.objectOne?.apartment.id)
-            );
-            setSelectedAmenities(
-                objectState.objectOne?.conveniences.map((amenity) =>
-                    String(amenity.id)
-                )!
-            );
-            setSelectedPrepayment(
-                String(objectState.objectOne?.prepayment_percentage)
-            );
-            setEditorData(String(objectState.objectOne?.description));
-            setIsObjectActivated(
-                objectState.objectOne ? objectState.objectOne.active : true
-            );
-            setPhotos(
-                objectState.objectOne ? objectState.objectOne.photos : []
-            );
-            setMaxFiles(10 - objectState.objectOne?.photos.length!);
-        }
-    }, [objectState.statusOne]);
+        if (objectState.statusOne !== Status.SUCCESS || !objectState.objectOne)
+            return;
+        setSelectedRegion(String(objectState.objectOne.city.region.id));
+        setSelectedCity(String(objectState.objectOne.city.id));
+        setSelectedPropertyType(String(objectState.objectOne.apartment.id));
+        setSelectedAmenities(
+            objectState.objectOne.conveniences.map((amenity) =>
+                String(amenity.id)
+            )!
+        );
+        setSelectedPrepayment(
+            String(objectState.objectOne.prepayment_percentage)
+        );
+        setEditorData(String(objectState.objectOne.description));
+        setIsObjectActivated(objectState.objectOne.active);
+        setPhotos(objectState.objectOne.photos);
+        setMaxFiles(10 - objectState.objectOne.photos.length!);
+        setData(objectState.objectOne!);
+    }, [objectState.statusOne, objectState.objectOne]);
 
     useEffect(() => {
         const elDropzoneValidationRef = dropzoneValidationRef.current;
@@ -391,21 +389,14 @@ function Main() {
 
     if (
         (regionsState.status === Status.LOADING ||
-            objectState.statusOne === Status.LOADING) &&
+            (objectState.statusOne === Status.LOADING &&
+                !objectState.objectOne)) &&
         !isLoaderOpen
     ) {
-        return (
-            <>
-                <div className="w-full h-screen relative">
-                    <div className="absolute inset-0 z-[70] bg-slate-50 bg-opacity-70 flex justify-center items-center w-full h-full">
-                        <div className="w-10 h-10">
-                            <LoadingIcon icon="ball-triangle" />
-                        </div>
-                    </div>
-                </div>
-            </>
-        );
+        return <Loader />;
     }
+
+    if (!data) return <Loader />;
 
     return (
         <>
@@ -441,7 +432,7 @@ function Main() {
                                 className={clsx({
                                     "border-danger": errors.name,
                                 })}
-                                defaultValue={objectState.objectOne?.name}
+                                defaultValue={data.name}
                                 placeholder="Название"
                             />
                             {errors.name && (
@@ -622,7 +613,7 @@ function Main() {
                                 })}
                                 defaultValue={
                                     objectState.objectOne
-                                        ? Number(objectState.objectOne.area)
+                                        ? Number(data.area)
                                         : undefined
                                 }
                                 placeholder="100"
@@ -652,11 +643,7 @@ function Main() {
                                 className={clsx({
                                     "border-danger": errors.room_count,
                                 })}
-                                defaultValue={
-                                    objectState.objectOne
-                                        ? objectState.objectOne.room_count
-                                        : undefined
-                                }
+                                defaultValue={data.room_count}
                                 placeholder="3"
                             />
                             {errors.room_count && (
@@ -685,11 +672,7 @@ function Main() {
                                     className={clsx({
                                         "border-danger": errors.adult_places,
                                     })}
-                                    defaultValue={
-                                        objectState.objectOne
-                                            ? objectState.objectOne.adult_places
-                                            : undefined
-                                    }
+                                    defaultValue={data.adult_places}
                                     placeholder="3"
                                 />
                                 {errors.adult_places && (
@@ -718,11 +701,7 @@ function Main() {
                                     className={clsx({
                                         "border-danger": errors.child_places,
                                     })}
-                                    defaultValue={
-                                        objectState.objectOne
-                                            ? objectState.objectOne.child_places
-                                            : undefined
-                                    }
+                                    defaultValue={data.child_places}
                                     placeholder="1"
                                 />
                                 {errors.child_places && (
@@ -752,11 +731,7 @@ function Main() {
                                 className={clsx({
                                     "border-danger": errors.floor,
                                 })}
-                                defaultValue={
-                                    objectState.objectOne
-                                        ? objectState.objectOne.floor
-                                        : undefined
-                                }
+                                defaultValue={data.floor}
                                 placeholder="4 из 10"
                             />
                             {errors.floor && (
@@ -924,11 +899,7 @@ function Main() {
                                 className={clsx({
                                     "border-danger": errors.price,
                                 })}
-                                defaultValue={
-                                    objectState.objectOne
-                                        ? objectState.objectOne.price
-                                        : undefined
-                                }
+                                defaultValue={data.price}
                                 placeholder="10 000"
                             />
                             {errors.price && (
@@ -1000,11 +971,7 @@ function Main() {
                                 className={clsx({
                                     "border-danger": errors.min_ded,
                                 })}
-                                defaultValue={
-                                    objectState.objectOne
-                                        ? objectState.objectOne.min_ded
-                                        : undefined
-                                }
+                                defaultValue={data.min_ded}
                                 placeholder="5"
                             />
                             {errors.min_ded && (

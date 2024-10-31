@@ -7,11 +7,6 @@ import adminSideMenu from "@/main/admin-side-menu";
 import guestSideMenu from "@/main/guest-side-menu";
 import simpleMenu from "@/main/simple-menu";
 import topMenu from "@/main/top-menu";
-import { useAppSelector } from "./hooks";
-import { IUser } from "./models/IUser";
-import { fetchAuthorizedUser } from "./reducers/users/actions";
-import { Status } from "./reducers/types";
-import { useEffect } from "react";
 
 export interface Menu {
     icon: keyof typeof icons;

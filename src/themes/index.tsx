@@ -10,7 +10,6 @@ import ThemeSwitcher from "@/components/ThemeSwitcher";
 import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import PrivateRoute from "@/components/Custom/PrivateRoute";
-import { fetchAuthorizedUser } from "@/stores/reducers/users/actions";
 
 function Main({
     admin = false,

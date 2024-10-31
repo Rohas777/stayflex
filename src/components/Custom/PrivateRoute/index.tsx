@@ -21,7 +21,10 @@ const PrivateRoute = ({
     const isAdmin = !!authorizedUser ? authorizedUser?.is_admin : false;
 
     useEffect(() => {
-        if (authorizedUserStatus !== Status.LOADING) {
+        if (
+            authorizedUserStatus === Status.SUCCESS ||
+            authorizedUserStatus === Status.ERROR
+        ) {
             setIsLoading(false);
         }
     }, [authorizedUserStatus]);

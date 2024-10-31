@@ -30,20 +30,10 @@ import Tariffs from "../pages/Tariffs";
 import TariffsClient from "../pages/TariffsClient";
 import Icon from "../pages/Icon";
 import { useEffect } from "react";
-import { useAppDispatch, useAppSelector } from "@/stores/hooks";
-import {
-    fetchAuthorizedUser,
-    fetchUserById,
-} from "@/stores/reducers/users/actions";
-import { startLoader } from "@/utils/customUtils";
+import { useAppSelector } from "@/stores/hooks";
 
 function Router() {
-    const dispatch = useAppDispatch();
     const { authorizedUser } = useAppSelector((state) => state.user);
-
-    useEffect(() => {
-        dispatch(fetchAuthorizedUser());
-    }, []);
 
     useEffect(() => {
         // if (!authorizedUser) {
