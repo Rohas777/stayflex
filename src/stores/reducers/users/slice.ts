@@ -54,6 +54,11 @@ export const userSlice = createSlice({
             state.statusOne = Status.IDLE;
             state.error = null;
         },
+        resetStatusOnAuth: (state) => {
+            state.authorizedUser = null;
+            state.authorizedUserStatus = Status.IDLE;
+            state.error = null;
+        },
     },
     extraReducers(builder) {
         builder

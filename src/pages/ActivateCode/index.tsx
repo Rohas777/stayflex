@@ -102,10 +102,12 @@ function Main() {
             authorizedUser?.is_admin
         ) {
             navigate("/admin/");
+            dispatch(authActions.resetStatusOnAuth());
             stopLoader(setIsLoaderOpen);
         }
         if (codeStatus === Status.SUCCESS && !isSignUp && !!authorizedUser) {
             navigate("/");
+            dispatch(authActions.resetStatusOnAuth());
             stopLoader(setIsLoaderOpen);
         }
     }, [codeStatus, signInStatus, signUpStatus, isSignUp, authorizedUser]);

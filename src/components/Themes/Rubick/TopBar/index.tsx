@@ -13,6 +13,7 @@ import { startLoader } from "@/utils/customUtils";
 import { logout } from "@/stores/reducers/auth/actions";
 import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
 import { Status } from "@/stores/reducers/types";
+import { userSlice } from "@/stores/reducers/users/slice";
 
 function Main() {
     const [searchDropdown, setSearchDropdown] = useState(false);
@@ -30,6 +31,8 @@ function Main() {
     const { authorizedUser } = useAppSelector((state) => state.user);
     const { logoutStatus } = useAppSelector((state) => state.auth);
 
+    const { resetStatusOnAuth } = userSlice.actions;
+
     const navigate = useNavigate();
 
     const onLogout = () => {
@@ -39,6 +42,7 @@ function Main() {
 
     useEffect(() => {
         if (logoutStatus === Status.SUCCESS) {
+            dispatch(resetStatusOnAuth());
             navigate("/login");
             setIsLoaderOpen(false);
         }

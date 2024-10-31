@@ -506,6 +506,12 @@ function Main() {
         }
     }, [users]);
 
+    useEffect(() => {
+        if (error === "Ошибка авторизации") {
+            navigate("/login");
+        }
+    }, [error]);
+
     return (
         <>
             <div className="flex flex-col items-center mt-8 intro-y sm:flex-row">

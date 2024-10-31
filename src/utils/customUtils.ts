@@ -1,7 +1,3 @@
-import { GetThunkAPI } from "@reduxjs/toolkit";
-import { useLayoutEffect } from "react";
-import { lock, unlock } from "tua-body-scroll-lock";
-
 export const startLoader = (
     setIsLoaderOpen: React.Dispatch<React.SetStateAction<boolean>>,
     targetElement?: HTMLElement
@@ -51,6 +47,9 @@ export const formatDate = (date: Date) => {
 };
 
 export const checkErrorsBase = (error: any) => {
+    if (error.response.status === 401) {
+        return "Ошибка авторизации";
+    }
     if (error.code === "ERR_NETWORK") {
         return "Ошибка сети";
     }

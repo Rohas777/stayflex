@@ -22,6 +22,14 @@ export const authSlice = createSlice({
             state.status = Status.IDLE;
             state.error = null;
         },
+        resetStatusOnAuth: (state) => {
+            state.authTempUser = null;
+            state.signInStatus = Status.IDLE;
+            state.signUpStatus = Status.IDLE;
+            state.logoutStatus = Status.IDLE;
+            state.codeStatus = Status.IDLE;
+            state.error = null;
+        },
     },
     extraReducers(builder) {
         builder
