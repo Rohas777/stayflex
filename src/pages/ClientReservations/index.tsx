@@ -116,6 +116,22 @@ function Main() {
 
                     // For HTML table
                     {
+                        title: "ID",
+                        maxWidth: 100,
+                        responsive: 0,
+                        field: "id",
+                        vertAlign: "middle",
+                        print: false,
+                        download: false,
+                        sorter: "string",
+                        formatter(cell) {
+                            const response: Response = cell.getData();
+                            return `<div>
+                                        <div class="font-medium whitespace-nowrap">${response.id}</div>
+                                    </div>`;
+                        },
+                    },
+                    {
                         title: "Объект",
                         minWidth: 200,
                         responsive: 0,
