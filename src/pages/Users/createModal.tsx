@@ -312,7 +312,7 @@ function UserCreateModal({
                     </div>
                     <div className="input-form mt-3">
                         <FormLabel className="flex flex-col w-full sm:flex-row">
-                            Регион
+                            Тариф
                             <span className="mt-1 text-xs sm:ml-auto sm:mt-0 text-slate-500">
                                 Обязательное
                             </span>

@@ -3,6 +3,7 @@ import { AnyAction, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import {
     createUser,
     deleteUser,
+    fetchAdmins,
     fetchAuthorizedUser,
     fetchUserById,
     fetchUsers,
@@ -74,6 +75,25 @@ export const userSlice = createSlice({
             })
             .addCase(
                 fetchUsers.rejected,
+                (state, action: PayloadAction<any>) => {
+                    state.users = [];
+                    state.error = action.payload;
+                    state.status = Status.ERROR;
+                }
+            );
+        builder
+            .addCase(fetchAdmins.fulfilled, (state, action) => {
+                state.users = action.payload;
+                state.status = Status.SUCCESS;
+                state.error = null;
+            })
+            .addCase(fetchAdmins.pending, (state) => {
+                state.users = [];
+                state.status = Status.LOADING;
+                state.error = null;
+            })
+            .addCase(
+                fetchAdmins.rejected,
                 (state, action: PayloadAction<any>) => {
                     state.users = [];
                     state.error = action.payload;

@@ -24,6 +24,7 @@ export interface UserCreateType {
     is_active: boolean;
     is_verified: boolean;
     tariff_id: number;
+    is_admin?: boolean; //FIXME -
 }
 export interface UserUpdateType {
     mail: string;

@@ -28,7 +28,6 @@ interface UserCreateModalProps {
 type CustomErrors = {
     isValid: boolean;
     tel: string | null;
-    tariff: string | null;
 };
 
 function UserCreateModal({
@@ -41,21 +40,16 @@ function UserCreateModal({
     const [isUserActive, setIsUserActive] = useState(false);
     const [isUserVerified, setIsUserVerified] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
-    const [selectedTariff, setSelectedTariff] = useState<string>("1");
 
     const [customErrors, setCustomErrors] = useState<CustomErrors>({
         isValid: true,
         tel: null,
-        tariff: null,
     });
-
-    const { tariffs, statusAll } = useAppSelector((state) => state.tariff);
 
     const vaildateWithoutYup = async () => {
         const errors: CustomErrors = {
             isValid: true,
             tel: null,
-            tariff: null,
         };
 
         if (maskLengthValidation) {
@@ -63,9 +57,6 @@ function UserCreateModal({
         }
         if (!tel) {
             errors.tel = "Обязательно введите телефон пользователя";
-        }
-        if (selectedTariff === "-1") {
-            errors.tariff = "Выберите тариф";
         }
 
         Object.keys(errors).forEach((key) => {
@@ -105,15 +96,6 @@ function UserCreateModal({
                     "Пароль должен содержать хотя бы 1 цифру"
                 )
                 .required("'Пароль' это обязательное поле"),
-
-            balance: yup
-                .number()
-                .lessThan(2147483647, "Превышено максимальное число")
-                .typeError("Баланс должен быть числовым значением")
-                .positive("Баланс не может быть отрицательным")
-                .integer("Баланс должен быть целым числом")
-                .moreThan(-1, "Минимальный баланс: 0")
-                .required("'Баланс' это обязательное поле"),
         })
         .required();
 
@@ -141,15 +123,14 @@ function UserCreateModal({
             mail: String(formData.get("email")),
             phone: tel!,
             password: String(formData.get("password")),
-            balance: Number(formData.get("balance")),
             is_active: isUserActive,
             is_verified: isUserVerified,
-            tariff_id: Number(selectedTariff),
+            is_admin: true, //FIXME -
+            balance: 0, //FIXME -
+            tariff_id: 1, //FIXME -
         };
         onCreate(userData);
     };
-
-    if (statusAll === Status.LOADING) return <Loader />;
 
     return (
         <>
@@ -310,82 +291,7 @@ function UserCreateModal({
                             </div>
                         )}
                     </div>
-                    <div className="input-form mt-3">
-                        <FormLabel className="flex flex-col w-full sm:flex-row">
-                            Регион
-                            <span className="mt-1 text-xs sm:ml-auto sm:mt-0 text-slate-500">
-                                Обязательное
-                            </span>
-                        </FormLabel>
-                        <div
-                            className={clsx(
-                                "border rounded-md border-transparent",
-                                {
-                                    "border-danger-important":
-                                        customErrors.tariff,
-                                }
-                            )}
-                        >
-                            <TomSelect
-                                value={selectedTariff}
-                                onChange={(e) => {
-                                    setSelectedTariff(e.target.value);
-                                    setCustomErrors((prev) => ({
-                                        ...prev,
-                                        tariff: null,
-                                    }));
-                                }}
-                                options={{
-                                    placeholder: "Выберите регион",
-                                }}
-                                className="w-full"
-                            >
-                                {tariffs.map((tariffs) => {
-                                    return (
-                                        <option
-                                            key={tariffs.id}
-                                            value={tariffs.id}
-                                        >
-                                            {tariffs.name}
-                                        </option>
-                                    );
-                                })}
-                            </TomSelect>
-                        </div>
-                        {customErrors.tariff && (
-                            <div className="mt-2 text-danger">
-                                {typeof customErrors.tariff === "string" &&
-                                    customErrors.tariff}
-                            </div>
-                        )}
-                    </div>
-                    <div className="input-form mt-3">
-                        <FormLabel
-                            htmlFor="validation-form-balance"
-                            className="flex flex-col w-full sm:flex-row"
-                        >
-                            Баланс
-                            <span className="mt-1 text-xs sm:ml-auto sm:mt-0 text-slate-500">
-                                Обязательное
-                            </span>
-                        </FormLabel>
-                        <FormInput
-                            {...register("balance")}
-                            id="validation-form-balance"
-                            type="number"
-                            name="balance"
-                            className={clsx({
-                                "border-danger": errors.balance,
-                            })}
-                            placeholder="1 000"
-                        />
-                        {errors.balance && (
-                            <div className="mt-2 text-danger">
-                                {typeof errors.balance.message === "string" &&
-                                    errors.balance.message}
-                            </div>
-                        )}
-                    </div>
+
                     <div className="flex items-center gap-3 mt-5">
                         <label
                             onChange={(e) =>

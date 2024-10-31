@@ -14,6 +14,7 @@ import { userSlice } from "@/stores/reducers/users/slice";
 import {
     createUser,
     deleteUser,
+    fetchAdmins,
     fetchUserById,
     fetchUsers,
     updateUserAdmin,
@@ -137,43 +138,6 @@ function Main() {
                         },
                     },
                     {
-                        title: "Объекты",
-                        minWidth: 200,
-                        field: "objects",
-                        hozAlign: "center",
-                        headerHozAlign: "center",
-                        vertAlign: "middle",
-                        print: false,
-                        download: false,
-                        sorter: "number",
-                        formatter(cell) {
-                            const response: Response = cell.getData();
-                            return `<div class="flex lg:justify-center">
-                                        <div class="font-medium whitespace-nowrap">${response.objects}</div>
-                                    </div>`;
-                        },
-                    },
-                    {
-                        title: "Активен до",
-                        minWidth: 200,
-                        field: "subscription",
-                        hozAlign: "center",
-                        headerHozAlign: "center",
-                        vertAlign: "middle",
-                        print: false,
-                        download: false,
-                        sorter: "date",
-                        sorterParams: { format: "DD/MM/YY" },
-                        formatter(cell) {
-                            const response: Response = cell.getData();
-                            const formattedDate =
-                                response.subscription!.toFormat("dd.MM.yyyy");
-                            return `<div class="flex lg:justify-center">
-                                        <div class="font-medium whitespace-nowrap">${formattedDate}</div>
-                                    </div>`;
-                        },
-                    },
-                    {
                         title: "Действия",
                         minWidth: 200,
                         field: "id",
@@ -188,10 +152,6 @@ function Main() {
                             const a = stringToHTML(
                                 `<div class="flex lg:justify-center items-center"></div>`
                             );
-                            const infoA =
-                                stringToHTML(`<a class="flex items-center mr-3 w-7 h-7 p-1 border border-black rounded-md hover:opacity-70" href="javascript:;">
-                                <i data-lucide="info"></i>
-                              </a>`);
                             const editA =
                                 stringToHTML(`<a class="flex items-center mr-3 w-7 h-7 p-1 border border-black rounded-md hover:opacity-70" href="javascript:;">
                                 <i data-lucide="pencil"></i>
@@ -200,11 +160,6 @@ function Main() {
                                 stringToHTML(`<a class="flex items-center text-danger w-7 h-7 p-1 border border-danger rounded-md hover:opacity-70" href="javascript:;">
                                 <i data-lucide="trash-2"></i>
                               </a>`);
-                            tippy(infoA, {
-                                content: "К объектам",
-                                placement: "bottom",
-                                animation: "shift-away",
-                            });
                             tippy(editA, {
                                 content: "Редактировать",
                                 placement: "bottom",
@@ -228,7 +183,7 @@ function Main() {
                                 placement: "bottom",
                                 animation: "shift-away",
                             });
-                            a.append(switcher, infoA, editA, deleteA);
+                            a.append(switcher, editA, deleteA);
                             a.addEventListener("hover", function () {});
                             deleteA.addEventListener("click", function () {
                                 setConfirmModalContent({
@@ -247,9 +202,6 @@ function Main() {
                                 dispatch(fetchUserById(response.id!));
                                 dispatch(fetchTariffs());
                                 setUpdateModalPreview(true);
-                            });
-                            infoA.addEventListener("click", function () {
-                                navigate(`/admin/objects/user/${response.id}`);
                             });
 
                             switcher.addEventListener("change", (e) => {
@@ -420,9 +372,6 @@ function Main() {
     const onUpdate = async (user: UserUpdateType) => {
         await dispatch(updateUserAdmin(user));
     };
-    const onUpdateTariff = async (tariffData: UserTariffUpdateType) => {
-        await dispatch(updateUserTariff(tariffData));
-    };
 
     useEffect(() => {
         if (status === Status.ERROR && error) {
@@ -435,14 +384,7 @@ function Main() {
             stopLoader(setIsLoaderOpen);
             dispatch(userActions.resetStatusOne());
         }
-        if (tariffState.statusAll === Status.ERROR && tariffState.error) {
-            dispatch(
-                setErrorToast({ message: tariffState.error, isError: true })
-            );
-            stopLoader(setIsLoaderOpen);
-            dispatch(tariffActions.resetStatus());
-        }
-    }, [status, statusOne, error, tariffState.statusAll, tariffState.error]);
+    }, [status, statusOne, error]);
 
     useEffect(() => {
         if (statusOne === Status.ERROR || status === Status.ERROR) {
@@ -453,7 +395,7 @@ function Main() {
             switcherIsActive!.checked = !switcherIsActive!.checked;
         }
         if (isCreated || isUpdated || isActiveStatusUpdated || isDeleted) {
-            dispatch(fetchUsers());
+            dispatch(fetchAdmins());
             setCreateModalPreview(false);
             setConfirmationModalPreview(false);
             setUpdateModalPreview(false);
@@ -461,10 +403,10 @@ function Main() {
                 .querySelectorAll("#success-notification-content")[0]
                 .cloneNode(true) as HTMLElement;
             successEl.querySelector(".text-content")!.textContent = isCreated
-                ? "Пользователь успешно создан"
+                ? "Администратор успешно создан"
                 : isDeleted
-                ? "Пользователь успешно удалён"
-                : "Пользователь успешно обновлен";
+                ? "Администратор успешно удалён"
+                : "Администратор успешно обновлен";
             successEl.classList.remove("hidden");
             Toastify({
                 node: successEl,
@@ -494,7 +436,7 @@ function Main() {
         initTabulator();
         reInitOnResizeWindow();
 
-        dispatch(fetchUsers());
+        dispatch(fetchAdmins());
     }, []);
     useEffect(() => {
         if (users && users.length) {
@@ -697,7 +639,6 @@ function Main() {
                         isLoaderOpen={isLoaderOpen}
                         setIsLoaderOpen={setIsLoaderOpen}
                         onUpdateUser={onUpdate}
-                        onUpdateUserTariff={onUpdateTariff}
                     />
                 </Dialog.Panel>
             </Dialog>

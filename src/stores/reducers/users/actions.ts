@@ -1,4 +1,3 @@
-import { IUser } from "@/stores/models/IUser";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { instance } from "@/vars";
 import { UserCreateType, UserTariffUpdateType, UserUpdateType } from "./types";
@@ -16,6 +15,24 @@ export const fetchUsers = createAsyncThunk(
             }
             if (error.response.status === 404) {
                 return thunkAPI.rejectWithValue("Пользователи не найдены");
+            }
+
+            return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
+        }
+    }
+);
+export const fetchAdmins = createAsyncThunk(
+    "user/fetchAdmins",
+    async (_, thunkAPI) => {
+        try {
+            const response = await instance.get("/admin/user/all/admin");
+            return response.data;
+        } catch (error: any) {
+            if (!!checkErrorsBase(error)) {
+                return thunkAPI.rejectWithValue(checkErrorsBase(error));
+            }
+            if (error.response.status === 404) {
+                return thunkAPI.rejectWithValue("Администраторы не найдены");
             }
 
             return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
@@ -98,6 +115,7 @@ export const fetchUserById = createAsyncThunk(
     "user/fetch",
     async (id: number, thunkAPI) => {
         try {
+            //FIXME - переделать вывод админа по айди
             const response = await instance.get(`/admin/user/id/${id}`);
             return response.data;
         } catch (error: any) {
