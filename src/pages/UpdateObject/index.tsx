@@ -71,6 +71,7 @@ function Main() {
     const { isUpdated, status, error } = useAppSelector(
         (state) => state.object
     );
+    const { authorizedUser } = useAppSelector((state) => state.user);
     const objectState = useAppSelector((state) => state.object);
     const amenityActions = amenitySlice.actions;
     const propertyTypeActions = propertyTypeSlice.actions;
@@ -368,7 +369,8 @@ function Main() {
             }).showToast();
             stopLoader(setIsLoaderOpen);
             dispatch(objectActions.resetIsUpdated());
-            navigate("/objects");
+            dispatch(objectActions.resetObjectOne());
+            navigate(authorizedUser?.is_admin ? "/admin/objects" : "/objects");
         }
     }, [isUpdated, objectState.statusOne, error]);
 
