@@ -55,7 +55,8 @@
     border-radius: 0;
 }
 
-.ck-insert-data {
+.ck-insert-data,
+.policy-content {
     h2,
     h3,
     h4,
@@ -87,5 +88,8 @@
     }
     p {
         margin-bottom: 1rem;
+    }
+    a {
+        color: rgb(var(--color-primary)) !important;
     }
 }

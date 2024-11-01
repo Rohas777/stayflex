@@ -484,7 +484,8 @@ function Main() {
                                         Я согласен с условиями
                                         <a
                                             className="ml-1 text-primary dark:text-slate-200"
-                                            href=""
+                                            target="_blank"
+                                            href="/terms"
                                         >
                                             политики конфиденциальности
                                         </a>

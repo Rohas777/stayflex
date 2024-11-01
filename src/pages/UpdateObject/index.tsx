@@ -814,6 +814,20 @@ function Main() {
                             <ClassicEditor
                                 value={editorData}
                                 onChange={setEditorData}
+                                config={{
+                                    toolbar: [
+                                        "heading",
+                                        "|",
+                                        "bold",
+                                        "italic",
+                                        "link",
+                                        "bulletedList",
+                                        "numberedList",
+                                        "|",
+                                        "undo",
+                                        "redo",
+                                    ],
+                                }}
                             />
                         </div>
                         {customErrors.description && (

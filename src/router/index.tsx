@@ -30,6 +30,7 @@ import Widget from "../pages/Widget";
 import Tariffs from "../pages/Tariffs";
 import TariffsClient from "../pages/TariffsClient";
 import Icon from "../pages/Icon";
+import PrivacyPolicy from "../pages/PrivacyPolicy";
 import { useEffect } from "react";
 import { useAppSelector } from "@/stores/hooks";
 
@@ -183,6 +184,10 @@ function Router() {
                 {
                     path: "/object/:id",
                     element: <Object />,
+                },
+                {
+                    path: "/terms",
+                    element: <PrivacyPolicy />,
                 },
             ],
         },
