@@ -454,7 +454,7 @@ function Main() {
                     >
                         <div className="items-center mt-2 sm:flex sm:mr-4 xl:mt-0">
                             <label className="whitespace-nowrap flex-none mr-2 xl:w-auto xl:flex-initial">
-                                Поиск по названию
+                                <Lucide icon="Search" className="w-4 h-4" />
                             </label>
                             <FormInput
                                 id="tabulator-html-filter-value"
