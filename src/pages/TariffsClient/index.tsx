@@ -12,6 +12,8 @@ import { ITariff } from "@/stores/models/ITariff";
 import * as lucideIcons from "lucide-react";
 import { tariffSlice } from "@/stores/reducers/tariffs/slice";
 import { errorToastSlice } from "@/stores/errorToastSlice";
+import Loader from "@/components/Custom/Loader/Loader";
+import clsx from "clsx";
 
 type IconType = keyof typeof lucideIcons.icons;
 function Main() {
@@ -23,6 +25,9 @@ function Main() {
     const location = useLocation();
     const { tariffs, statusAll, error, statusByID } = useAppSelector(
         (state) => state.tariff
+    );
+    const { authorizedUser, authorizedUserStatus } = useAppSelector(
+        (state) => state.user
     );
     const { resetStatusByID, resetStatus } = tariffSlice.actions;
     const dispatch = useAppDispatch();
@@ -47,18 +52,12 @@ function Main() {
         dispatch(fetchTariffs());
     }, []);
 
-    if (statusAll === Status.LOADING && !isLoaderOpen) {
-        return (
-            <>
-                <div className="w-full h-screen relative">
-                    <div className="absolute inset-0 z-[70] bg-slate-50 bg-opacity-70 flex justify-center items-center w-full h-full">
-                        <div className="w-10 h-10">
-                            <LoadingIcon icon="ball-triangle" />
-                        </div>
-                    </div>
-                </div>
-            </>
-        );
+    if (
+        (statusAll === Status.LOADING ||
+            authorizedUserStatus === Status.LOADING) &&
+        !isLoaderOpen
+    ) {
+        return <Loader />;
     }
 
     return (
@@ -72,7 +71,10 @@ function Main() {
                     {tariffsChunk.map((tariff) => (
                         <div
                             key={tariff.id}
-                            className="flex-1 px-5 py-16 intro-y"
+                            className={clsx("flex-1 px-5 py-16 intro-y", {
+                                "bg-success bg-opacity-30":
+                                    tariff.id === authorizedUser?.tariff.id,
+                            })}
                         >
                             {tariff.icon && tariff.icon in icons && (
                                 <Lucide
@@ -108,14 +110,26 @@ function Main() {
                                     / в день
                                 </div>
                             </div>
-                            <Button
-                                variant="primary"
-                                rounded
-                                type="button"
-                                className="block px-4 py-3 mx-auto mt-8"
-                            >
-                                ПЕРЕКЛЮЧИТЬСЯ
-                            </Button>
+                            {authorizedUser?.tariff.id !== tariff.id && (
+                                <Button
+                                    variant="primary"
+                                    rounded
+                                    type="button"
+                                    className="block px-4 py-3 mx-auto mt-8"
+                                >
+                                    ВЫБРАТЬ
+                                </Button>
+                            )}
+                            {authorizedUser?.tariff.id === tariff.id && (
+                                <Button
+                                    variant="success"
+                                    rounded
+                                    type="button"
+                                    className="block px-4 py-3 mx-auto mt-8 cursor-default !focus:ring-0"
+                                >
+                                    АКТИВЕН
+                                </Button>
+                            )}
                         </div>
                     ))}
                 </div>
