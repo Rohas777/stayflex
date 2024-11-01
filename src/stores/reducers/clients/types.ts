@@ -13,6 +13,7 @@ export interface ClientState {
     isCreated: boolean;
     createdClient: IClient | null;
     isFound: boolean | null;
+    isDeleted: boolean;
 }
 
 export interface ClientCreateType {

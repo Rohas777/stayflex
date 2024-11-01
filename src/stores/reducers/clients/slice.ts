@@ -3,6 +3,7 @@ import { Status } from "../types";
 import { ClientState } from "./types";
 import {
     createClient,
+    deleteClient,
     fetchClientByID,
     fetchClientByPhone,
     fetchClients,
@@ -21,6 +22,7 @@ const initialState: ClientState = {
     isCreated: false,
     createdClient: null,
     isFound: null,
+    isDeleted: false,
 };
 
 export const clientSlice = createSlice({
@@ -36,9 +38,14 @@ export const clientSlice = createSlice({
         resetIsCreated: (state) => {
             state.isCreated = false;
             state.createdClient = null;
+            state.status = Status.IDLE;
+        },
+        resetIsDeleted: (state) => {
+            state.isDeleted = false;
+            state.status = Status.IDLE;
         },
         resetStatus: (state) => {
-            state.status = Status.LOADING;
+            state.status = Status.IDLE;
             state.error = null;
         },
         resetStatusOne: (state) => {
@@ -120,6 +127,25 @@ export const clientSlice = createSlice({
                 state.isCreated = false;
                 state.createdClient = null;
             });
+        builder
+            .addCase(deleteClient.fulfilled, (state) => {
+                state.isDeleted = true;
+                state.status = Status.SUCCESS;
+                state.error = null;
+            })
+            .addCase(deleteClient.pending, (state, action) => {
+                state.status = Status.LOADING;
+                state.error = null;
+                state.isDeleted = false;
+            })
+            .addCase(
+                deleteClient.rejected,
+                (state, action: PayloadAction<any>) => {
+                    state.error = action.payload;
+                    state.status = Status.ERROR;
+                    state.isDeleted = false;
+                }
+            );
     },
 });
 

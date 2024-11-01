@@ -4,4 +4,5 @@ export interface IClient {
     reiting: number;
     phone: string;
     email: string;
+    reservation_count: number;
 }

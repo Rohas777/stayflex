@@ -10,17 +10,20 @@ import { TabulatorFull as Tabulator } from "tabulator-tables";
 import { stringToHTML } from "@/utils/helper";
 import { DateTime } from "luxon";
 import { useAppDispatch, useAppSelector } from "@/stores/hooks";
-import { userSlice } from "@/stores/reducers/users/slice";
 import { deleteUser, fetchUsers } from "@/stores/reducers/users/actions";
 import tippy from "tippy.js";
 import { Link, useNavigate } from "react-router-dom";
 import { clientSlice } from "@/stores/reducers/clients/slice";
-import { fetchClients } from "@/stores/reducers/clients/actions";
+import { deleteClient, fetchClients } from "@/stores/reducers/clients/actions";
 import { Status } from "@/stores/reducers/types";
 import LoadingIcon from "@/components/Base/LoadingIcon";
 import { ListPlus } from "lucide-react";
 import { errorToastSlice } from "@/stores/errorToastSlice";
-import { stopLoader } from "@/utils/customUtils";
+import { startLoader, stopLoader } from "@/utils/customUtils";
+import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
+import clsx from "clsx";
+import Toastify from "toastify-js";
+import Notification from "@/components/Base/Notification";
 
 window.DateTime = DateTime;
 interface Response {
@@ -29,14 +32,28 @@ interface Response {
     phone?: string;
     email?: string;
     grade?: number;
+    reservation_count?: number;
 }
 
 function Main() {
-    const [deleteConfirmationModal, setDeleteConfirmationModal] =
+    const [isLoaderOpen, setIsLoaderOpen] = useState(false);
+    const [confirmationModalPreview, setConfirmationModalPreview] =
         useState(false);
-    const [columnAcionFocusId, setcolumnAcionFocusId] = useState<number | null>(
-        null
-    );
+    const [confirmModalContent, setConfirmModalContent] = useState<{
+        title: string | null;
+        description: string | null;
+        onConfirm: (() => void) | null;
+        confirmLabel: string | null;
+        cancelLabel: string | null;
+        is_danger: boolean;
+    }>({
+        title: null,
+        description: null,
+        onConfirm: null,
+        confirmLabel: null,
+        cancelLabel: null,
+        is_danger: true,
+    });
 
     const { authorizedUser } = useAppSelector((state) => state.user);
 
@@ -148,47 +165,64 @@ function Main() {
                         },
                     },
                     {
-                        title: "Оценка",
+                        title: "Брони",
                         minWidth: 200,
-                        field: "grade",
-                        responsive: 1,
+                        field: "reservation_count",
                         hozAlign: "center",
                         headerHozAlign: "center",
                         vertAlign: "middle",
                         print: false,
                         download: false,
+                        sorter: "number",
                         formatter(cell) {
                             const response: Response = cell.getData();
-                            const a = stringToHTML(
-                                `<div class="min-w-32 flex lg:justify-center items-center"></div>`
-                            );
-                            const grades = [0, 1, 2, 3, 4, 5];
-                            const options = grades.map((grade) => {
-                                return `<option class="cursor-pointer" ${
-                                    grade === response.grade ? "selected" : ""
-                                } value="${grade}">${
-                                    grade === 0
-                                        ? "Без оценки"
-                                        : "★".repeat(grade)
-                                }</option>`;
-                            });
-                            const selector =
-                                stringToHTML(`<select class="cursor-pointer bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                                    ${options.join("")}
-                                        </select>`);
-
-                            a.append(selector);
-                            a.addEventListener("hover", function () {});
-
-                            selector.addEventListener(
-                                "change",
-                                function (this: HTMLInputElement) {
-                                    console.log(this.value);
-                                }
-                            );
-                            return a;
+                            return `<div class="flex lg:justify-center">
+                                        <div class="font-medium whitespace-nowrap">${response.reservation_count}</div>
+                                    </div>`;
                         },
                     },
+                    // {
+                    //     title: "Оценка",
+                    //     minWidth: 200,
+                    //     field: "grade",
+                    //     responsive: 1,
+                    //     hozAlign: "center",
+                    //     headerHozAlign: "center",
+                    //     vertAlign: "middle",
+                    //     print: false,
+                    //     download: false,
+                    //     formatter(cell) {
+                    //         const response: Response = cell.getData();
+                    //         const a = stringToHTML(
+                    //             `<div class="min-w-32 flex lg:justify-center items-center"></div>`
+                    //         );
+                    //         const grades = [0, 1, 2, 3, 4, 5];
+                    //         const options = grades.map((grade) => {
+                    //             return `<option class="cursor-pointer" ${
+                    //                 grade === response.grade ? "selected" : ""
+                    //             } value="${grade}">${
+                    //                 grade === 0
+                    //                     ? "Без оценки"
+                    //                     : "★".repeat(grade)
+                    //             }</option>`;
+                    //         });
+                    //         const selector =
+                    //             stringToHTML(`<select class="cursor-pointer bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                    //                 ${options.join("")}
+                    //                     </select>`);
+
+                    //         a.append(selector);
+                    //         a.addEventListener("hover", function () {});
+
+                    //         selector.addEventListener(
+                    //             "change",
+                    //             function (this: HTMLInputElement) {
+                    //                 console.log(this.value);
+                    //             }
+                    //         );
+                    //         return a;
+                    //     },
+                    // },
                     {
                         minWidth: 50,
                         maxWidth: 150,
@@ -214,6 +248,31 @@ function Main() {
                                 animation: "shift-away",
                             });
                             a.append(info);
+                            if (response?.reservation_count! < 1) {
+                                const deleteA =
+                                    stringToHTML(`<a class="flex items-center text-danger w-7 h-7 p-1 ml-3 border border-danger rounded-md hover:opacity-70" href="javascript:;">
+                                <i data-lucide="trash-2"></i>
+                              </a>`);
+                                tippy(deleteA, {
+                                    content: "Удалить",
+                                    placement: "bottom",
+                                    animation: "shift-away",
+                                });
+                                deleteA.addEventListener("click", function () {
+                                    setConfirmModalContent({
+                                        title: "Удалить клиента?",
+                                        description: `Вы уверены, что хотите удалить клиента "${response.name?.trim()}"?<br/>Это действие нельзя будет отменить.`,
+                                        onConfirm: () => {
+                                            onDelete(response.id!);
+                                        },
+                                        confirmLabel: "Удалить",
+                                        cancelLabel: "Отмена",
+                                        is_danger: true,
+                                    });
+                                    setConfirmationModalPreview(true);
+                                });
+                                a.append(deleteA);
+                            }
                             a.addEventListener("hover", function () {});
                             info.addEventListener("click", function () {
                                 if (authorizedUser?.is_admin) {
@@ -359,15 +418,14 @@ function Main() {
         }
     };
 
-    const onDelete = () => {
-        if (columnAcionFocusId) {
-            dispatch(deleteUser(String(columnAcionFocusId)));
-            reInitTabulator();
-            setDeleteConfirmationModal(false);
-        }
+    const onDelete = async (id: number) => {
+        startLoader(setIsLoaderOpen);
+        await dispatch(deleteClient(String(id)));
     };
 
-    const { clients, status, error } = useAppSelector((state) => state.client);
+    const { clients, status, error, isDeleted } = useAppSelector(
+        (state) => state.client
+    );
     const clientActions = clientSlice.actions;
     const dispatch = useAppDispatch();
     const { setErrorToast } = errorToastSlice.actions;
@@ -375,10 +433,34 @@ function Main() {
     useEffect(() => {
         if (status === Status.ERROR && error) {
             dispatch(setErrorToast({ message: error, isError: true }));
-
+            stopLoader(setIsLoaderOpen);
             dispatch(clientActions.resetStatus());
         }
     }, [status, error]);
+
+    useEffect(() => {
+        if (isDeleted) {
+            dispatch(fetchClients());
+            setConfirmationModalPreview(false);
+            const successEl = document
+                .querySelectorAll("#success-notification-content")[0]
+                .cloneNode(true) as HTMLElement;
+            successEl.querySelector(".text-content")!.textContent =
+                "Пользователь успешно удалён";
+            successEl.classList.remove("hidden");
+            Toastify({
+                node: successEl,
+                duration: 3000,
+                newWindow: true,
+                close: true,
+                gravity: "top",
+                position: "right",
+                stopOnFocus: true,
+            }).showToast();
+            dispatch(clientActions.resetIsDeleted());
+            stopLoader(setIsLoaderOpen);
+        }
+    }, [isDeleted, status]);
 
     useEffect(() => {
         initTabulator();
@@ -394,6 +476,7 @@ function Main() {
                 phone: client.phone,
                 email: client.email,
                 grade: client.reiting,
+                reservation_count: client.reservation_count,
             }));
             tabulator.current?.setData(formattedData).then(function () {
                 reInitTabulator();
@@ -519,51 +602,84 @@ function Main() {
                 </div>
             </div>
             {/* END: HTML Table Data */}
-
-            {/* BEGIN: Delete Confirmation Modal */}
+            {/* BEGIN: Confirmation Modal */}
             <Dialog
-                open={deleteConfirmationModal}
+                open={confirmationModalPreview}
                 onClose={() => {
-                    setDeleteConfirmationModal(false);
+                    setConfirmationModalPreview(false);
                 }}
             >
                 <Dialog.Panel>
+                    {isLoaderOpen && <OverlayLoader />}
                     <div className="p-5 text-center">
                         <Lucide
-                            icon="XCircle"
-                            className="w-16 h-16 mx-auto mt-3 text-danger"
+                            icon={
+                                confirmModalContent.is_danger
+                                    ? "XCircle"
+                                    : "BadgeInfo"
+                            }
+                            className={clsx("w-16 h-16 mx-auto mt-3", {
+                                "text-danger": confirmModalContent.is_danger,
+                                "text-warning": !confirmModalContent.is_danger,
+                            })}
                         />
-                        <div className="mt-5 text-3xl">Are you sure?</div>
-                        <div className="mt-2 text-slate-500">
-                            Do you really want to delete these records? <br />
-                            This process cannot be undone.
+                        <div className="mt-5 text-3xl">
+                            {confirmModalContent.title}
                         </div>
+                        <div
+                            className="mt-2 text-slate-500"
+                            dangerouslySetInnerHTML={{
+                                __html: confirmModalContent.description
+                                    ? confirmModalContent.description
+                                    : "",
+                            }}
+                        ></div>
                     </div>
-                    <div className="px-5 pb-8 text-center">
+                    <div className="px-5 pb-8 grid grid-cols-12">
                         <Button
                             variant="outline-secondary"
                             type="button"
                             onClick={() => {
-                                setDeleteConfirmationModal(false);
+                                setConfirmationModalPreview(false);
                             }}
-                            className="w-24 mr-1"
+                            disabled={isLoaderOpen}
+                            className="col-span-6 mr-1"
                         >
-                            Cancel
+                            {confirmModalContent.cancelLabel}
                         </Button>
                         <Button
-                            variant="danger"
+                            variant={
+                                confirmModalContent.is_danger
+                                    ? "danger"
+                                    : "warning"
+                            }
+                            disabled={isLoaderOpen}
                             type="button"
-                            className="w-24"
+                            className="col-span-6"
                             onClick={() => {
-                                onDelete();
+                                confirmModalContent.onConfirm &&
+                                    confirmModalContent.onConfirm();
                             }}
                         >
-                            Delete
+                            {confirmModalContent.confirmLabel}
                         </Button>
                     </div>
                 </Dialog.Panel>
             </Dialog>
-            {/* END: Delete Confirmation Modal */}
+            {/* END: Confirmation Modal */}
+            {/* BEGIN: Success Notification Content */}
+            <Notification
+                id="success-notification-content"
+                className="flex hidden"
+            >
+                <Lucide icon="CheckCircle" className="text-success" />
+                <div className="ml-4 mr-4">
+                    <div className="font-medium text-content">
+                        Пользователь успешно добавлен
+                    </div>
+                </div>
+            </Notification>
+            {/* END: Success Notification Content */}
         </>
     );
 }

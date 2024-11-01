@@ -84,3 +84,24 @@ export const createClient = createAsyncThunk(
         }
     }
 );
+export const deleteClient = createAsyncThunk<string, string>(
+    "/client/delete",
+    async (id, thunkAPI) => {
+        try {
+            const response = await instance.delete(`/client/delete/${id}`);
+            return response.data.id;
+        } catch (error: any) {
+            if (!!checkErrorsBase(error)) {
+                return thunkAPI.rejectWithValue(checkErrorsBase(error));
+            }
+            if (error.response.status === 404) {
+                return thunkAPI.rejectWithValue("Клиент не найден");
+            }
+            if (error.response.status === 409) {
+                return thunkAPI.rejectWithValue("Клиент не может быть удален");
+            }
+
+            return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
+        }
+    }
+);
