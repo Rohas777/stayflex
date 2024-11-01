@@ -4,6 +4,7 @@ import {
     setTheme,
     themes,
     Themes,
+    setLayout,
 } from "@/stores/themeSlice";
 import { useAppDispatch, useAppSelector } from "@/stores/hooks";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
@@ -30,6 +31,12 @@ function Main({
     };
 
     useEffect(() => {
+        if (guest) {
+            dispatch(setLayout("without-menu"));
+            return;
+        }
+        dispatch(setLayout("side-menu"));
+
         if (queryParams.get("theme")) {
             const selectedTheme = themes.find(
                 (theme) => theme.name === queryParams.get("theme")
@@ -44,7 +51,6 @@ function Main({
     if (guest) {
         return (
             <div>
-                <ThemeSwitcher />
                 <Component />
             </div>
         );
