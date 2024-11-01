@@ -34,7 +34,7 @@ function Main() {
             </div>
             {/* BEGIN: Profile Info */}
             <div className="grid lg:grid-cols-3 xl:grid-cols-2 px-5 pt-5 mt-5 intro-y box">
-                <div className="col-span-2 xl:col-span-1 pb-14 mx-6 border-b border-slate-200/60 dark:border-darkmode-400">
+                <div className="lg:col-span-2 xl:col-span-1 pb-14 mx-6 border-b border-slate-200/60 dark:border-darkmode-400">
                     <TinySlider
                         options={{
                             mode: "gallery",
@@ -52,9 +52,54 @@ function Main() {
                         ))}
                     </TinySlider>
                 </div>
-                <div className="col-span-1 flex flex-col pt-8 mx-6 border-b border-slate-200/60 dark:border-darkmode-400">
-                    <div className="mb-5 grid grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-4">
-                        <div className="col-span-1 mb-5 xl:mb-0">
+                <div className="lg:col-span-1 flex flex-col pt-8 lg:pt-2 xl:pt-8 mx-6 border-b border-slate-200/60 dark:border-darkmode-400">
+                    <div className="grid sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-4">
+                        <div className="mb-5 col-span-1">
+                            <div className="flex items-center mb-2 font-medium text-slate-600 dark:text-slate-300">
+                                <Lucide icon="Home" className="w-4 h-4 mr-1" />
+                                Объект:
+                            </div>
+                            <p className="flex items-end text-slate-600 dark:text-slate-300">
+                                <span className="flex flex-grow whitespace-nowrap after:content-[''] after:mb-1.5 after:mx-1 after:w-full after:border-b after:border-slate-300 after:border-dotted">
+                                    Тип:
+                                </span>{" "}
+                                {objectOne?.apartment.name}
+                            </p>
+                            <p className="flex items-end text-slate-600 dark:text-slate-300">
+                                <span className="flex flex-grow whitespace-nowrap after:content-[''] after:mb-1.5 after:mx-1 after:w-full after:border-b after:border-slate-300 after:border-dotted">
+                                    Комнат:
+                                </span>{" "}
+                                {objectOne?.room_count}
+                            </p>
+                            <p className="flex items-end text-slate-600 dark:text-slate-300">
+                                <span className="flex flex-grow whitespace-nowrap after:content-[''] after:mb-1.5 after:mx-1 after:w-full after:border-b after:border-slate-300 after:border-dotted">
+                                    Площадь:
+                                </span>{" "}
+                                {objectOne?.area} м2
+                            </p>
+                            <p className="flex items-end text-slate-600 dark:text-slate-300">
+                                <span className="flex flex-grow whitespace-nowrap after:content-[''] after:mb-1.5 after:mx-1 after:w-full after:border-b after:border-slate-300 after:border-dotted">
+                                    Этаж:
+                                </span>{" "}
+                                {objectOne?.floor}
+                            </p>
+                            <ul className="text-slate-600 dark:text-slate-300">
+                                <span className="ml-2">Спальных мест:</span>
+                                <li className="flex items-end">
+                                    <span className="flex flex-grow whitespace-nowrap after:content-[''] after:mb-1.5 after:mx-1 after:w-full after:border-b after:border-slate-300 after:border-dotted">
+                                        Взрослых:
+                                    </span>{" "}
+                                    {objectOne?.adult_places}
+                                </li>
+                                <li className="flex items-end">
+                                    <span className="flex flex-grow whitespace-nowrap after:content-[''] after:mb-1.5 after:mx-1 after:w-full after:border-b after:border-slate-300 after:border-dotted">
+                                        Детских:
+                                    </span>{" "}
+                                    {objectOne?.child_places}
+                                </li>
+                            </ul>
+                        </div>
+                        <div className="mb-5 col-span-1 xl:mb-0">
                             <div className="flex items-center mb-2 font-medium text-slate-600 dark:text-slate-300">
                                 <Lucide
                                     icon="DollarSign"
@@ -62,39 +107,27 @@ function Main() {
                                 />
                                 Аренда:
                             </div>
-                            <p className="text-slate-600 dark:text-slate-300">
-                                Цена: {objectOne?.price} ₽
+                            <p className="flex items-end text-slate-600 dark:text-slate-300">
+                                <span className="flex flex-grow whitespace-nowrap after:content-[''] after:mb-1.5 after:mx-1 after:w-full after:border-b after:border-slate-300 after:border-dotted">
+                                    Цена:
+                                </span>{" "}
+                                {objectOne?.price} ₽
                             </p>
-                            <p className="text-slate-600 dark:text-slate-300">
-                                Предоплата: {objectOne?.prepayment_percentage}%
+                            <p className="flex items-end text-slate-600 dark:text-slate-300">
+                                <span className="flex flex-grow whitespace-nowrap after:content-[''] after:mb-1.5 after:mx-1 after:w-full after:border-b after:border-slate-300 after:border-dotted">
+                                    Предоплата:
+                                </span>{" "}
+                                {(objectOne?.price! *
+                                    objectOne?.prepayment_percentage!) /
+                                    100}{" "}
+                                ₽
                             </p>
-                            <p className="text-slate-600 dark:text-slate-300">
-                                Минимальный срок сдачи: {objectOne?.min_ded}
+                            <p className="flex items-end text-slate-600 dark:text-slate-300">
+                                <span className="flex flex-grow whitespace-nowrap after:content-[''] after:mb-1.5 after:mx-1 after:w-full after:border-b after:border-slate-300 after:border-dotted">
+                                    Мин. срок сдачи:
+                                </span>{" "}
+                                {objectOne?.min_ded}
                             </p>
-                        </div>
-                        <div className="col-span-1">
-                            <div className="flex items-center mb-2 font-medium text-slate-600 dark:text-slate-300">
-                                <Lucide icon="Home" className="w-4 h-4 mr-1" />
-                                Объект:
-                            </div>
-                            <p className="text-slate-600 dark:text-slate-300">
-                                {objectOne?.apartment.name}
-                            </p>
-                            <p className="text-slate-600 dark:text-slate-300">
-                                Площадь: {objectOne?.area} м2
-                            </p>
-                            <p className="text-slate-600 dark:text-slate-300">
-                                Этаж: {objectOne?.floor}
-                            </p>
-                            <ul className="text-slate-600 dark:text-slate-300">
-                                Спальных мест:
-                                <li className="before:content-['•'] before:text-xl/3 before:text-slate-500 before:mr-1">
-                                    Взрослых: {objectOne?.adult_places}
-                                </li>
-                                <li className="before:content-['•'] before:text-xl/3 before:text-slate-500 before:mr-1">
-                                    Детских: {objectOne?.child_places}
-                                </li>
-                            </ul>
                         </div>
                     </div>
                     <div className="mb-5">

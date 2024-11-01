@@ -61,6 +61,7 @@ function Main() {
         (state) => state.object
     );
     const { resetIsCreated } = objectSlice.actions;
+    const { authorizedUser } = useAppSelector((state) => state.user);
 
     const dispatch = useAppDispatch();
     const amenityActions = amenitySlice.actions;
@@ -310,7 +311,7 @@ function Main() {
             }).showToast();
             stopLoader(setIsLoaderOpen);
             dispatch(resetIsCreated());
-            navigate("/objects");
+            navigate(authorizedUser?.is_admin ? "/admin/objects" : "/objects");
         }
     }, [isCreated, status]);
 
