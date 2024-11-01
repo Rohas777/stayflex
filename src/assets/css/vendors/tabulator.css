@@ -58,6 +58,7 @@
             background-color: theme("colors.slate.50");
         }
         .tabulator-cell {
+            position: relative;
             border-right: 0;
             padding: theme("spacing.4") theme("spacing.5");
             &.tabulator-row-handle {

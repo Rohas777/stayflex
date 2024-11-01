@@ -51,6 +51,7 @@ interface Response {
     name?: string;
     owner?: string;
     active?: boolean;
+    type?: string;
 }
 
 function Main() {
@@ -145,15 +146,13 @@ function Main() {
                         sorter: "string",
                         formatter(cell) {
                             const response: Response = cell.getData();
-                            return `<div>
-                                        <div class="font-medium whitespace-nowrap">${response.name}</div>
-                                    </div>`;
+                            return `<a href="/object/${response.id}" target="_blank" class="absolute inset-0 h-full items-center justify-between flex w-full font-medium whitespace-nowrap hover:text-primary">${response.name}<i data-lucide="external-link" class="size-4"></i></a>`;
                         },
                     },
                     {
-                        title: "Ссылка",
+                        title: "Тип",
                         minWidth: 200,
-                        field: "id",
+                        field: "type",
                         hozAlign: "center",
                         headerHozAlign: "center",
                         vertAlign: "middle",
@@ -163,7 +162,7 @@ function Main() {
                         formatter(cell) {
                             const response: Response = cell.getData();
                             return `<div class="flex lg:justify-center">
-                                        <a href="/object/${response.id}" target="_blank" class="flex items-center font-medium whitespace-nowrap hover:text-primary">../object/${response.id} <i data-lucide="external-link" class="size-4 ml-1"></i></a>
+                                        <div class="font-medium whitespace-nowrap">${response.type}</div>
                                     </div>`;
                         },
                     },
@@ -587,6 +586,7 @@ function Main() {
                 name: object.name,
                 owner: object.author.fullname,
                 active: object.active,
+                type: object.apartment.name,
             }));
             tabulator.current
                 ?.setData(formattedData.reverse())
