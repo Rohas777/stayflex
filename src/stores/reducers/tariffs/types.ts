@@ -9,6 +9,7 @@ export interface TariffState {
     statusByID: Status;
     error: string | null;
     isCreated: boolean;
+    isActivated: boolean;
 }
 
 export interface TariffCreateType {

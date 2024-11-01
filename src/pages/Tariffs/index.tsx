@@ -27,6 +27,8 @@ import { tariffSlice } from "@/stores/reducers/tariffs/slice";
 import { IconType } from "@/vars";
 import * as lucideIcons from "lucide-react";
 import { errorToastSlice } from "@/stores/errorToastSlice";
+import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
+import clsx from "clsx";
 
 function Main() {
     const [buttonModalPreview, setButtonModalPreview] = useState(false);
@@ -163,7 +165,7 @@ function Main() {
                                 {tariff.name}
                             </div>
                             <div className="mt-5 text-center text-slate-600 dark:text-slate-500">
-                                Объектов: {tariff.object_count}
+                                Объектов до: {tariff.object_count}
                             </div>
                             <div
                                 className="px-10 mx-auto mt-2 text-center text-slate-500"

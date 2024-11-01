@@ -89,3 +89,21 @@ export const updateTariff = createAsyncThunk(
         }
     }
 );
+export const tariffActivate = createAsyncThunk(
+    "/tariff/activate",
+    async (id: string, thunkAPI) => {
+        try {
+            const response = await instance.put(`/tariff/activate/${id}`);
+            return id;
+        } catch (error: any) {
+            if (!!checkErrorsBase(error)) {
+                return thunkAPI.rejectWithValue(checkErrorsBase(error));
+            }
+            if (error.response.status === 404) {
+                return thunkAPI.rejectWithValue("Тариф не найден");
+            }
+
+            return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
+        }
+    }
+);

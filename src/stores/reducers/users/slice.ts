@@ -12,6 +12,7 @@ import {
     updateUserTariff,
 } from "./actions";
 import { Status } from "../types";
+import { IUser } from "@/stores/models/IUser";
 
 const initialState: UserState = {
     users: [],
@@ -31,6 +32,9 @@ export const userSlice = createSlice({
     name: "user",
     initialState,
     reducers: {
+        updateAuthUserData: (state, action: PayloadAction<IUser>) => {
+            state.authorizedUser = action.payload;
+        },
         resetIsCreated: (state) => {
             state.isCreated = false;
         },

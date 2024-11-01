@@ -5,8 +5,10 @@ import {
     createTariff,
     fetchTariffById,
     fetchTariffs,
+    tariffActivate,
     updateTariff,
 } from "./actions";
+import { userSlice } from "../users/slice";
 
 const initialState: TariffState = {
     tariffs: [],
@@ -15,6 +17,7 @@ const initialState: TariffState = {
     statusByID: Status.IDLE,
     error: null,
     isCreated: false,
+    isActivated: false,
 };
 
 export const tariffSlice = createSlice({
@@ -23,6 +26,9 @@ export const tariffSlice = createSlice({
     reducers: {
         resetIsCreated: (state) => {
             state.isCreated = false;
+        },
+        resetIsActivated: (state) => {
+            state.isActivated = false;
         },
         resetStatus: (state) => {
             state.statusAll = Status.IDLE;
@@ -110,6 +116,25 @@ export const tariffSlice = createSlice({
                     state.error = action.payload;
                     state.statusAll = Status.ERROR;
                     state.isCreated = false;
+                }
+            );
+        builder
+            .addCase(tariffActivate.fulfilled, (state, action) => {
+                state.statusAll = Status.SUCCESS;
+                state.error = null;
+                state.isActivated = true;
+            })
+            .addCase(tariffActivate.pending, (state) => {
+                state.statusAll = Status.LOADING;
+                state.error = null;
+                state.isActivated = false;
+            })
+            .addCase(
+                tariffActivate.rejected,
+                (state, action: PayloadAction<any>) => {
+                    state.error = action.payload;
+                    state.statusAll = Status.ERROR;
+                    state.isActivated = false;
                 }
             );
     },
