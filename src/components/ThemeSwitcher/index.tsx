@@ -14,21 +14,15 @@ import { useRef, useState } from "react";
 import clsx from "clsx";
 import Tippy from "@/components/Base/Tippy";
 import TippyContent from "@/components/Base/TippyContent";
+import { preferencesSlice } from "@/stores/preferencesSlice";
 
 function Main() {
     const dispatch = useAppDispatch();
-    const [themeSwitcherSlideover, setThemeSwitcherSlideover] = useState(false);
 
-    const activeTheme = useAppSelector(selectTheme);
     const activeColorScheme = useAppSelector(selectColorScheme);
     const activeDarkMode = useAppSelector(selectDarkMode);
-
-    const switchTheme = (theme: Themes["name"]) => {
-        dispatch(setTheme(theme));
-    };
-    const switchLayout = (layout: Themes["layout"]) => {
-        dispatch(setLayout(layout));
-    };
+    const preferencesState = useAppSelector((state) => state.preferences);
+    const { setPreferencesSlideover } = preferencesSlice.actions;
 
     const setColorSchemeClass = () => {
         const el = document.querySelectorAll("html")[0];
@@ -79,9 +73,9 @@ function Main() {
     return (
         <div>
             <Slideover
-                open={themeSwitcherSlideover}
+                open={preferencesState.isOpen}
                 onClose={() => {
-                    setThemeSwitcherSlideover(false);
+                    dispatch(setPreferencesSlideover(false));
                 }}
             >
                 <Slideover.Panel className="w-72 rounded-[0.75rem_0_0_0.75rem/1.1rem_0_0_1.1rem]">
@@ -90,7 +84,7 @@ function Main() {
                         className="focus:outline-none hover:bg-white/10 bg-white/5 transition-all hover:rotate-180 absolute inset-y-0 left-0 right-auto flex items-center justify-center my-auto -ml-[60px] sm:-ml-[105px] border rounded-full text-white/90 w-8 h-8 sm:w-14 sm:h-14 border-white/90 hover:scale-105"
                         onClick={(e) => {
                             e.preventDefault();
-                            setThemeSwitcherSlideover(false);
+                            dispatch(setPreferencesSlideover(false));
                         }}
                     >
                         <Lucide
@@ -243,15 +237,6 @@ function Main() {
                     </Slideover.Description>
                 </Slideover.Panel>
             </Slideover>
-            <div
-                onClick={(event: React.MouseEvent) => {
-                    event.preventDefault();
-                    setThemeSwitcherSlideover(true);
-                }}
-                className=" hover:animate-spin fixed bottom-0 right-0 z-[100] flex items-center justify-center mb-5 mr-5 text-white rounded-full shadow-lg cursor-pointer w-14 h-14 bg-theme-1"
-            >
-                <Lucide className="w-5 h-5" icon="Settings" />
-            </div>
         </div>
     );
 }

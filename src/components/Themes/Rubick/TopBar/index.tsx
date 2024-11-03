@@ -14,6 +14,7 @@ import { logout } from "@/stores/reducers/auth/actions";
 import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
 import { Status } from "@/stores/reducers/types";
 import { userSlice } from "@/stores/reducers/users/slice";
+import { preferencesSlice } from "@/stores/preferencesSlice";
 
 function Main() {
     const [searchDropdown, setSearchDropdown] = useState(false);
@@ -32,12 +33,17 @@ function Main() {
     const { logoutStatus } = useAppSelector((state) => state.auth);
 
     const { resetStatusOnAuth } = userSlice.actions;
+    const { setPreferencesSlideover } = preferencesSlice.actions;
 
     const navigate = useNavigate();
 
     const onLogout = () => {
         startLoader(setIsLoaderOpen);
         dispatch(logout());
+    };
+
+    const openPreferencesSlideover = () => {
+        dispatch(setPreferencesSlideover(true));
     };
 
     useEffect(() => {
@@ -151,6 +157,14 @@ function Main() {
                                 <Lucide icon="User" className="w-4 h-4 mr-2" />{" "}
                                 Профиль
                             </Link>
+                        </Menu.Item>
+                        <Menu.Divider className="bg-white/[0.08]" />
+                        <Menu.Item
+                            onClick={openPreferencesSlideover}
+                            className="hover:bg-white/5"
+                        >
+                            <Lucide icon="Cog" className="w-4 h-4 mr-2" />{" "}
+                            Настройки
                         </Menu.Item>
                         {/* <Menu.Item className="hover:bg-white/5">
                             <Lucide icon="Lock" className="w-4 h-4 mr-2" />{" "}

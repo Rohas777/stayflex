@@ -14,6 +14,7 @@ import tariffReducer from "./reducers/tariffs/slice";
 import reservationReducer from "./reducers/reservations/slice";
 import authReducer from "./reducers/auth/slice";
 import errorToastReducer from "./errorToastSlice";
+import preferencesReducer from "./preferencesSlice";
 
 export const store = configureStore({
     reducer: {
@@ -32,6 +33,7 @@ export const store = configureStore({
         reservation: reservationReducer,
         auth: authReducer,
         error: errorToastReducer,
+        preferences: preferencesReducer,
     },
 });
 

@@ -1,12 +1,12 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "./store";
 
-interface DarkModeState {
+interface ErrorToastState {
     isError: boolean;
     message: string | null;
 }
 
-const initialState: DarkModeState = {
+const initialState: ErrorToastState = {
     isError: false,
     message: null,
 };
