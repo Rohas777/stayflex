@@ -29,6 +29,7 @@ import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
 import { IconType } from "@/vars";
 import ReactDOMServer from "react-dom/server";
 import { errorToastSlice } from "@/stores/errorToastSlice";
+import Icon from "@/components/Custom/Icon";
 
 window.DateTime = DateTime;
 interface Response {
@@ -104,9 +105,7 @@ function Main() {
                                 ${
                                     response.icon &&
                                     ReactDOMServer.renderToString(
-                                        takeLucideIcon(
-                                            response.icon as IconType
-                                        )
+                                        takeIcon(response.icon as IconType)
                                     )
                                 }
                                         <div class="font-medium whitespace-nowrap">${
@@ -265,8 +264,8 @@ function Main() {
         }
     };
 
-    const takeLucideIcon = (icon: IconType) => {
-        return <Lucide className="size-7 mr-2" icon={icon} />;
+    const takeIcon = (icon: IconType) => {
+        return <Icon className="size-7 mr-2" icon={icon} />;
     };
 
     const { amenities, status, error, isCreated, isDeleted } = useAppSelector(

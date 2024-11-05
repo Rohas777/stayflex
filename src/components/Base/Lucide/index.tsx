@@ -1,9 +1,7 @@
 import * as lucideIcons from "lucide-react";
-import * as lucideLabIcons from "@lucide/lab";
 import { twMerge } from "tailwind-merge";
 
 export const { icons } = lucideIcons;
-
 interface LucideProps extends React.ComponentPropsWithoutRef<"svg"> {
     icon: keyof typeof icons;
     title?: string;

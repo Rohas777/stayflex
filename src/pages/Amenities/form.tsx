@@ -13,8 +13,10 @@ import LoadingIcon from "@/components/Base/LoadingIcon";
 import { startLoader, stopLoader } from "@/utils/customUtils";
 import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
 import * as lucideIcons from "lucide-react";
+import * as lucideLabIcons from "@lucide/lab";
 import { IconType } from "@/vars";
 import Lucide from "@/components/Base/Lucide";
+import Icon from "@/components/Custom/Icon";
 
 interface AmenityFormProps {
     onCreate: (amenityData: AmenityCreateType) => void;
@@ -45,7 +47,10 @@ function AmenityForm({
             isValid: true,
             icon: null,
         };
-        if (!(String(formData.get("icon")) in icons)) {
+        if (
+            !(String(formData.get("icon")) in icons) &&
+            !(String(formData.get("icon")) in lucideLabIcons)
+        ) {
             errors.icon = "Такой иконки не существует";
         }
         if (!formData.get("icon")) {
@@ -146,9 +151,11 @@ function AmenityForm({
                                     customErrors.icon,
                             })}
                         >
-                            {iconValue && iconValue in icons && (
-                                <Lucide icon={iconValue as IconType} />
-                            )}
+                            {iconValue &&
+                                (iconValue in icons ||
+                                    iconValue in lucideLabIcons) && (
+                                    <Icon icon={iconValue as IconType} />
+                                )}
                             <FormInput
                                 id="validation-form-icon"
                                 type="text"

@@ -1,5 +1,6 @@
 import axios from "axios";
 import * as lucideIcons from "lucide-react";
+import * as lucideLabIcons from "@lucide/lab";
 
 export const instance = axios.create({
     withCredentials: true,
@@ -44,4 +45,6 @@ export const reservationStatusesFullWithNames: {
     },
 ];
 
-export type IconType = keyof typeof lucideIcons.icons;
+export type IconType =
+    | keyof typeof lucideIcons.icons
+    | keyof typeof lucideLabIcons;
