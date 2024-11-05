@@ -734,7 +734,7 @@ function Main() {
                                     "border-danger": errors.floor,
                                 })}
                                 defaultValue={data.floor}
-                                placeholder="4 из 10"
+                                placeholder="4"
                             />
                             {errors.floor && (
                                 <div className="mt-2 text-danger">

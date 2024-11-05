@@ -31,10 +31,19 @@ import {
 import Loader from "@/components/Custom/Loader/Loader";
 import OpacityLoader from "@/components/Custom/OpacityLoader/Loader";
 import { DateTime } from "luxon";
-import { formatDate, startLoader, stopLoader } from "@/utils/customUtils";
+import {
+    dayTitle,
+    formatDate,
+    getDaysBetweenDates,
+    startLoader,
+    stopLoader,
+    validateEndDaterange,
+    validateStartDaterange,
+} from "@/utils/customUtils";
 import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
 import { IReservation } from "@/stores/models/IReservation";
 import { reservationStatus, reservationStatusesWithNames } from "@/vars";
+import { IObject } from "@/stores/models/IObject";
 
 interface ReservationFormProps {
     onCreate: (reservation: ReservationCreateType) => void;
@@ -56,6 +65,7 @@ type CustomErrors = {
     tel: string | null;
     email: string | null;
     name: string | null;
+    date: string | null;
 };
 
 function ReservationForm({
@@ -67,13 +77,14 @@ function ReservationForm({
     currentReservation,
     currentUnreservedData,
 }: ReservationFormProps) {
-    const [selectedObject, setSelectedObject] = useState(
+    const [selectedObjectID, setSelectedObjectID] = useState(
         currentReservation?.object.id
             ? String(currentReservation?.object.id)
             : currentUnreservedData?.objectID
             ? String(currentUnreservedData?.objectID)
             : "-1"
     );
+    const [selectedObject, setSelectedObject] = useState<IObject | null>(null);
     const [startDate, setStartDate] = useState(
         currentReservation?.start_date ||
             currentUnreservedData?.start_date ||
@@ -113,83 +124,8 @@ function ReservationForm({
         tel: null,
         email: null,
         name: null,
+        date: null,
     });
-
-    const validateStartDaterange = (stardDate: string, endDate: string) => {
-        if (!stardDate) {
-            const error = "Обязательно выберите дату заезда";
-            return {
-                isValid: false,
-                error: error,
-            };
-        }
-        if (!new Date(startDate)) {
-            const error = "Введите корректную дату заезда";
-            return {
-                isValid: false,
-                error: error,
-            };
-        }
-        if (formatDate(new Date(startDate)) < formatDate(new Date())) {
-            const error = "Дата заезда не может быть раньше сегодняшней";
-            return {
-                isValid: false,
-                error: error,
-            };
-        }
-        if (formatDate(new Date(startDate)) > formatDate(new Date(endDate))) {
-            const error = "Дата заезда не может быть позже даты выезда";
-            return {
-                isValid: false,
-                error: error,
-            };
-        }
-        return {
-            isValid: true,
-            error: null,
-        };
-    };
-    const validateEndDaterange = (stardDate: string, endDate: string) => {
-        if (!endDate) {
-            const error = "Обязательно выберите дату выезда";
-            return {
-                isValid: false,
-                error: error,
-            };
-        }
-        if (!new Date(endDate)) {
-            const error = "Введите корректную дату выезда";
-            return {
-                isValid: false,
-                error: error,
-            };
-        }
-        if (formatDate(new Date(endDate)) < formatDate(new Date())) {
-            const error = "Дата выезда не может быть раньше сегодняшней";
-            return {
-                isValid: false,
-                error: error,
-            };
-        }
-        if (formatDate(new Date(startDate)) > formatDate(new Date(endDate))) {
-            const error = "Дата выезда не может быть раньше даты заезда";
-            return {
-                isValid: false,
-                error: error,
-            };
-        }
-        if (new Date(endDate).getFullYear() > new Date().getFullYear() + 2) {
-            const error = "Дата выезда не может быть больше 2-х лет";
-            return {
-                isValid: false,
-                error: error,
-            };
-        }
-        return {
-            isValid: true,
-            error: null,
-        };
-    };
 
     const vaildateWithoutYup = async (formData: FormData) => {
         const errors: CustomErrors = {
@@ -200,11 +136,12 @@ function ReservationForm({
             tel: null,
             email: null,
             name: null,
+            date: null,
         };
-        if (selectedObject === "-1") {
+        if (selectedObjectID === "-1") {
             errors.object = "Обязательно выберите объект";
         }
-        if (selectedObject === "-1") {
+        if (selectedObjectID === "-1") {
             errors.object = "Обязательно выберите объект";
         }
         if (!validateStartDaterange(startDate, endDate).isValid) {
@@ -215,6 +152,16 @@ function ReservationForm({
         }
         if (!validateEndDaterange(startDate, endDate).isValid) {
             errors.end_date = validateEndDaterange(startDate, endDate).error;
+        }
+
+        if (
+            getDaysBetweenDates(startDate, endDate) < selectedObject?.min_ded!
+        ) {
+            errors.date =
+                "Минимальный срок бронирования: " +
+                selectedObject?.min_ded +
+                " " +
+                dayTitle(selectedObject?.min_ded!);
         }
         if (!tel) {
             errors.tel = "Обязательно введите телефон клиента";
@@ -290,7 +237,7 @@ function ReservationForm({
             const reservationData: ReservationCreateType = {
                 start_date: formatDate(new Date(startDate)),
                 end_date: formatDate(new Date(endDate)),
-                object_id: Number(selectedObject),
+                object_id: Number(selectedObjectID),
                 client_id: clientsState.createdClient?.id!,
                 description: String(formData?.get("description")),
                 letter: String(formData?.get("letter")),
@@ -311,7 +258,7 @@ function ReservationForm({
             const reservationData: ReservationCreateType = {
                 start_date: formatDate(new Date(startDate)),
                 end_date: formatDate(new Date(endDate)),
-                object_id: Number(selectedObject),
+                object_id: Number(selectedObjectID),
                 client_id: clientsState.clientByPhone?.id!,
                 description: String(formData?.get("description")),
                 letter: String(formData?.get("letter")),
@@ -342,6 +289,14 @@ function ReservationForm({
             setIsTelChecking(false);
         }
     }, [clientsState.statusByPhone]);
+    useEffect(() => {
+        if (Number(selectedObjectID) <= 0) return;
+        setSelectedObject(
+            objectsState.objects.find(
+                (object) => object.id === Number(selectedObjectID)
+            )!
+        );
+    }, [selectedObjectID]);
 
     if (
         objectsState.status === Status.LOADING &&
@@ -382,9 +337,9 @@ function ReservationForm({
                         >
                             <TomSelect
                                 id="validation-form-object"
-                                value={selectedObject}
+                                value={selectedObjectID}
                                 onChange={(e) => {
-                                    setSelectedObject(e.target.value);
+                                    setSelectedObjectID(e.target.value);
                                     setCustomErrors((prev) => ({
                                         ...prev,
                                         object: null,
@@ -414,135 +369,155 @@ function ReservationForm({
                             </div>
                         )}
                     </div>
-                    <div className="input-form mt-3">
-                        <FormLabel
-                            htmlFor="validation-form-start-date"
-                            className="flex flex-col w-full sm:flex-row"
-                        >
-                            Дата заезда
-                            <span className="mt-1 text-xs sm:ml-auto sm:mt-0 text-slate-500">
-                                Обязательное
-                            </span>
-                        </FormLabel>
-                        <div className="flex gap-1 items-center">
-                            <div className="relative w-full">
+                    <div className="mt-3">
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="col-span-1 input-form">
                                 <FormLabel
-                                    className={clsx(
-                                        "absolute flex items-center justify-center w-10 h-full border rounded-l bg-slate-100 text-slate-500 dark:bg-darkmode-700 dark:border-darkmode-800 dark:text-slate-400",
-                                        {
-                                            "border-danger-important":
-                                                customErrors.start_date,
-                                        }
-                                    )}
                                     htmlFor="validation-form-start-date"
+                                    className="flex flex-col w-full sm:flex-row"
                                 >
-                                    <Lucide icon="CalendarDays" />
+                                    Дата заезда
+                                    <span className="mt-1 text-xs sm:ml-auto sm:mt-0 text-slate-500">
+                                        Обязательное
+                                    </span>
                                 </FormLabel>
-                                <Litepicker
-                                    value={startDate}
-                                    id="validation-form-start-date"
-                                    name="date"
-                                    options={{
-                                        lang: "RU-ru",
-                                        autoApply: true,
-                                        singleMode: true,
-                                        showWeekNumbers: false,
-                                        dropdowns: {
-                                            minYear: new Date().getFullYear(),
-                                            maxYear:
-                                                new Date().getFullYear() + 2,
-                                            months: true,
-                                            years: true,
-                                        },
-                                    }}
-                                    onChange={(e) => {
-                                        setStartDate(e.target.value);
-                                        setCustomErrors((prev) => ({
-                                            ...prev,
-                                            start_date: null,
-                                        }));
-                                    }}
-                                    className={clsx(
-                                        "pl-12 block w-full border rounded-md border",
-                                        {
-                                            "border-danger-important":
-                                                customErrors.start_date,
-                                        }
-                                    )}
-                                    placeholder="Выберите дату заезда"
-                                />
+                                <div className="flex gap-1 items-center">
+                                    <div className="relative w-full">
+                                        <FormLabel
+                                            className={clsx(
+                                                "absolute flex items-center justify-center w-10 h-full border rounded-l bg-slate-100 text-slate-500 dark:bg-darkmode-700 dark:border-darkmode-800 dark:text-slate-400",
+                                                {
+                                                    "border-danger-important":
+                                                        customErrors.start_date ||
+                                                        customErrors.date,
+                                                }
+                                            )}
+                                            htmlFor="validation-form-start-date"
+                                        >
+                                            <Lucide icon="CalendarDays" />
+                                        </FormLabel>
+                                        <Litepicker
+                                            value={startDate}
+                                            id="validation-form-start-date"
+                                            name="date"
+                                            options={{
+                                                lang: "RU-ru",
+                                                autoApply: true,
+                                                singleMode: true,
+                                                showWeekNumbers: false,
+                                                dropdowns: {
+                                                    minYear:
+                                                        new Date().getFullYear(),
+                                                    maxYear:
+                                                        new Date().getFullYear() +
+                                                        2,
+                                                    months: true,
+                                                    years: true,
+                                                },
+                                            }}
+                                            onChange={(e) => {
+                                                setStartDate(e.target.value);
+                                                setCustomErrors((prev) => ({
+                                                    ...prev,
+                                                    start_date: null,
+                                                    date: null,
+                                                }));
+                                            }}
+                                            className={clsx(
+                                                "pl-12 block w-full border rounded-md border",
+                                                {
+                                                    "border-danger-important":
+                                                        customErrors.start_date ||
+                                                        customErrors.date,
+                                                }
+                                            )}
+                                            placeholder="Выберите дату заезда"
+                                        />
+                                    </div>
+                                </div>
+                                {customErrors.start_date && (
+                                    <div className="mt-2 text-danger">
+                                        {typeof customErrors.start_date ===
+                                            "string" && customErrors.start_date}
+                                    </div>
+                                )}
                             </div>
-                        </div>
-                        {customErrors.start_date && (
-                            <div className="mt-2 text-danger">
-                                {typeof customErrors.start_date === "string" &&
-                                    customErrors.start_date}
-                            </div>
-                        )}
-                    </div>
-                    <div className="input-form mt-3">
-                        <FormLabel
-                            htmlFor="validation-form-end-date"
-                            className="flex flex-col w-full sm:flex-row"
-                        >
-                            Дата выезда
-                            <span className="mt-1 text-xs sm:ml-auto sm:mt-0 text-slate-500">
-                                Обязательное
-                            </span>
-                        </FormLabel>
-                        <div className="flex gap-1 items-center">
-                            <div className="relative w-full">
+                            <div className="col-span-1 input-form">
                                 <FormLabel
                                     htmlFor="validation-form-end-date"
-                                    className={clsx(
-                                        "absolute flex items-center justify-center w-10 h-full border rounded-l bg-slate-100 text-slate-500 dark:bg-darkmode-700 dark:border-darkmode-800 dark:text-slate-400",
-                                        {
-                                            "border-danger-important":
-                                                customErrors.end_date,
-                                        }
-                                    )}
+                                    className="flex flex-col w-full sm:flex-row"
                                 >
-                                    <Lucide icon="CalendarDays" />
+                                    Дата выезда
+                                    <span className="mt-1 text-xs sm:ml-auto sm:mt-0 text-slate-500">
+                                        Обязательное
+                                    </span>
                                 </FormLabel>
-                                <Litepicker
-                                    value={endDate}
-                                    id="validation-form-end-date"
-                                    name="date"
-                                    options={{
-                                        lang: "RU-ru",
-                                        autoApply: true,
-                                        singleMode: true,
-                                        showWeekNumbers: false,
-                                        dropdowns: {
-                                            minYear: new Date().getFullYear(),
-                                            maxYear:
-                                                new Date().getFullYear() + 2,
-                                            months: true,
-                                            years: true,
-                                        },
-                                    }}
-                                    onChange={(e) => {
-                                        setEndDate(e.target.value);
-                                        setCustomErrors((prev) => ({
-                                            ...prev,
-                                            end_date: null,
-                                        }));
-                                    }}
-                                    className={clsx(
-                                        "pl-12 block w-full border rounded-md border",
-                                        {
-                                            "border-danger-important":
-                                                customErrors.end_date,
-                                        }
-                                    )}
-                                    placeholder="Выберите дату выезда"
-                                />
+                                <div className="flex gap-1 items-center">
+                                    <div className="relative w-full">
+                                        <FormLabel
+                                            htmlFor="validation-form-end-date"
+                                            className={clsx(
+                                                "absolute flex items-center justify-center w-10 h-full border rounded-l bg-slate-100 text-slate-500 dark:bg-darkmode-700 dark:border-darkmode-800 dark:text-slate-400",
+                                                {
+                                                    "border-danger-important":
+                                                        customErrors.end_date ||
+                                                        customErrors.date,
+                                                }
+                                            )}
+                                        >
+                                            <Lucide icon="CalendarDays" />
+                                        </FormLabel>
+                                        <Litepicker
+                                            value={endDate}
+                                            id="validation-form-end-date"
+                                            name="date"
+                                            options={{
+                                                lang: "RU-ru",
+                                                autoApply: true,
+                                                singleMode: true,
+                                                showWeekNumbers: false,
+                                                dropdowns: {
+                                                    minYear:
+                                                        new Date().getFullYear(),
+                                                    maxYear:
+                                                        new Date().getFullYear() +
+                                                        2,
+                                                    months: true,
+                                                    years: true,
+                                                },
+                                            }}
+                                            onChange={(e) => {
+                                                setEndDate(e.target.value);
+                                                setCustomErrors((prev) => ({
+                                                    ...prev,
+                                                    end_date: null,
+                                                    date: null,
+                                                }));
+                                            }}
+                                            className={clsx(
+                                                "pl-12 block w-full border rounded-md border",
+                                                {
+                                                    "border-danger-important":
+                                                        customErrors.end_date ||
+                                                        customErrors.date,
+                                                }
+                                            )}
+                                            placeholder="Выберите дату выезда"
+                                        />
+                                    </div>
+                                </div>
+                                {customErrors.end_date && (
+                                    <div className="mt-2 text-danger">
+                                        {typeof customErrors.end_date ===
+                                            "string" && customErrors.end_date}
+                                    </div>
+                                )}
                             </div>
                         </div>
-                        {customErrors.end_date && (
+                        {customErrors.date && (
                             <div className="mt-2 text-danger">
-                                {typeof customErrors.end_date === "string" &&
-                                    customErrors.end_date}
+                                {typeof customErrors.date === "string" &&
+                                    customErrors.date}
                             </div>
                         )}
                     </div>
