@@ -81,16 +81,13 @@ function Main() {
                 <Slideover.Panel className="w-72 rounded-[0.75rem_0_0_0.75rem/1.1rem_0_0_1.1rem]">
                     <a
                         href=""
-                        className="focus:outline-none hover:bg-white/10 bg-white/5 transition-all hover:rotate-180 absolute inset-y-0 left-0 right-auto flex items-center justify-center my-auto -ml-[60px] sm:-ml-[105px] border rounded-full text-white/90 w-8 h-8 sm:w-14 sm:h-14 border-white/90 hover:scale-105"
+                        className="focus:outline-none hover:bg-white/10 bg-white/5 transition-all hover:rotate-180 fixed top-0 left-0 md:absolute md:inset-y-0 md:right-auto md:-ml-[105px] md:size-[56px] md:my-auto flex items-center justify-center mt-4 ml-4 border rounded-full text-white/90 w-8 h-8 border-white/90 hover:scale-105"
                         onClick={(e) => {
                             e.preventDefault();
                             dispatch(setPreferencesSlideover(false));
                         }}
                     >
-                        <Lucide
-                            className="w-3 h-3 sm:w-8 sm:h-8 stroke-[1]"
-                            icon="X"
-                        />
+                        <Lucide className="w-6 h-6" icon="X" />
                     </a>
                     <Slideover.Description className="p-0">
                         <div className="flex flex-col">

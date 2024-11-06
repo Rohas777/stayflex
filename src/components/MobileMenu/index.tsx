@@ -12,6 +12,7 @@ import Lucide from "@/components/Base/Lucide";
 import logoUrl from "@/assets/images/logo.svg";
 import clsx from "clsx";
 import SimpleBar from "simplebar";
+import { useClickAway } from "ahooks";
 
 function Main() {
     const navigate = useNavigate();
@@ -24,6 +25,19 @@ function Main() {
     const menu = () => nestedMenu(toRaw(menuStore), location);
     const [activeMobileMenu, setActiveMobileMenu] = useState(false);
     const scrollableRef = createRef<HTMLDivElement>();
+    const mobileMenuOpenRef = createRef<HTMLAnchorElement>();
+
+    useClickAway(
+        (e) => {
+            if (
+                activeMobileMenu &&
+                mobileMenuOpenRef.current?.contains(e.target as Node) === false
+            ) {
+                setActiveMobileMenu(false);
+            }
+        },
+        () => document.getElementsByClassName("simplebar-wrapper")[0]
+    );
 
     useEffect(() => {
         if (scrollableRef.current) {
@@ -46,13 +60,14 @@ function Main() {
             >
                 <div className="h-[70px] px-3 sm:px-8 flex items-center">
                     <a href="" className="flex mr-auto">
-                        <img
-                            alt="Midone Tailwind HTML Admin Template"
-                            className="w-20"
-                            src={logoUrl}
-                        />
+                        <img className="w-20" src={logoUrl} />
                     </a>
-                    <a href="#" onClick={(e) => e.preventDefault()}>
+                    <a
+                        id="mobile-menu-open"
+                        ref={mobileMenuOpenRef}
+                        href="#"
+                        onClick={(e) => e.preventDefault()}
+                    >
                         <Lucide
                             icon="BarChart2"
                             className="w-8 h-8 text-white transform -rotate-90"
@@ -87,7 +102,7 @@ function Main() {
                             }}
                         />
                     </a>
-                    <ul className="py-2">
+                    <ul id="mobile-menu-content" className="py-2">
                         {/* BEGIN: First Child */}
                         {formattedMenu.map((menu, menuKey) =>
                             menu == "divider" ? (
