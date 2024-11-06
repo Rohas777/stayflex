@@ -7,7 +7,12 @@ import { Status } from "@/stores/reducers/types";
 import clsx from "clsx";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { FormLabel, FormInput, FormCheck } from "@/components/Base/Form";
+import {
+    FormLabel,
+    FormInput,
+    FormCheck,
+    FormTextarea,
+} from "@/components/Base/Form";
 import Dropzone, { DropzoneElement } from "@/components/Base/Dropzone";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import TomSelect from "@/components/Base/TomSelect";
@@ -246,6 +251,7 @@ function Main() {
             prepayment_percentage: Number(selectedPrepayment),
             min_ded: Number(formData.get("min_ded")),
             active: isObjectActivated,
+            letter: String(formData.get("letter")),
         };
         function filterDeletedPhotos(remaining: string[], initial: string[]) {
             const dictFromReamining = new Map();
@@ -369,7 +375,6 @@ function Main() {
             }).showToast();
             stopLoader(setIsLoaderOpen);
             dispatch(objectActions.resetIsUpdated());
-            dispatch(objectActions.resetObjectOne());
             navigate(authorizedUser?.is_admin ? "/admin/objects" : "/objects");
         }
     }, [isUpdated, objectState.statusOne, error]);
@@ -796,48 +801,6 @@ function Main() {
                         </div>
                     </div>
                     <div className="p-5 mt-5 intro-y box">
-                        <div className="flex flex-col items-center mb-3 intro-y sm:flex-row">
-                            <h2 className="mr-auto text-lg font-medium">
-                                Описание
-                            </h2>
-                        </div>
-                        <div
-                            ref={editorValidationRef}
-                            className={clsx(
-                                "border rounded-sm border-transparent",
-                                {
-                                    "border-danger-important":
-                                        customErrors.description,
-                                }
-                            )}
-                        >
-                            <ClassicEditor
-                                value={editorData}
-                                onChange={setEditorData}
-                                config={{
-                                    toolbar: [
-                                        "heading",
-                                        "|",
-                                        "bold",
-                                        "italic",
-                                        "link",
-                                        "bulletedList",
-                                        "numberedList",
-                                        "|",
-                                        "undo",
-                                        "redo",
-                                    ],
-                                }}
-                            />
-                        </div>
-                        {customErrors.description && (
-                            <div className="mt-2 text-danger">
-                                {typeof customErrors.description === "string" &&
-                                    customErrors.description}
-                            </div>
-                        )}
-                    </div>
-                    <div className="p-5 mt-5 intro-y box">
                         <div className="flex flex-col items-center intro-y sm:flex-row">
                             <h2 className="mr-auto text-lg font-medium">
                                 Удобства
@@ -1067,6 +1030,87 @@ function Main() {
                                 <div className="mt-2 text-danger">
                                     {typeof customErrors.gallery === "string" &&
                                         customErrors.gallery}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                    <div className="p-5 mt-5 intro-y box">
+                        <div className="flex flex-col items-center mb-3 intro-y sm:flex-row">
+                            <h2 className="mr-auto text-lg font-medium">
+                                Дополнительная информация
+                            </h2>
+                        </div>
+                        <div className="input-form mt-3">
+                            <FormLabel
+                                htmlFor="validation-form-description"
+                                className="flex flex-col w-full sm:flex-row"
+                            >
+                                Описание
+                                <span className="mt-1 text-xs sm:ml-auto sm:mt-0 text-slate-500">
+                                    Обязательное
+                                </span>
+                            </FormLabel>
+                            <div
+                                ref={editorValidationRef}
+                                className={clsx(
+                                    "border rounded-sm border-transparent",
+                                    {
+                                        "border-danger-important":
+                                            customErrors.description,
+                                    }
+                                )}
+                            >
+                                <ClassicEditor
+                                    id="validation-form-description"
+                                    value={editorData}
+                                    onChange={setEditorData}
+                                    config={{
+                                        toolbar: [
+                                            "heading",
+                                            "|",
+                                            "bold",
+                                            "italic",
+                                            "link",
+                                            "bulletedList",
+                                            "numberedList",
+                                            "|",
+                                            "undo",
+                                            "redo",
+                                        ],
+                                    }}
+                                />
+                            </div>
+                            {customErrors.description && (
+                                <div className="mt-2 text-danger">
+                                    {typeof customErrors.description ===
+                                        "string" && customErrors.description}
+                                </div>
+                            )}
+                        </div>
+                        <div className="input-form mt-3">
+                            <FormLabel
+                                htmlFor="validation-form-letter"
+                                className="flex flex-col w-full sm:flex-row"
+                            >
+                                Служебная информация
+                                <span className="mt-1 text-xs sm:ml-auto sm:mt-0 text-slate-500">
+                                    Обязательное
+                                </span>
+                            </FormLabel>
+                            <FormTextarea
+                                {...register("letter")}
+                                id="validation-form-letter"
+                                name="letter"
+                                className={clsx({
+                                    "border-danger": errors.letter,
+                                })}
+                                defaultValue={data.letter}
+                                placeholder="Ключи под ковриком"
+                            ></FormTextarea>
+                            {errors.letter && (
+                                <div className="mt-2 text-danger">
+                                    {typeof errors.letter.message ===
+                                        "string" && errors.letter.message}
                                 </div>
                             )}
                         </div>

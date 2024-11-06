@@ -141,9 +141,6 @@ function ReservationForm({
         if (selectedObjectID === "-1") {
             errors.object = "Обязательно выберите объект";
         }
-        if (selectedObjectID === "-1") {
-            errors.object = "Обязательно выберите объект";
-        }
         if (!validateStartDaterange(startDate, endDate).isValid) {
             errors.start_date = validateStartDaterange(
                 startDate,
@@ -736,7 +733,9 @@ function ReservationForm({
                                 "border-danger": errors.letter,
                             })}
                             defaultValue={
-                                currentReservation && currentReservation.letter
+                                (currentReservation &&
+                                    currentReservation.letter) ||
+                                selectedObject?.letter
                             }
                             placeholder="Ключи под ковриком"
                         ></FormTextarea>

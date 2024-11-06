@@ -724,7 +724,7 @@ function ReservationForm({
                                 "border-danger": errors.letter,
                             })}
                             defaultValue={
-                                reservationState.reservationOne?.letter || ""
+                                reservationState.reservationOne?.letter
                             }
                             placeholder="Ключи под ковриком"
                         ></FormTextarea>

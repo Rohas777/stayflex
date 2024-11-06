@@ -13,6 +13,7 @@ export interface IObject {
     id: number;
     photos: string[];
     active: boolean;
+    letter: string;
     city: {
         id: number;
         name: string;

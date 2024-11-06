@@ -590,6 +590,7 @@ function Main() {
 
         dispatch(fetchObjectsByUser(userId));
         dispatch(fetchUserById(userId));
+        dispatch(objectActions.resetObjectOne());
     }, []);
 
     useEffect(() => {

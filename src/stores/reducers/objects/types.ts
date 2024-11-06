@@ -29,6 +29,7 @@ export interface ObjectCreateType {
     convenience: number[];
     description: string;
     active: boolean;
+    letter: string;
 }
 export interface ObjectUpdateType {
     apartment_id: number;
@@ -46,4 +47,5 @@ export interface ObjectUpdateType {
     id: number;
     description: string;
     active: boolean;
+    letter: string;
 }

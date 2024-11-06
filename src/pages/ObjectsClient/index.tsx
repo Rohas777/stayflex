@@ -553,6 +553,7 @@ function Main() {
         reInitOnResizeWindow();
 
         dispatch(fetchObjects());
+        dispatch(objectActions.resetObjectOne());
     }, []);
 
     useEffect(() => {

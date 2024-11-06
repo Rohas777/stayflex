@@ -77,6 +77,12 @@ function ReservationForm({
     currentReservation,
     currentUnreservedData,
 }: ReservationFormProps) {
+    const objectsState = useAppSelector((state) => state.object);
+    const clientsState = useAppSelector((state) => state.client);
+    const reservationState = useAppSelector((state) => state.reservation);
+    const objectActions = objectSlice.actions;
+    const clientActions = clientSlice.actions;
+
     const [selectedObjectID, setSelectedObjectID] = useState(
         currentReservation?.object.id
             ? String(currentReservation?.object.id)
@@ -101,12 +107,6 @@ function ReservationForm({
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [formData, setFormData] = useState<FormData | null>(null);
     const [isCreate, setIsCreate] = useState(true);
-
-    const objectsState = useAppSelector((state) => state.object);
-    const clientsState = useAppSelector((state) => state.client);
-    const reservationState = useAppSelector((state) => state.reservation);
-    const objectActions = objectSlice.actions;
-    const clientActions = clientSlice.actions;
 
     const dispatch = useAppDispatch();
 
@@ -739,7 +739,9 @@ function ReservationForm({
                                 "border-danger": errors.letter,
                             })}
                             defaultValue={
-                                currentReservation && currentReservation.letter
+                                (currentReservation &&
+                                    currentReservation.letter) ||
+                                selectedObject?.letter
                             }
                             placeholder="Ключи под ковриком"
                         ></FormTextarea>

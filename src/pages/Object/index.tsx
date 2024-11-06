@@ -221,15 +221,17 @@ function Main() {
                                     {objectOne?.min_ded}
                                 </p>
                             </div>
-                            <Button
-                                variant="primary"
-                                className="my-5 w-full"
-                                onClick={() => {
-                                    setReservationModal(true);
-                                }}
-                            >
-                                Забронировать
-                            </Button>
+                            {objectOne?.active && (
+                                <Button
+                                    variant="primary"
+                                    className="my-5 w-full"
+                                    onClick={() => {
+                                        setReservationModal(true);
+                                    }}
+                                >
+                                    Забронировать
+                                </Button>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -283,33 +285,35 @@ function Main() {
             {/* END: Profile Info */}
 
             {/* BEGIN: Form Modal */}
-            <Dialog
-                size="lg"
-                id="reservation-form-modal"
-                open={reservationModal}
-                onClose={() => {
-                    setReservationModal(false);
-                }}
-            >
-                <Dialog.Panel>
-                    <a
-                        onClick={(event: React.MouseEvent) => {
-                            event.preventDefault();
-                            setReservationModal(false);
-                        }}
-                        className="absolute top-0 right-0 mt-3 mr-3"
-                        href="#"
-                    >
-                        <Icon icon="X" className="w-8 h-8 text-slate-400" />
-                    </a>
-                    <ReservationForm
-                        object={objectOne!}
-                        onCreate={onCreate}
-                        setIsLoaderOpen={setIsLoaderOpen}
-                        isLoaderOpen={isLoaderOpen}
-                    />
-                </Dialog.Panel>
-            </Dialog>
+            {objectOne?.active && (
+                <Dialog
+                    size="lg"
+                    id="reservation-form-modal"
+                    open={reservationModal}
+                    onClose={() => {
+                        setReservationModal(false);
+                    }}
+                >
+                    <Dialog.Panel>
+                        <a
+                            onClick={(event: React.MouseEvent) => {
+                                event.preventDefault();
+                                setReservationModal(false);
+                            }}
+                            className="absolute top-0 right-0 mt-3 mr-3"
+                            href="#"
+                        >
+                            <Icon icon="X" className="w-8 h-8 text-slate-400" />
+                        </a>
+                        <ReservationForm
+                            object={objectOne!}
+                            onCreate={onCreate}
+                            setIsLoaderOpen={setIsLoaderOpen}
+                            isLoaderOpen={isLoaderOpen}
+                        />
+                    </Dialog.Panel>
+                </Dialog>
+            )}
             {/* END: Form Modal */}
             {/* BEGIN: Success Notification Content */}
             <Notification
