@@ -51,13 +51,13 @@ interface Response {
 }
 
 function Main() {
-    const [confirmationModal, setConfirmationModal] = useState(false);
     const [reservationModal, setReservationModal] = useState(false);
     const [calendarModal, setCalendarModal] = useState(false);
     const [isLoaderOpen, setIsLoaderOpen] = useState(false);
     const [currentObjectID, setCurrentObjectID] = useState<number | null>(null);
     const [switcherIsActive, setSwitcherIsActive] =
         useState<HTMLInputElement | null>(null);
+    const [confirmationModal, setConfirmationModal] = useState(false);
     const [confirmModalContent, setConfirmModalContent] = useState<{
         title: string | null;
         description: string | null;

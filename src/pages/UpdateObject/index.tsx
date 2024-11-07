@@ -37,7 +37,12 @@ import CustomTomSelect, {
     TomSelectElement,
 } from "@/components/Base/CustomTomSelect";
 import LoadingIcon from "@/components/Base/LoadingIcon";
-import { startLoader, stopLoader } from "@/utils/customUtils";
+import {
+    ImageDropzoneFile,
+    resizeDropzoneFiles,
+    startLoader,
+    stopLoader,
+} from "@/utils/customUtils";
 import { DropzoneFile } from "dropzone";
 import { objectSlice } from "@/stores/reducers/objects/slice";
 import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
@@ -69,6 +74,7 @@ type CustomErrors = {
 };
 
 function Main() {
+    const maxFilesize = 1.5;
     const dispatch = useAppDispatch();
     const regionsState = useAppSelector((state) => state.region);
     const amenitiesState = useAppSelector((state) => state.amenity);
@@ -226,9 +232,13 @@ function Main() {
     });
     const onSubmit = async (event: React.ChangeEvent<HTMLFormElement>) => {
         event.preventDefault();
-        startLoader(setIsLoaderOpen);
-        const result = await trigger();
         const gallery = dropzoneValidationRef.current!.dropzone.files;
+        startLoader(setIsLoaderOpen);
+        const resizedFiles = await resizeDropzoneFiles(
+            gallery as ImageDropzoneFile[],
+            dropzoneValidationRef
+        );
+        const result = await trigger();
         const customResult = vaildateWithoutYup(gallery);
         if (!result || !customResult.isValid) {
             stopLoader(setIsLoaderOpen);
@@ -279,7 +289,7 @@ function Main() {
             JSON.stringify(convenience_and_removed_photos)
         );
         objectData.append("update_object", JSON.stringify(object));
-        gallery.forEach((file) => {
+        resizedFiles.forEach((file) => {
             objectData.append("files", file);
         });
         dispatch(updateObject(objectData));
@@ -1011,10 +1021,8 @@ function Main() {
                                 options={{
                                     url: "https://httpbin.org/post",
                                     thumbnailWidth: 150,
-                                    maxFilesize: 10,
+                                    maxFilesize: maxFilesize,
                                     maxFiles: maxFiles,
-                                    resizeHeight: 40,
-                                    resizeWidth: 40,
                                     acceptedFiles: "image/*",
                                     clickable: true,
                                     addRemoveLinks: true,

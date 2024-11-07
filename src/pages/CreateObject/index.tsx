@@ -30,7 +30,12 @@ import CustomTomSelect, {
     TomSelectElement,
 } from "@/components/Base/CustomTomSelect";
 import LoadingIcon from "@/components/Base/LoadingIcon";
-import { startLoader, stopLoader } from "@/utils/customUtils";
+import {
+    ImageDropzoneFile,
+    resizeDropzoneFiles,
+    startLoader,
+    stopLoader,
+} from "@/utils/customUtils";
 import { DropzoneFile } from "dropzone";
 import { objectSlice } from "@/stores/reducers/objects/slice";
 import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
@@ -59,6 +64,7 @@ type CustomErrors = {
 };
 
 function Main() {
+    const maxFilesize = 1.5;
     const regionsState = useAppSelector((state) => state.region);
     const amenitiesState = useAppSelector((state) => state.amenity);
     const propertyTypesState = useAppSelector((state) => state.propertyType);
@@ -154,6 +160,7 @@ function Main() {
     const addDangerBorder = (ref?: HTMLDivElement | null) => {
         ref?.classList.add("border-danger-important");
     };
+
     const vaildateWithoutYup = (photos: DropzoneFile[]) => {
         const errors: CustomErrors = {
             isValid: true,
@@ -214,14 +221,20 @@ function Main() {
     });
     const onSubmit = async (event: React.ChangeEvent<HTMLFormElement>) => {
         event.preventDefault();
-        startLoader(setIsLoaderOpen);
-        const result = await trigger();
         const photos = dropzoneValidationRef.current!.dropzone.files;
+
+        startLoader(setIsLoaderOpen);
+        const resizedFiles = await resizeDropzoneFiles(
+            photos as ImageDropzoneFile[],
+            dropzoneValidationRef
+        );
+        const result = await trigger();
         const customResult = vaildateWithoutYup(photos);
         if (!result || !customResult.isValid) {
             stopLoader(setIsLoaderOpen);
             return;
         }
+
         const formData = new FormData(event.target);
         const object: ObjectCreateType = {
             name: String(formData.get("name")),
@@ -241,20 +254,15 @@ function Main() {
             active: isActivated,
             letter: String(formData.get("letter")),
         };
-        let formDataTest = new FormData();
-
-        // Добавляем каждый файл в объект FormData
-        for (let i = 0; i < photos.length; i++) {
-            let file = photos[i];
-            formDataTest.append("files[]", file, file.name);
-        }
         const objectData = new FormData();
         objectData.append("object_data", JSON.stringify(object));
-        photos.forEach((file) => {
+        resizedFiles.forEach((file) => {
             objectData.append("files", file);
         });
+        stopLoader(setIsLoaderOpen);
         dispatch(createObject(objectData));
     };
+
     useEffect(() => {
         dispatch(fetchRegions());
         dispatch(fetchAmenities());
@@ -263,7 +271,8 @@ function Main() {
 
     useEffect(() => {
         const elDropzoneValidationRef = dropzoneValidationRef.current;
-        if (elDropzoneValidationRef) {
+        if (!!elDropzoneValidationRef) {
+            elDropzoneValidationRef.dropzone.on("complete", (file) => {});
             elDropzoneValidationRef.dropzone.on("addedfile", (file) => {
                 setCustomErrors((prev) => ({ ...prev, gallery: null }));
                 dropzoneValidationRef.current?.classList.remove(
@@ -271,11 +280,15 @@ function Main() {
                 );
             });
             elDropzoneValidationRef.dropzone.on("removedfile", (file) => {});
-            elDropzoneValidationRef.dropzone.on("error", (file) => {
+            elDropzoneValidationRef.dropzone.on("error", (file, message) => {
                 elDropzoneValidationRef.dropzone.removeFile(file);
                 const rejectGalleryEl = document
                     .querySelectorAll("#reject-gallery-notification")[0]
                     .cloneNode(true) as HTMLElement;
+                rejectGalleryEl.querySelector(".text-content")!.textContent =
+                    file.size > maxFilesize
+                        ? "Превышен максимальный размер файла"
+                        : "Вы загрузили максимальное количество изображений";
                 rejectGalleryEl.classList.remove("hidden");
                 Toastify({
                     node: rejectGalleryEl,
@@ -917,10 +930,8 @@ function Main() {
                                 options={{
                                     url: "https://httpbin.org/post",
                                     thumbnailWidth: 150,
-                                    maxFilesize: 10,
-                                    maxFiles: 2,
-                                    resizeHeight: 40,
-                                    resizeWidth: 40,
+                                    maxFilesize: maxFilesize,
+                                    maxFiles: 10,
                                     acceptedFiles: "image/*",
                                     clickable: true,
                                     addRemoveLinks: true,
@@ -1116,7 +1127,7 @@ function Main() {
                 >
                     <Lucide icon="XCircle" className="text-danger" />
                     <div className="ml-4 mr-4">
-                        <div className="font-medium">
+                        <div className="font-medium text-content">
                             Вы загрузили максимальное количество изображений
                         </div>
                     </div>
