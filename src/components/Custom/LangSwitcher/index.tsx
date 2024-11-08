@@ -67,7 +67,7 @@ const LanguageSwitcher = () => {
                             {t("theme_switcher.lang.ru")}
                         </div>
                     </div>
-                    <div>
+                    <div className="relative">
                         <Tippy content={t("theme_switcher.lang.on_dev")}>
                             <a
                                 onClick={() => handleLanguageChange("en")}
@@ -80,11 +80,11 @@ const LanguageSwitcher = () => {
                                 <div className="h-full image-fit">
                                     <img src={enFlag} alt="En" />
                                 </div>
-                                <Icon
-                                    className="absolute top-0 right-0 -mt-1.5 -mr-1.5 text-white bg-pending p-2 rounded-full size-8 stroke-2"
-                                    icon="Wrench"
-                                />
                             </a>
+                            <Icon
+                                className="absolute top-0 right-0 -mt-2 -mr-2 text-white bg-pending p-2 rounded-full size-8 stroke-2"
+                                icon="Wrench"
+                            />
                         </Tippy>
                         <div className="mt-2.5 text-center text-xs capitalize">
                             {t("theme_switcher.lang.en")}
