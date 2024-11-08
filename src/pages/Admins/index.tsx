@@ -53,7 +53,8 @@ interface Response {
 }
 
 function Main() {
-    const { t, i18n } = useTranslation();
+    const { t } = useTranslation();
+    const { language } = useAppSelector((state) => state.language);
     const [isLoaderOpen, setIsLoaderOpen] = useState(false);
     const [createModalPreview, setCreateModalPreview] = useState(false);
     const [updateModalPreview, setUpdateModalPreview] = useState(false);
@@ -472,7 +473,7 @@ function Main() {
         reInitOnResizeWindow();
 
         dispatch(fetchAdmins());
-    }, []);
+    }, [language]);
     useEffect(() => {
         if (users && users.length) {
             const formattedData = users.map((user) => {
