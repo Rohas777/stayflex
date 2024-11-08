@@ -19,11 +19,14 @@ import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
 import { startLoader, stopLoader } from "@/utils/customUtils";
 import Loader from "@/components/Custom/Loader/Loader";
 import { errorToastSlice } from "@/stores/errorToastSlice";
+import ValidationErrorNotification from "@/components/Custom/ValidationErrorNotification";
 
 function Main() {
     const [showPassword, setShowPassword] = useState(false);
     const [isLoaderOpen, setIsLoaderOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+    const [showValidationNotification, setShowValidationNotification] =
+        useState(false);
 
     const { signInStatus, error } = useAppSelector((state) => state.auth);
     const { authorizedUser, authorizedUserStatus } = useAppSelector(
@@ -59,6 +62,7 @@ function Main() {
         const formData = new FormData(event.target);
         const result = await trigger();
         if (!result) {
+            setShowValidationNotification(true);
             stopLoader(setIsLoaderOpen);
             return;
         }
@@ -249,6 +253,12 @@ function Main() {
                     </div>
                 </div>
             </div>
+            <ValidationErrorNotification
+                show={showValidationNotification}
+                resetValidationError={() => {
+                    setShowValidationNotification(false);
+                }}
+            />
         </>
     );
 }

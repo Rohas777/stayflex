@@ -21,6 +21,7 @@ import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
 import Loader from "@/components/Custom/Loader/Loader";
 import { setErrorToast } from "@/stores/errorToastSlice";
 import { authSlice } from "@/stores/reducers/auth/slice";
+import ValidationErrorNotification from "@/components/Custom/ValidationErrorNotification";
 
 type CustomErrors = {
     isValid: boolean;
@@ -40,6 +41,8 @@ function Main() {
     //     "bad" | "good" | "strong" | null
     // >(null);
 
+    const [showValidationNotification, setShowValidationNotification] =
+        useState(false);
     const [customErrors, setCustomErrors] = useState<CustomErrors>({
         isValid: true,
         tel: null,
@@ -131,6 +134,7 @@ function Main() {
         const result = await trigger();
         const customResult = await vaildateWithoutYup(formData);
         if (!result || !customResult.isValid) {
+            setShowValidationNotification(true);
             stopLoader(setIsLoaderOpen);
             return;
         }
@@ -521,6 +525,12 @@ function Main() {
                     </div>
                 </div>
             </div>
+            <ValidationErrorNotification
+                show={showValidationNotification}
+                resetValidationError={() => {
+                    setShowValidationNotification(false);
+                }}
+            />
         </>
     );
 }

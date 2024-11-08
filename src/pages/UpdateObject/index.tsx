@@ -53,6 +53,7 @@ import { amenitySlice } from "@/stores/reducers/amenities/slice";
 import { propertyTypeSlice } from "@/stores/reducers/property-types/slice";
 import Loader from "@/components/Custom/Loader/Loader";
 import { IObject } from "@/stores/models/IObject";
+import ValidationErrorNotification from "@/components/Custom/ValidationErrorNotification";
 
 window.DateTime = DateTime;
 
@@ -146,6 +147,8 @@ function Main() {
 
     const [isLoaderOpen, setIsLoaderOpen] = useState(false);
 
+    const [showValidationNotification, setShowValidationNotification] =
+        useState(false);
     const [customErrors, setCustomErrors] = useState<CustomErrors>({
         isValid: true,
         region: null,
@@ -241,6 +244,7 @@ function Main() {
         const result = await trigger();
         const customResult = vaildateWithoutYup(gallery);
         if (!result || !customResult.isValid) {
+            setShowValidationNotification(true);
             stopLoader(setIsLoaderOpen);
             return;
         }
@@ -1238,6 +1242,12 @@ function Main() {
                 </Notification>
                 {/* END: Success Notification Content */}
             </div>
+            <ValidationErrorNotification
+                show={showValidationNotification}
+                resetValidationError={() => {
+                    setShowValidationNotification(false);
+                }}
+            />
         </>
     );
 }

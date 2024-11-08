@@ -35,6 +35,7 @@ import {
 } from "@/utils/customUtils";
 import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
 import { IObject } from "@/stores/models/IObject";
+import ValidationErrorNotification from "@/components/Custom/ValidationErrorNotification";
 
 interface ReservationFormProps {
     // onCreate: (reservation: ReservationCreateType) => void; //FIXME -
@@ -71,6 +72,8 @@ function ReservationForm({
 
     const dispatch = useAppDispatch();
 
+    const [showValidationNotification, setShowValidationNotification] =
+        useState(false);
     const [customErrors, setCustomErrors] = useState<CustomErrors>({
         isValid: true,
         start_date: null,
@@ -191,6 +194,7 @@ function ReservationForm({
         const customResult = await vaildateWithoutYup(form);
         const result = await trigger();
         if (!result || !customResult.isValid) {
+            setShowValidationNotification(true);
             stopLoader(setIsLoaderOpen);
             return;
         }
@@ -633,6 +637,12 @@ function ReservationForm({
                     </div>
                 </form>
             </div>
+            <ValidationErrorNotification
+                show={showValidationNotification}
+                resetValidationError={() => {
+                    setShowValidationNotification(false);
+                }}
+            />
         </>
     );
 }

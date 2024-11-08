@@ -11,6 +11,7 @@ import TomSelect from "@/components/Base/CustomTomSelect";
 import { RegionCreateType } from "@/stores/reducers/regions/types";
 import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
 import { startLoader, stopLoader } from "@/utils/customUtils";
+import ValidationErrorNotification from "@/components/Custom/ValidationErrorNotification";
 
 interface RegionFormProps {
     onCreate: (name: RegionCreateType) => void;
@@ -42,6 +43,8 @@ function RegionForm({
             name: "Server-4",
         },
     ]);
+    const [showValidationNotification, setShowValidationNotification] =
+        useState(false);
     const schema = yup
         .object({
             name: yup.string().required("'Название' это обязательное поле"),
@@ -61,6 +64,8 @@ function RegionForm({
         const result = await trigger();
         startLoader(setIsLoaderOpened);
         if (!result) {
+            const [showValidationNotification, setShowValidationNotification] =
+                useState(false);
             stopLoader(setIsLoaderOpened);
             return;
         }
@@ -146,6 +151,12 @@ function RegionForm({
                     </Button>
                 </form>
             </div>
+            <ValidationErrorNotification
+                show={showValidationNotification}
+                resetValidationError={() => {
+                    setShowValidationNotification(false);
+                }}
+            />
         </>
     );
 }

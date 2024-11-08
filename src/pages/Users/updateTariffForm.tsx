@@ -11,6 +11,7 @@ import { startLoader, stopLoader } from "@/utils/customUtils";
 import { UserTariffUpdateType } from "@/stores/reducers/users/types";
 import { useAppSelector } from "@/stores/hooks";
 import { Status } from "@/stores/reducers/types";
+import ValidationErrorNotification from "@/components/Custom/ValidationErrorNotification";
 
 interface UserTariffUpdateFormProps {
     onUpdate: (userData: UserTariffUpdateType) => void;
@@ -32,6 +33,8 @@ function UserTariffUpdateForm({
 
     const [selectedTariff, setSelectedTariff] = useState<string>("-1");
 
+    const [showValidationNotification, setShowValidationNotification] =
+        useState(false);
     const [customErrors, setCustomErrors] = useState<CustomErrors>({
         isValid: true,
         tariff: null,
@@ -85,6 +88,7 @@ function UserTariffUpdateForm({
         const result = await trigger();
         const customResult = await vaildateWithoutYup();
         if (!result || !customResult.isValid) {
+            setShowValidationNotification(true);
             stopLoader(setIsLoaderOpen);
             return;
         }
@@ -195,6 +199,12 @@ function UserTariffUpdateForm({
                     Обновить
                 </Button>
             </form>
+            <ValidationErrorNotification
+                show={showValidationNotification}
+                resetValidationError={() => {
+                    setShowValidationNotification(false);
+                }}
+            />
         </>
     );
 }

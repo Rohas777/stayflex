@@ -13,6 +13,7 @@ import Icon from "@/components/Custom/Icon";
 import { ServerUpdateType } from "@/stores/reducers/servers/types";
 import { startLoader, stopLoader } from "@/utils/customUtils";
 import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
+import ValidationErrorNotification from "@/components/Custom/ValidationErrorNotification";
 
 interface IConfiramtionModal {
     title: string | null;
@@ -47,6 +48,8 @@ function Server({
     const { servers } = useAppSelector((state) => state.server);
 
     const [data, setData] = useState<IServer | null>(null);
+    const [showValidationNotification, setShowValidationNotification] =
+        useState(false);
 
     const schema = yup
         .object({
@@ -70,6 +73,7 @@ function Server({
         startLoader(setIsLoaderOpened);
         const result = await trigger();
         if (!result) {
+            setShowValidationNotification(true);
             stopLoader(setIsLoaderOpened);
             return;
         }
@@ -205,6 +209,12 @@ function Server({
                     </div>
                 </form>
             </Accordion>
+            <ValidationErrorNotification
+                show={showValidationNotification}
+                resetValidationError={() => {
+                    setShowValidationNotification(false);
+                }}
+            />
         </>
     );
 }

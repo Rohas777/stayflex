@@ -48,6 +48,7 @@ import {
     reservationStatusesWithNames,
 } from "@/vars";
 import { IObject } from "@/stores/models/IObject";
+import ValidationErrorNotification from "@/components/Custom/ValidationErrorNotification";
 
 interface ReservationFormProps {
     onCreate: (reservation: ReservationCreateType) => void;
@@ -97,6 +98,8 @@ function ReservationForm({
         .email("Введите корректный email")
         .required("'Email' это обязательное поле");
 
+    const [showValidationNotification, setShowValidationNotification] =
+        useState(false);
     const [customErrors, setCustomErrors] = useState<CustomErrors>({
         isValid: true,
         object: null,
@@ -191,6 +194,7 @@ function ReservationForm({
         const customResult = await vaildateWithoutYup(form);
         const result = await trigger();
         if (!result || !customResult.isValid) {
+            setShowValidationNotification(true);
             stopLoader(setIsLoaderOpen);
             return;
         }
@@ -773,6 +777,12 @@ function ReservationForm({
                     </Button>
                 </form>
             </div>
+            <ValidationErrorNotification
+                show={showValidationNotification}
+                resetValidationError={() => {
+                    setShowValidationNotification(false);
+                }}
+            />
         </>
     );
 }

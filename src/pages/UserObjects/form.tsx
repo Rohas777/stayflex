@@ -46,6 +46,7 @@ import { reservationStatus, reservationStatusesWithNames } from "@/vars";
 import { reservationSlice } from "@/stores/reducers/reservations/slice";
 import { errorToastSlice } from "@/stores/errorToastSlice";
 import { IObject } from "@/stores/models/IObject";
+import ValidationErrorNotification from "@/components/Custom/ValidationErrorNotification";
 
 interface ReservationFormProps {
     onCreate: (reservation: ReservationCreateType) => void;
@@ -118,6 +119,8 @@ function ReservationForm({
         .email("Введите корректный email")
         .required("'Email' это обязательное поле");
 
+    const [showValidationNotification, setShowValidationNotification] =
+        useState(false);
     const [customErrors, setCustomErrors] = useState<CustomErrors>({
         isValid: true,
         object: null,
@@ -140,9 +143,6 @@ function ReservationForm({
             name: null,
             date: null,
         };
-        if (selectedObjectID === "-1") {
-            errors.object = "Обязательно выберите объект";
-        }
         if (selectedObjectID === "-1") {
             errors.object = "Обязательно выберите объект";
         }
@@ -216,6 +216,7 @@ function ReservationForm({
         const customResult = await vaildateWithoutYup(form);
         const result = await trigger();
         if (!result || !customResult.isValid) {
+            setShowValidationNotification(true);
             stopLoader(setIsLoaderOpen);
             return;
         }
@@ -803,6 +804,12 @@ function ReservationForm({
                     </div>
                 </form>
             </div>
+            <ValidationErrorNotification
+                show={showValidationNotification}
+                resetValidationError={() => {
+                    setShowValidationNotification(false);
+                }}
+            />
         </>
     );
 }

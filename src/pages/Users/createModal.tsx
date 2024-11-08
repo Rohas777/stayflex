@@ -19,6 +19,7 @@ import Tippy from "@/components/Base/Tippy";
 import { useAppSelector } from "@/stores/hooks";
 import { Status } from "@/stores/reducers/types";
 import Loader from "@/components/Custom/Loader/Loader";
+import ValidationErrorNotification from "@/components/Custom/ValidationErrorNotification";
 
 interface UserCreateModalProps {
     onCreate: (userData: UserCreateType) => void;
@@ -39,10 +40,11 @@ function UserCreateModal({
     const [tel, setTel] = useState<string>();
     const [maskLengthValidation, setMaskLengthValidation] = useState(false);
     const [isUserActive, setIsUserActive] = useState(false);
-    const [isUserVerified, setIsUserVerified] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [selectedTariff, setSelectedTariff] = useState<string>("1");
 
+    const [showValidationNotification, setShowValidationNotification] =
+        useState(false);
     const [customErrors, setCustomErrors] = useState<CustomErrors>({
         isValid: true,
         tel: null,
@@ -132,6 +134,7 @@ function UserCreateModal({
         const result = await trigger();
         const customResult = await vaildateWithoutYup();
         if (!result || !customResult.isValid) {
+            setShowValidationNotification(true);
             stopLoader(setIsLoaderOpen);
             return;
         }
@@ -143,7 +146,7 @@ function UserCreateModal({
             password: String(formData.get("password")),
             balance: Number(formData.get("balance")),
             is_active: isUserActive,
-            is_verified: isUserVerified,
+            is_verified: false, //FIXME -
             tariff_id: Number(selectedTariff),
         };
         onCreate(userData);
@@ -416,6 +419,12 @@ function UserCreateModal({
                     </Button>
                 </form>
             </div>
+            <ValidationErrorNotification
+                show={showValidationNotification}
+                resetValidationError={() => {
+                    setShowValidationNotification(false);
+                }}
+            />
         </>
     );
 }

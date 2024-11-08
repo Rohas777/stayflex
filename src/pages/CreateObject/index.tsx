@@ -43,6 +43,7 @@ import Tippy from "@/components/Base/Tippy";
 import { amenitySlice } from "@/stores/reducers/amenities/slice";
 import { propertyTypeSlice } from "@/stores/reducers/property-types/slice";
 import { errorToastSlice } from "@/stores/errorToastSlice";
+import ValidationErrorNotification from "@/components/Custom/ValidationErrorNotification";
 
 window.DateTime = DateTime;
 
@@ -134,6 +135,8 @@ function Main() {
 
     const [isLoaderOpen, setIsLoaderOpen] = useState(false);
 
+    const [showValidationNotification, setShowValidationNotification] =
+        useState(false);
     const [customErrors, setCustomErrors] = useState<CustomErrors>({
         isValid: true,
         region: null,
@@ -231,6 +234,7 @@ function Main() {
         const result = await trigger();
         const customResult = vaildateWithoutYup(photos);
         if (!result || !customResult.isValid) {
+            setShowValidationNotification(true);
             stopLoader(setIsLoaderOpen);
             return;
         }
@@ -1146,6 +1150,12 @@ function Main() {
                 </Notification>
                 {/* END: Success Notification Content */}
             </div>
+            <ValidationErrorNotification
+                show={showValidationNotification}
+                resetValidationError={() => {
+                    setShowValidationNotification(false);
+                }}
+            />
         </>
     );
 }

@@ -15,6 +15,7 @@ import clsx from "clsx";
 import Tippy from "@/components/Base/Tippy";
 import TippyContent from "@/components/Base/TippyContent";
 import { preferencesSlice } from "@/stores/preferencesSlice";
+import Icon from "../Custom/Icon";
 
 function Main() {
     const dispatch = useAppDispatch();
@@ -132,8 +133,12 @@ function Main() {
                                                         src={enFlag}
                                                         alt="En"
                                                     />
-                                                    <span className="absolute inset-0 size-full bg-slate-200 bg-opacity-70"></span>
                                                 </div>
+                                                <div className="absolute inset-0 size-full bg-slate-200 bg-opacity-70"></div>
+                                                <Icon
+                                                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-6 stroke-2"
+                                                    icon="Wrench"
+                                                />
                                             </a>
                                         </Tippy>
                                         <div className="mt-2.5 text-center text-xs capitalize">

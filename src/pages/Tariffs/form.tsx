@@ -22,7 +22,10 @@ import TomSelect from "@/components/Base/TomSelect";
 import Lucide from "@/components/Base/Lucide";
 import { startLoader, stopLoader } from "@/utils/customUtils";
 import { IconType } from "@/vars";
+import * as lucideLabIcons from "@lucide/lab";
 import * as lucideIcons from "lucide-react";
+import ValidationErrorNotification from "@/components/Custom/ValidationErrorNotification";
+import Icon from "@/components/Custom/Icon";
 
 interface TariffFormProps {
     isCreate: boolean;
@@ -40,6 +43,8 @@ function TariffForm({ isCreate, onCreate, onUpdate }: TariffFormProps) {
     const [isLoaderOpen, setIsLoaderOpen] = useState(false);
     const [iconValue, setIconValue] = useState<string | null>(null);
 
+    const [showValidationNotification, setShowValidationNotification] =
+        useState(false);
     const [customErrors, setCustomErrors] = useState<CustomErrors>({
         isValid: true,
         icon: null,
@@ -106,6 +111,7 @@ function TariffForm({ isCreate, onCreate, onUpdate }: TariffFormProps) {
         const customResult = vaildateWithoutYup(formData);
         const result = await trigger();
         if (!result || !customResult.isValid) {
+            setShowValidationNotification(true);
             stopLoader(setIsLoaderOpen);
             return;
         }
@@ -182,9 +188,11 @@ function TariffForm({ isCreate, onCreate, onUpdate }: TariffFormProps) {
                                     customErrors.icon,
                             })}
                         >
-                            {iconValue && iconValue in icons && (
-                                <Lucide icon={iconValue as IconType} />
-                            )}
+                            {iconValue &&
+                                (iconValue in icons ||
+                                    iconValue in lucideLabIcons) && (
+                                    <Icon icon={iconValue as IconType} />
+                                )}
                             <FormInput
                                 id="validation-form-icon"
                                 type="text"
@@ -343,6 +351,12 @@ function TariffForm({ isCreate, onCreate, onUpdate }: TariffFormProps) {
                     </Button>
                 </form>
             </div>
+            <ValidationErrorNotification
+                show={showValidationNotification}
+                resetValidationError={() => {
+                    setShowValidationNotification(false);
+                }}
+            />
         </>
     );
 }

@@ -19,6 +19,7 @@ import Tippy from "@/components/Base/Tippy";
 import { useAppSelector } from "@/stores/hooks";
 import { Status } from "@/stores/reducers/types";
 import Loader from "@/components/Custom/Loader/Loader";
+import ValidationErrorNotification from "@/components/Custom/ValidationErrorNotification";
 
 interface UserCreateModalProps {
     onCreate: (userData: UserCreateType) => void;
@@ -38,8 +39,9 @@ function UserCreateModal({
     const [tel, setTel] = useState<string>();
     const [maskLengthValidation, setMaskLengthValidation] = useState(false);
     const [isUserActive, setIsUserActive] = useState(false);
-    const [isUserVerified, setIsUserVerified] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
+    const [showValidationNotification, setShowValidationNotification] =
+        useState(false);
 
     const [customErrors, setCustomErrors] = useState<CustomErrors>({
         isValid: true,
@@ -114,6 +116,7 @@ function UserCreateModal({
         const result = await trigger();
         const customResult = await vaildateWithoutYup();
         if (!result || !customResult.isValid) {
+            setShowValidationNotification(true);
             stopLoader(setIsLoaderOpen);
             return;
         }
@@ -124,7 +127,7 @@ function UserCreateModal({
             phone: tel!,
             password: String(formData.get("password")),
             is_active: isUserActive,
-            is_verified: isUserVerified,
+            is_verified: true, //FIXME -
             is_admin: true, //FIXME -
             balance: 0, //FIXME -
             tariff_id: 1, //FIXME -
@@ -322,6 +325,12 @@ function UserCreateModal({
                     </Button>
                 </form>
             </div>
+            <ValidationErrorNotification
+                show={showValidationNotification}
+                resetValidationError={() => {
+                    setShowValidationNotification(false);
+                }}
+            />
         </>
     );
 }

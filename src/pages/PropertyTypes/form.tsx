@@ -12,6 +12,7 @@ import { RegionCreateType } from "@/stores/reducers/regions/types";
 import { PropertyTypeCreateType } from "@/stores/reducers/property-types/types";
 import { startLoader, stopLoader } from "@/utils/customUtils";
 import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
+import ValidationErrorNotification from "@/components/Custom/ValidationErrorNotification";
 
 interface PropertyTypeFormProps {
     setIsLoaderOpened: React.Dispatch<React.SetStateAction<boolean>>;
@@ -24,6 +25,8 @@ function PropertyTypeForm({
     setIsLoaderOpened,
     isLoaderOpened,
 }: PropertyTypeFormProps) {
+    const [showValidationNotification, setShowValidationNotification] =
+        useState(false);
     const schema = yup
         .object({
             name: yup.string().required("'Название' это обязательное поле"),
@@ -43,6 +46,7 @@ function PropertyTypeForm({
         startLoader(setIsLoaderOpened);
         const result = await trigger();
         if (!result) {
+            setShowValidationNotification(true);
             stopLoader(setIsLoaderOpened);
             return;
         }
@@ -98,6 +102,12 @@ function PropertyTypeForm({
                     </Button>
                 </form>
             </div>
+            <ValidationErrorNotification
+                show={showValidationNotification}
+                resetValidationError={() => {
+                    setShowValidationNotification(false);
+                }}
+            />
         </>
     );
 }

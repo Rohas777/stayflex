@@ -16,6 +16,7 @@ import { Status } from "@/stores/reducers/types";
 import LoadingIcon from "@/components/Base/LoadingIcon";
 import { startLoader, stopLoader } from "@/utils/customUtils";
 import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
+import ValidationErrorNotification from "@/components/Custom/ValidationErrorNotification";
 
 interface CityFormProps {
     onCreate: (data: CityCreateType) => void;
@@ -40,6 +41,8 @@ function CityForm({
             name: "Stayflex",
         },
     ]);
+    const [showValidationNotification, setShowValidationNotification] =
+        useState(false);
     const [customErrors, setCustomErrors] = useState<CustomErrors>({
         isValid: true,
         region: null,
@@ -85,6 +88,7 @@ function CityForm({
         const customResult = await vaildateWithoutYup();
         startLoader(setIsLoaderOpened);
         if (!result || !customResult.isValid) {
+            setShowValidationNotification(true);
             stopLoader(setIsLoaderOpened);
             return;
         }
@@ -238,6 +242,12 @@ function CityForm({
                     </Button>
                 </form>
             </div>
+            <ValidationErrorNotification
+                show={showValidationNotification}
+                resetValidationError={() => {
+                    setShowValidationNotification(false);
+                }}
+            />
         </>
     );
 }

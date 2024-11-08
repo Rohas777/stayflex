@@ -17,6 +17,7 @@ import * as lucideLabIcons from "@lucide/lab";
 import { IconType } from "@/vars";
 import Lucide from "@/components/Base/Lucide";
 import Icon from "@/components/Custom/Icon";
+import ValidationErrorNotification from "@/components/Custom/ValidationErrorNotification";
 
 interface AmenityFormProps {
     onCreate: (amenityData: AmenityCreateType) => void;
@@ -35,6 +36,8 @@ function AmenityForm({
     isLoaderOpened,
 }: AmenityFormProps) {
     const [iconValue, setIconValue] = useState<string | null>(null);
+    const [showValidationNotification, setShowValidationNotification] =
+        useState(false);
     const [customErrors, setCustomErrors] = useState<CustomErrors>({
         isValid: true,
         icon: null,
@@ -88,6 +91,7 @@ function AmenityForm({
         const result = await trigger();
         const customResult = vaildateWithoutYup(formData);
         if (!result || !customResult.isValid) {
+            setShowValidationNotification(true);
             stopLoader(setIsLoaderOpened);
             return;
         }
@@ -186,6 +190,12 @@ function AmenityForm({
                     </Button>
                 </form>
             </div>
+            <ValidationErrorNotification
+                show={showValidationNotification}
+                resetValidationError={() => {
+                    setShowValidationNotification(false);
+                }}
+            />
         </>
     );
 }

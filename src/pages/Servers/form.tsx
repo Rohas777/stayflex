@@ -11,6 +11,7 @@ import TomSelect from "@/components/Base/CustomTomSelect";
 import { ServerCreateType } from "@/stores/reducers/servers/types";
 import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
 import { startLoader, stopLoader } from "@/utils/customUtils";
+import ValidationErrorNotification from "@/components/Custom/ValidationErrorNotification";
 
 interface ServerFormProps {
     onCreate: (name: ServerCreateType) => void;
@@ -23,6 +24,8 @@ function ServerForm({
     setIsLoaderOpened,
     isLoaderOpened,
 }: ServerFormProps) {
+    const [showValidationNotification, setShowValidationNotification] =
+        useState(false);
     const schema = yup
         .object({
             name: yup.string().required("'Название' это обязательное поле"),
@@ -45,6 +48,7 @@ function ServerForm({
         const result = await trigger();
         startLoader(setIsLoaderOpened);
         if (!result) {
+            setShowValidationNotification(true);
             stopLoader(setIsLoaderOpened);
             return;
         }
@@ -128,6 +132,12 @@ function ServerForm({
                     </Button>
                 </form>
             </div>
+            <ValidationErrorNotification
+                show={showValidationNotification}
+                resetValidationError={() => {
+                    setShowValidationNotification(false);
+                }}
+            />
         </>
     );
 }

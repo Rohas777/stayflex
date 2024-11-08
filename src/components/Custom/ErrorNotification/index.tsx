@@ -20,6 +20,7 @@ function ErrorNotification() {
 
     useEffect(() => {
         if (message === "Ошибка авторизации") {
+            //FIXME -
             dispatch(resetStatusOnAuth());
             navigate("/login");
         }

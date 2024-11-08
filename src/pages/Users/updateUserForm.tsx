@@ -19,6 +19,7 @@ import { useAppSelector } from "@/stores/hooks";
 import { Status } from "@/stores/reducers/types";
 import Loader from "@/components/Custom/Loader/Loader";
 import { Tab } from "@/components/Base/Headless";
+import ValidationErrorNotification from "@/components/Custom/ValidationErrorNotification";
 
 interface UserUpdateFormProps {
     onUpdate: (userData: UserUpdateType) => void;
@@ -38,6 +39,8 @@ function UserUpdateForm({
     const [tel, setTel] = useState<string>();
     const [maskLengthValidation, setMaskLengthValidation] = useState(false);
 
+    const [showValidationNotification, setShowValidationNotification] =
+        useState(false);
     const [customErrors, setCustomErrors] = useState<CustomErrors>({
         isValid: true,
         tel: null,
@@ -92,6 +95,7 @@ function UserUpdateForm({
         const result = await trigger();
         const customResult = await vaildateWithoutYup();
         if (!result || !customResult.isValid) {
+            setShowValidationNotification(true);
             stopLoader(setIsLoaderOpen);
             return;
         }
@@ -231,6 +235,12 @@ function UserUpdateForm({
                     Обновить
                 </Button>
             </form>
+            <ValidationErrorNotification
+                show={showValidationNotification}
+                resetValidationError={() => {
+                    setShowValidationNotification(false);
+                }}
+            />
         </>
     );
 }
