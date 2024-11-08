@@ -1,1 +1,52 @@
 @import "dropzone/dist/dropzone.css";
+
+.dz-preview.dz-complete {
+    .dz-remove {
+        opacity: 0;
+    }
+
+    &:hover {
+        .dz-remove {
+            opacity: 1;
+        }
+    }
+}
+
+.dz-remove {
+    position: absolute;
+    right: 0;
+    top: 0;
+    background: rgb(var(--color-danger));
+    z-index: 100;
+    border-radius: 100%;
+    color: white;
+    width: 25px;
+    height: 25px;
+    transform: translate(30%, -30%);
+    cursor: pointer;
+    transition: all 0.1s ease-in-out;
+
+    &:hover {
+        transform: translate(30%, -30%) scale(1.1);
+    }
+    &::after,
+    &::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 15px;
+        height: 1px;
+        background: white;
+        border-radius: 2px;
+    }
+
+    &::after {
+        transform: translate(-50%, -50%) rotate(45deg);
+    }
+
+    &::before {
+        transform: translate(-50%, -50%) rotate(-45deg);
+    }
+}

@@ -1,4 +1,5 @@
 import "@/assets/css/vendors/tabulator.css";
+import "@/assets/css/vendors/dropzone.css";
 import Button from "@/components/Base/Button";
 import { useEffect, useRef, createRef, useState } from "react";
 import { DateTime } from "luxon";
@@ -1030,6 +1031,8 @@ function Main() {
                                     acceptedFiles: "image/*",
                                     clickable: true,
                                     addRemoveLinks: true,
+                                    dictRemoveFile: "",
+                                    dictCancelUpload: "",
                                 }}
                                 className="dropzone"
                             >
