@@ -88,6 +88,7 @@ function Main() {
         value: "",
     });
 
+    const { authorizedUser } = useAppSelector((state) => state.user);
     const [tableData, setTableData] = useState<Response[]>([]);
 
     const initTabulator = () => {
@@ -231,7 +232,11 @@ function Main() {
                                 setCalendarModal(true);
                             });
                             editA.addEventListener("click", function () {
-                                navigate(`/objects  /update/${response.id}`);
+                                navigate(
+                                    `${
+                                        authorizedUser?.is_admin ? "/admin" : ""
+                                    }/objects/update/${response.id}`
+                                );
                             });
                             deleteA.addEventListener("click", function () {
                                 setConfirmModalContent({

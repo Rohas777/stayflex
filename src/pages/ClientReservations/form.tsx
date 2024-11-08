@@ -370,7 +370,7 @@ function ReservationForm({
                                     </span>
                                 </FormLabel>
                                 <div className="flex gap-1 items-center">
-                                    <div className="relative w-full">
+                                    <div className="litepicker-wrapper relative w-full">
                                         <FormLabel
                                             className={clsx(
                                                 "absolute flex items-center justify-center w-10 h-full border rounded-l bg-slate-100 text-slate-500 dark:bg-darkmode-700 dark:border-darkmode-800 dark:text-slate-400",
@@ -442,7 +442,7 @@ function ReservationForm({
                                     </span>
                                 </FormLabel>
                                 <div className="flex gap-1 items-center">
-                                    <div className="relative w-full">
+                                    <div className="litepicker-wrapper relative w-full">
                                         <FormLabel
                                             htmlFor="validation-form-end-date"
                                             className={clsx(

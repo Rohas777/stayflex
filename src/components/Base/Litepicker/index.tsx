@@ -4,6 +4,7 @@ import { setValue, init, reInit } from "./litepicker";
 import LitepickerJs from "litepicker";
 import { FormInput } from "@/components/Base/Form";
 import { ILPConfiguration } from "litepicker/dist/types/interfaces";
+import { formatDatePretty } from "@/utils/customUtils";
 
 export interface LitepickerElement extends HTMLInputElement {
     litePickerInstance: LitepickerJs;
@@ -66,18 +67,38 @@ function Litepicker({
         tempValue.current = props.value;
     }, [props.value]);
 
+    const clickTrigger = () => {
+        if (litepickerRef.current) {
+            litepickerRef.current.litePickerInstance.show();
+        }
+    };
+
     return (
-        <FormInput
-            ref={litepickerRef}
-            type="text"
-            value={props.value}
-            onChange={(e) => {
-                if (props.onChange) {
-                    props.onChange(e);
-                }
-            }}
-            {...computedProps}
-        />
+        <>
+            <FormInput
+                type="text"
+                value={props.value && formatDatePretty(new Date(props.value))}
+                onChange={(e) => {
+                    if (props.onChange) {
+                        props.onChange(e);
+                    }
+                }}
+                {...computedProps}
+                onClick={clickTrigger}
+            />
+            <FormInput
+                ref={litepickerRef}
+                type="text"
+                value={props.value}
+                onChange={(e) => {
+                    if (props.onChange) {
+                        props.onChange(e);
+                    }
+                }}
+                {...computedProps}
+                className="!h-0 !opacity-0 !w-0 !p-0 !m-0 !absolute"
+            />
+        </>
     );
 }
 

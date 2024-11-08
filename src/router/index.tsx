@@ -18,7 +18,7 @@ import Amenities from "../pages/Amenities";
 import Objects from "../pages/Objects";
 import Object from "../pages/Object";
 import UserObjects from "../pages/UserObjects";
-import ObjectsClient from "../pages/ObjectsClient";
+import ObjectsClient from "../pages/ObjectsUser";
 import CreateObject from "../pages/CreateObject";
 import UpdateObject from "../pages/UpdateObject";
 import Clients from "../pages/Clients";
