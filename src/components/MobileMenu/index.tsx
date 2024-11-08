@@ -13,6 +13,7 @@ import logoUrl from "@/assets/images/logo.svg";
 import clsx from "clsx";
 import SimpleBar from "simplebar";
 import { useClickAway } from "ahooks";
+import Icon from "../Custom/Icon";
 
 function Main() {
     const navigate = useNavigate();
@@ -138,6 +139,14 @@ function Main() {
                                         </div>
                                         <div className="menu__title">
                                             {menu.title}
+                                            {menu.mark &&
+                                                menu.mark ===
+                                                    "experimental" && (
+                                                    <Icon
+                                                        icon="FlaskConical"
+                                                        className="size-4 text-pending ml-2 mb-3 menu-mark"
+                                                    />
+                                                )}
                                             {menu.subMenu && (
                                                 <div
                                                     className={clsx([
@@ -208,6 +217,14 @@ function Main() {
                                                                     {
                                                                         subMenu.title
                                                                     }
+                                                                    {subMenu.mark &&
+                                                                        subMenu.mark ===
+                                                                            "experimental" && (
+                                                                            <Icon
+                                                                                icon="FlaskConical"
+                                                                                className="size-4 text-pending ml-2 mb-3 menu-mark"
+                                                                            />
+                                                                        )}
                                                                     {subMenu.subMenu && (
                                                                         <div
                                                                             className={clsx(
@@ -297,6 +314,14 @@ function Main() {
                                                                                             {
                                                                                                 lastSubMenu.title
                                                                                             }
+                                                                                            {lastSubMenu.mark &&
+                                                                                                lastSubMenu.mark ===
+                                                                                                    "experimental" && (
+                                                                                                    <Icon
+                                                                                                        icon="FlaskConical"
+                                                                                                        className="size-4 text-pending ml-2 mb-3 menu-mark"
+                                                                                                    />
+                                                                                                )}
                                                                                         </div>
                                                                                     </a>
                                                                                 </li>

@@ -11,6 +11,7 @@ import logoUrl from "@/assets/images/logo.svg";
 import clsx from "clsx";
 import TopBar from "@/components/Themes/Rubick/TopBar";
 import MobileMenu from "@/components/MobileMenu";
+import Icon from "@/components/Custom/Icon";
 
 function Main() {
     const navigate = useNavigate();
@@ -82,10 +83,26 @@ function Main() {
                                         ])}
                                     >
                                         <div className="side-menu__icon">
-                                            <Lucide icon={menu.icon} />
+                                            <Lucide icon={menu.icon} />{" "}
+                                            {menu.mark &&
+                                                menu.mark ===
+                                                    "experimental" && (
+                                                    <Icon
+                                                        icon="FlaskConical"
+                                                        className="size-4 text-pending ml-2 mb-3 menu-mark"
+                                                    />
+                                                )}
                                         </div>
                                         <div className="side-menu__title">
                                             {menu.title}
+                                            {menu.mark &&
+                                                menu.mark ===
+                                                    "experimental" && (
+                                                    <Icon
+                                                        icon="FlaskConical"
+                                                        className="size-4 text-pending ml-2 mb-3 menu-mark"
+                                                    />
+                                                )}
                                             {menu.subMenu && (
                                                 <div
                                                     className={clsx([
@@ -107,7 +124,7 @@ function Main() {
                                             in={menu.activeDropdown}
                                             onEnter={enter}
                                             onExit={leave}
-                                            timeout={300}
+                                            timeout={100}
                                         >
                                             <ul
                                                 className={clsx({
@@ -163,12 +180,28 @@ function Main() {
                                                                         icon={
                                                                             subMenu.icon
                                                                         }
-                                                                    />
+                                                                    />{" "}
+                                                                    {subMenu.mark &&
+                                                                        subMenu.mark ===
+                                                                            "experimental" && (
+                                                                            <Icon
+                                                                                icon="FlaskConical"
+                                                                                className="size-4 text-pending ml-2 mb-3 menu-mark"
+                                                                            />
+                                                                        )}
                                                                 </div>
                                                                 <div className="side-menu__title">
                                                                     {
                                                                         subMenu.title
-                                                                    }
+                                                                    }{" "}
+                                                                    {subMenu.mark &&
+                                                                        subMenu.mark ===
+                                                                            "experimental" && (
+                                                                            <Icon
+                                                                                icon="FlaskConical"
+                                                                                className="size-4 text-pending ml-2 mb-3 menu-mark"
+                                                                            />
+                                                                        )}
                                                                     {subMenu.subMenu && (
                                                                         <div
                                                                             className={clsx(
@@ -266,11 +299,27 @@ function Main() {
                                                                                                     lastSubMenu.icon
                                                                                                 }
                                                                                             />
+                                                                                            {lastSubMenu.mark &&
+                                                                                                lastSubMenu.mark ===
+                                                                                                    "experimental" && (
+                                                                                                    <Icon
+                                                                                                        icon="FlaskConical"
+                                                                                                        className="size-4 text-pending ml-2 mb-3 menu-mark"
+                                                                                                    />
+                                                                                                )}
                                                                                         </div>
                                                                                         <div className="side-menu__title">
                                                                                             {
                                                                                                 lastSubMenu.title
                                                                                             }
+                                                                                            {lastSubMenu.mark &&
+                                                                                                lastSubMenu.mark ===
+                                                                                                    "experimental" && (
+                                                                                                    <Icon
+                                                                                                        icon="FlaskConical"
+                                                                                                        className="size-4 text-pending ml-2 mb-3 menu-mark"
+                                                                                                    />
+                                                                                                )}
                                                                                         </div>
                                                                                     </Tippy>
                                                                                 </li>

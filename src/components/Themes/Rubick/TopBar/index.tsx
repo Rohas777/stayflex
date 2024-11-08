@@ -175,10 +175,7 @@ function Main() {
                             onClick={onLogout}
                             className="hover:bg-white/5"
                         >
-                            <Lucide
-                                icon="ToggleRight"
-                                className="w-4 h-4 mr-2"
-                            />{" "}
+                            <Lucide icon="LogOut" className="w-4 h-4 mr-2" />{" "}
                             Выйти
                         </Menu.Item>
                     </Menu.Items>

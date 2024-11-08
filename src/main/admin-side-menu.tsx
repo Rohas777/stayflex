@@ -1,4 +1,4 @@
-import { useAppDispatch } from "@/stores/hooks";
+import Icon from "@/components/Custom/Icon";
 import { type Menu } from "@/stores/menuSlice";
 
 const newReservationsIndicator = document.createElement("span");
@@ -69,6 +69,12 @@ const menu: Array<Menu | "divider"> = [
                 icon: "Activity",
                 pathname: "/admin/icon",
                 title: "Иконки",
+            },
+            {
+                icon: "FileArchive",
+                pathname: "/admin/logs",
+                title: "Логи",
+                mark: "experimental",
             },
         ],
     },

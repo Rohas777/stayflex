@@ -15,6 +15,7 @@ export interface Menu {
     pathname?: string;
     subMenu?: Menu[];
     ignore?: boolean;
+    mark?: "experimental" | "new";
 }
 
 export interface MenuState {

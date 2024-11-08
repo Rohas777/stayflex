@@ -314,3 +314,16 @@
         }
     }
 }
+
+.side-menu__icon {
+    .menu-mark {
+        display: none;
+        @include media-breakpoint-down(xl) {
+            display: block;
+            position: absolute;
+            top: 0;
+            right: 0;
+            margin: 7px 12px 0 0;
+        }
+    }
+}
