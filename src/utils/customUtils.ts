@@ -85,6 +85,9 @@ export const checkErrorsBase = (error: any) => {
     if (error.code === "ERR_NETWORK") {
         return "Ошибка сети";
     }
+    if (error.code === "ERR_NAME_NOT_RESOLVED") {
+        return "Ошибка сети";
+    }
     if (error.response.status === 500) {
         return "Внутренняя ошибка сервера";
     }

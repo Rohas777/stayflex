@@ -16,6 +16,7 @@ import authReducer from "./reducers/auth/slice";
 import errorToastReducer from "./errorToastSlice";
 import preferencesReducer from "./preferencesSlice";
 import serverReducer from "./reducers/servers/slice";
+import languageReducer from "./languageSlice";
 
 export const store = configureStore({
     reducer: {
@@ -36,6 +37,7 @@ export const store = configureStore({
         error: errorToastReducer,
         preferences: preferencesReducer,
         server: serverReducer,
+        language: languageReducer,
     },
 });
 

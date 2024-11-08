@@ -49,9 +49,7 @@ export const serverSetDefault = createAsyncThunk(
     "/server/set-default",
     async (id: string, thunkAPI) => {
         try {
-            const response = await instance.put(
-                `/admin/server/activate/?server_id=${id}`
-            );
+            const response = await instance.put(`/admin/server/activate/${id}`);
             return id;
         } catch (error: any) {
             if (!!checkErrorsBase(error)) {

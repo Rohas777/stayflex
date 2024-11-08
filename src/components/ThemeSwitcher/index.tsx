@@ -16,6 +16,7 @@ import Tippy from "@/components/Base/Tippy";
 import TippyContent from "@/components/Base/TippyContent";
 import { preferencesSlice } from "@/stores/preferencesSlice";
 import Icon from "../Custom/Icon";
+import LanguageSwitcher from "../Custom/LangSwitcher";
 
 function Main() {
     const dispatch = useAppDispatch();
@@ -92,7 +93,7 @@ function Main() {
                     </a>
                     <Slideover.Description className="p-0">
                         <div className="flex flex-col">
-                            <div className="px-8 pt-6 pb-8">
+                            {/* <div className="px-8 pt-6 pb-8">
                                 <div className="text-base font-medium">
                                     Язык системы
                                 </div>
@@ -146,7 +147,8 @@ function Main() {
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </div> */}
+                            <LanguageSwitcher />
                             <div className="border-b border-dashed"></div>
                             <div className="px-8 pt-6 pb-8">
                                 <div className="text-base font-medium">

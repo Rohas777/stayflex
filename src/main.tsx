@@ -7,6 +7,7 @@ import Router from "./router";
 import "./assets/css/app.css";
 import AuthProvider from "./router/authProvider";
 import ErrorNotification from "./components/Custom/ErrorNotification";
+import "./i18n/i18n";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <BrowserRouter>

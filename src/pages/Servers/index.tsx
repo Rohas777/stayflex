@@ -191,7 +191,7 @@ function Main() {
 
     useEffect(() => {
         if (status !== Status.SUCCESS) return;
-        const defaultServer = servers.find((server) => server.is_default);
+        const defaultServer = servers.find((server) => server.default);
         setSelect(defaultServer ? String(defaultServer.id) : "-1");
     }, [status]);
 

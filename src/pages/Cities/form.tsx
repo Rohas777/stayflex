@@ -17,6 +17,8 @@ import LoadingIcon from "@/components/Base/LoadingIcon";
 import { startLoader, stopLoader } from "@/utils/customUtils";
 import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
 import ValidationErrorNotification from "@/components/Custom/ValidationErrorNotification";
+import { fetchServers } from "@/stores/reducers/servers/actions";
+import Loader from "@/components/Custom/Loader/Loader";
 
 interface CityFormProps {
     onCreate: (data: CityCreateType) => void;
@@ -35,12 +37,6 @@ function CityForm({
 }: CityFormProps) {
     const [selectServer, setSelectServer] = useState("1");
     const [selectRegion, setSelectRegion] = useState("-1");
-    const [serversData, setServersData] = useState([
-        {
-            id: 1,
-            name: "Stayflex",
-        },
-    ]);
     const [showValidationNotification, setShowValidationNotification] =
         useState(false);
     const [customErrors, setCustomErrors] = useState<CustomErrors>({
@@ -48,6 +44,7 @@ function CityForm({
         region: null,
     });
 
+    const serversState = useAppSelector((state) => state.server);
     const { regions, status, error } = useAppSelector((state) => state.region);
     const dispatch = useAppDispatch();
 
@@ -103,21 +100,22 @@ function CityForm({
 
     useEffect(() => {
         dispatch(fetchRegions());
+        dispatch(fetchServers());
     }, []);
 
-    if (status === Status.LOADING && !isLoaderOpened) {
-        return (
-            <>
-                <div className="w-full h-60 relative rounded-sm">
-                    <div className="absolute inset-0 z-[70] bg-slate-50 bg-opacity-70 flex justify-center items-center w-full h-full">
-                        <div className="w-10 h-10">
-                            <LoadingIcon icon="ball-triangle" />
-                        </div>
-                    </div>
-                </div>
-            </>
+    useEffect(() => {
+        if (status !== Status.SUCCESS) return;
+        const defaultServer = serversState.servers.find(
+            (server) => server.default
         );
-    }
+        setSelectServer(defaultServer ? String(defaultServer.id) : "-1");
+    }, [serversState.servers, serversState.status]);
+
+    if (
+        (serversState.status === Status.LOADING || status === Status.LOADING) &&
+        !isLoaderOpened
+    )
+        return <Loader />;
 
     return (
         <>
@@ -226,7 +224,7 @@ function CityForm({
                             }}
                             className="w-full"
                         >
-                            {serversData.map((server) => (
+                            {serversState.servers.map((server) => (
                                 <option key={server.id} value={server.id}>
                                     {server.name}
                                 </option>

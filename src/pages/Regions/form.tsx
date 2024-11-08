@@ -6,12 +6,17 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import Toastify from "toastify-js";
 import { FormLabel, FormInput } from "@/components/Base/Form";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import TomSelect from "@/components/Base/CustomTomSelect";
 import { RegionCreateType } from "@/stores/reducers/regions/types";
 import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
 import { startLoader, stopLoader } from "@/utils/customUtils";
 import ValidationErrorNotification from "@/components/Custom/ValidationErrorNotification";
+import { IServer } from "@/stores/models/IServer";
+import { useAppDispatch, useAppSelector } from "@/stores/hooks";
+import { fetchServers } from "@/stores/reducers/servers/actions";
+import Loader from "@/components/Custom/Loader/Loader";
+import { Status } from "@/stores/reducers/types";
 
 interface RegionFormProps {
     onCreate: (name: RegionCreateType) => void;
@@ -24,27 +29,14 @@ function RegionForm({
     setIsLoaderOpened,
     isLoaderOpened,
 }: RegionFormProps) {
-    const [select, setSelect] = useState("1");
-    const [serversData, setServersData] = useState([
-        {
-            id: 1,
-            name: "Stayflex",
-        },
-        {
-            id: 2,
-            name: "Server-2",
-        },
-        {
-            id: 3,
-            name: "Server-3",
-        },
-        {
-            id: 4,
-            name: "Server-4",
-        },
-    ]);
+    const [select, setSelect] = useState("-1");
     const [showValidationNotification, setShowValidationNotification] =
         useState(false);
+
+    const { servers, status, error } = useAppSelector((state) => state.server);
+
+    const dispatch = useAppDispatch();
+
     const schema = yup
         .object({
             name: yup.string().required("'Название' это обязательное поле"),
@@ -76,6 +68,18 @@ function RegionForm({
         };
         onCreate(region);
     };
+
+    useEffect(() => {
+        dispatch(fetchServers());
+    }, []);
+
+    useEffect(() => {
+        if (status !== Status.SUCCESS) return;
+        const defaultServer = servers.find((server) => server.default);
+        setSelect(defaultServer ? String(defaultServer.id) : "-1");
+    }, [servers, status]);
+
+    if (status === Status.LOADING && !isLoaderOpened) return <Loader />;
 
     return (
         <>
@@ -135,7 +139,7 @@ function RegionForm({
                             }}
                             className="w-full"
                         >
-                            {serversData.map((server) => (
+                            {servers.map((server) => (
                                 <option key={server.id} value={server.id}>
                                     {server.name}
                                 </option>

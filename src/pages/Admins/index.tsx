@@ -41,6 +41,7 @@ import UserUpdateModal from "./updateModal";
 import { fetchTariffs } from "@/stores/reducers/tariffs/actions";
 import { errorToastSlice } from "@/stores/errorToastSlice";
 import { tariffSlice } from "@/stores/reducers/tariffs/slice";
+import { useTranslation } from "react-i18next";
 
 window.DateTime = DateTime;
 interface Response {
@@ -52,6 +53,7 @@ interface Response {
 }
 
 function Main() {
+    const { t, i18n } = useTranslation();
     const [userData, setUserData] = useState<{
         name: string;
         id: number;
@@ -469,13 +471,20 @@ function Main() {
     }, []);
     useEffect(() => {
         if (users && users.length) {
-            const formattedData = users.map((user) => ({
-                id: user.id,
-                name: user.fullname,
-                active: user.is_active,
-                objects: user.object_count,
-                subscription: DateTime.fromISO(user.date_before),
-            }));
+            const formattedData = users.map((user) => {
+                if (!i18n.hasResourceBundle(i18n.language, "translation")) {
+                    i18n.addResourceBundle(i18n.language, "translation", {
+                        [user.fullname]: user.fullname,
+                    });
+                }
+                return {
+                    id: user.id,
+                    name: user.fullname,
+                    active: user.is_active,
+                    objects: user.object_count,
+                    subscription: DateTime.fromISO(user.date_before),
+                };
+            });
             tabulator.current
                 ?.setData(formattedData.reverse())
                 .then(function () {
@@ -487,7 +496,9 @@ function Main() {
     return (
         <>
             <div className="flex flex-col items-center mt-8 intro-y sm:flex-row">
-                <h2 className="mr-auto text-lg font-medium">Администраторы</h2>
+                <h2 className="mr-auto text-lg font-medium">
+                    {t("admins_title")}
+                </h2>
                 <div className="flex w-full mt-4 sm:w-auto sm:mt-0">
                     <Button
                         as="a"
@@ -501,7 +512,7 @@ function Main() {
                         }}
                     >
                         <ListPlus className="size-5 mr-2" />
-                        Добавить
+                        {t("add")}
                     </Button>
                 </div>
             </div>
