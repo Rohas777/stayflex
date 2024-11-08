@@ -8,6 +8,7 @@ import { useAppSelector } from "@/stores/hooks";
 import { Status } from "@/stores/reducers/types";
 import Loader from "@/components/Custom/Loader/Loader";
 import UserUpdateForm from "./updateUserForm";
+import { useTranslation } from "react-i18next";
 
 interface UserUpdateModalProps {
     onUpdateUser: (userData: UserUpdateType) => void;
@@ -20,6 +21,7 @@ function UserUpdateModal({
     setIsLoaderOpen,
     isLoaderOpen,
 }: UserUpdateModalProps) {
+    const { t } = useTranslation();
     const { statusOne } = useAppSelector((state) => state.user);
     const tariffState = useAppSelector((state) => state.tariff);
 
@@ -35,7 +37,7 @@ function UserUpdateModal({
             {isLoaderOpen && <OverlayLoader />}
             <div className="p-5">
                 <div className="mt-5 text-lg font-bold text-center">
-                    Редактировать администратора
+                    {t("pages.users.admins.form.edit_title")}
                 </div>
 
                 <UserUpdateForm

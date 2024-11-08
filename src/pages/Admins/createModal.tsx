@@ -20,6 +20,7 @@ import { useAppSelector } from "@/stores/hooks";
 import { Status } from "@/stores/reducers/types";
 import Loader from "@/components/Custom/Loader/Loader";
 import ValidationErrorNotification from "@/components/Custom/ValidationErrorNotification";
+import { useTranslation } from "react-i18next";
 
 interface UserCreateModalProps {
     onCreate: (userData: UserCreateType) => void;
@@ -36,6 +37,9 @@ function UserCreateModal({
     setIsLoaderOpen,
     isLoaderOpen,
 }: UserCreateModalProps) {
+    const { t } = useTranslation();
+    const { language } = useAppSelector((state) => state.language);
+
     const [tel, setTel] = useState<string>();
     const [maskLengthValidation, setMaskLengthValidation] = useState(false);
     const [isUserActive, setIsUserActive] = useState(false);
@@ -55,10 +59,10 @@ function UserCreateModal({
         };
 
         if (maskLengthValidation) {
-            errors.tel = "Введите корректный номер телефона";
+            errors.tel = t("forms.validation.phone");
         }
         if (!tel) {
-            errors.tel = "Обязательно введите телефон пользователя";
+            errors.tel = t("forms.validation.required");
         }
 
         Object.keys(errors).forEach((key) => {
@@ -73,31 +77,25 @@ function UserCreateModal({
 
     const schema = yup
         .object({
-            name: yup.string().required("'Название' это обязательное поле"),
+            name: yup.string().required(t("forms.validation.required")),
             email: yup
                 .string()
-                .email("Введите корректный email")
-                .required("'Email' это обязательное поле"),
+                .email(t("forms.validation.email"))
+                .required(t("forms.validation.required")),
             password: yup
                 .string()
-                .min(8, "Пароль слишком короткий - минимум 8 символов")
-                .matches(
-                    /^[a-zA-Z\d]*$/,
-                    "Пароль должен содержать только цифры и латинские буквы"
-                )
+                .min(8, t("forms.validation.password_length"))
+                .matches(/^[a-zA-Z\d]*$/, t("forms.validation.password_lat"))
                 .matches(
                     /^(?=.*[A-Z]).*$/,
-                    "Пароль должен содержать хотя бы 1 заглавную букву"
+                    t("forms.validation.password_upper")
                 )
                 .matches(
                     /^(?=.*[a-z]).*$/,
-                    "Пароль должен содержать хотя бы 1 строчную букву"
+                    t("forms.validation.password_lower")
                 )
-                .matches(
-                    /^(?=.*\d).*$/,
-                    "Пароль должен содержать хотя бы 1 цифру"
-                )
-                .required("'Пароль' это обязательное поле"),
+                .matches(/^(?=.*\d).*$/, t("forms.validation.password_number"))
+                .required(t("forms.validation.required")),
         })
         .required();
 
@@ -140,7 +138,7 @@ function UserCreateModal({
             {isLoaderOpen && <OverlayLoader />}
             <div className="p-5">
                 <div className="mt-5 text-lg font-bold text-center">
-                    Добавить пользователя
+                    {t("pages.users.admins.form.create_title")}
                 </div>
                 <form className="validate-form mt-5" onSubmit={onSubmit}>
                     <div className="input-form mt-3">
@@ -148,9 +146,9 @@ function UserCreateModal({
                             htmlFor="validation-form-name"
                             className="flex flex-col w-full sm:flex-row"
                         >
-                            ФИО
+                            {t("forms.fullname")}
                             <span className="mt-1 text-xs sm:ml-auto sm:mt-0 text-slate-500">
-                                Обязательное
+                                {t("forms.required")}
                             </span>
                         </FormLabel>
                         <FormInput
@@ -161,7 +159,7 @@ function UserCreateModal({
                             className={clsx({
                                 "border-danger": errors.name,
                             })}
-                            placeholder="Иванов И.И."
+                            placeholder={t("forms.fullname_placeholder")}
                         />
                         {errors.name && (
                             <div className="mt-2 text-danger">
@@ -175,15 +173,15 @@ function UserCreateModal({
                             htmlFor="validation-form-tel"
                             className="flex flex-col w-full sm:flex-row"
                         >
-                            Номер телефона клиента
+                            {t("forms.phone")}
                             <span className="mt-1 text-xs sm:ml-auto sm:mt-0 text-slate-500">
-                                Обязательное
+                                {t("forms.required")}
                             </span>
                         </FormLabel>
                         <div className="custom-phone-input relative">
                             <PhoneInput
-                                country="ru"
-                                localization={ru}
+                                country={language == "en" ? "us" : "ru"}
+                                localization={language == "en" ? undefined : ru}
                                 value={tel}
                                 onChange={(
                                     value,
@@ -240,7 +238,7 @@ function UserCreateModal({
                         >
                             Email
                             <span className="mt-1 text-xs sm:ml-auto sm:mt-0 text-slate-500">
-                                Обязательное
+                                {t("forms.required")}
                             </span>
                         </FormLabel>
                         <FormInput
@@ -265,9 +263,9 @@ function UserCreateModal({
                             htmlFor="validation-form-email"
                             className="flex flex-col w-full sm:flex-row"
                         >
-                            Пароль
+                            {t("forms.password")}
                             <span className="mt-1 text-xs sm:ml-auto sm:mt-0 text-slate-500">
-                                Обязательное
+                                {t("forms.required")}
                             </span>
                         </FormLabel>
                         <div className="relative">
@@ -279,7 +277,7 @@ function UserCreateModal({
                                 className={clsx({
                                     "border-danger": errors.password,
                                 })}
-                                placeholder="Пароль"
+                                placeholder={t("forms.password")}
                             />
                             <Lucide
                                 icon={showPassword ? "EyeOff" : "Eye"}
@@ -310,9 +308,13 @@ function UserCreateModal({
                                 className="sr-only peer"
                             />
                             <div className="mr-3 relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-                            Активировать пользователя?
+                            {t("pages.users.admins.form.activate")}
                         </label>
-                        <Tippy content="Определяет будет ли пользователен активирован сразу">
+                        <Tippy
+                            content={t(
+                                "pages.users.admins.form.activate_tooltip"
+                            )}
+                        >
                             <Lucide icon="Info" className="cursor-help" />
                         </Tippy>
                     </div>
@@ -321,7 +323,7 @@ function UserCreateModal({
                         variant="primary"
                         className="w-full mt-5"
                     >
-                        Добавить
+                        {t("btns.add")}
                     </Button>
                 </form>
             </div>

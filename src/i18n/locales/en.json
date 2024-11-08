@@ -1,4 +1,101 @@
 {
-    "admins_title": "Administrators",
-    "add": "Add"
+    "menu": {
+        "admins": "Administrators",
+        "users": "Users",
+        "objects": "Objects",
+        "clients": "Clients",
+        "reservations": "Reservations",
+        "settings": "Settings",
+        "regions": "Regions",
+        "cities": "Cities",
+        "property_types": "Property types",
+        "amenities": "Amenities",
+        "servers": "Servers",
+        "tariffs": "Tariffs",
+        "icons": "Icons",
+        "logs": "Logs",
+        "channels": "Channels",
+        "widget": "Widget"
+    },
+    "theme_switcher": {
+        "lang": {
+            "lang_change": "Language has been change",
+            "system_lang": "System language",
+            "ru": "Russian",
+            "en": "English",
+            "on_dev": "On development"
+        },
+        "theme": {
+            "system_theme": "Theme",
+            "light": "Light",
+            "dark": "Dark"
+        },
+        "colors": {
+            "system_color": "Colors"
+        }
+    },
+    "btns": {
+        "create": "Create",
+        "update": "Update",
+        "delete": "Delete",
+        "activate": "Activate",
+        "deactivate": "Deactivate",
+        "export": "Export",
+        "edit": "Edit",
+        "cancel": "Cancel",
+        "save": "Save",
+        "add": "Add",
+        "start": "Start",
+        "reset": "Reset",
+        "switcher_is_active": "Is active?"
+    },
+    "search": {
+        "placeholder": "Search"
+    },
+    "table": {
+        "empty": "No data available",
+        "name": "Name",
+        "title": "Title",
+        "actions": "Actions"
+    },
+    "forms": {
+        "fullname_placeholder": "John Doe",
+        "fullname": "Full name",
+        "phone": "Phone number",
+        "password": "Password",
+        "confirm_password": "Confirm password",
+        "required": "Required",
+        "validation": {
+            "required": "This field is required",
+            "phone": "Enter the correct phone number",
+            "email": "Enter a valid email address",
+            "password_length": "The password must contain at least 8 characters",
+            "password_match": "The passwords don't match",
+            "password_lat": "The password must contain only numbers and Latin letters",
+            "password_upper": "The password must contain at least one uppercase letter",
+            "password_lower": "The password must contain at least one lowercase letter",
+            "password_number": "The password must contain at least one digit"
+        }
+    },
+    "pages": {
+        "users": {
+            "title": "Users",
+            "delete_title": "Delete user?",
+            "delete_description": "Are you sure you want to delete user \"{{name}}\"?<br/>This action cannot be undone.",
+            "deactivate_title": "Deactivate user?",
+            "deactivate_description": "Are you sure you want to deactivate user “{{name}}”? <br/>The user will no longer have access to the service.",
+            "admins": {
+                "title": "Administrators",
+                "created": "Administrator successfully created",
+                "deleted": "Administrator successfully deleted",
+                "updated": "Administrator successfully updated",
+                "form": {
+                    "create_title": "Add administrator",
+                    "edit_title": "Edit administrator",
+                    "activate": "Activate the administrator?",
+                    "activate_tooltip": "Determines whether the administrator will be activated immediately"
+                }
+            }
+        }
+    }
 }

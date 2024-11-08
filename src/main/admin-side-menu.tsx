@@ -1,79 +1,82 @@
-import Icon from "@/components/Custom/Icon";
 import { type Menu } from "@/stores/menuSlice";
+import en from "./../i18n/locales/en.json";
+import ru from "./../i18n/locales/ru.json";
 
 const newReservationsIndicator = document.createElement("span");
 newReservationsIndicator.classList.add("rounded-full", "size-5", "bg-success");
 newReservationsIndicator.textContent = "1";
 
+const lang = localStorage.getItem("language") == "en" ? en : ru;
+
 const menu: Array<Menu | "divider"> = [
     {
         icon: "UserCog",
         pathname: "/admin/",
-        title: "Администраторы",
+        title: lang.menu.admins,
     },
     {
         icon: "Users",
         pathname: "/admin/users",
-        title: "Пользователи",
+        title: lang.menu.users,
     },
     {
         icon: "Home",
         pathname: "/admin/objects",
-        title: "Объекты",
+        title: lang.menu.objects,
     },
     {
         icon: "UserCheck",
         pathname: "/admin/clients",
-        title: "Клиенты",
+        title: lang.menu.clients,
     },
     {
         icon: "Calendar",
         pathname: "/admin/reservations",
-        title: "Брони",
+        title: lang.menu.reservations,
     },
     {
         icon: "Wrench",
-        title: "Настройки",
+        title: lang.menu.settings,
         subMenu: [
             {
                 icon: "Map",
                 pathname: "/admin/regions",
-                title: "Регионы",
+                title: lang.menu.regions,
             },
             {
                 icon: "MapPin",
                 pathname: "/admin/cities",
-                title: "Города",
+                title: lang.menu.cities,
             },
             {
                 icon: "Home",
                 pathname: "/admin/property-types",
-                title: "Типы недвижимости",
+                title: lang.menu.property_types,
             },
             {
                 icon: "Coffee",
                 pathname: "/admin/amenities",
-                title: "Удобства",
+                title: lang.menu.amenities,
             },
             {
                 icon: "Server",
                 pathname: "/admin/servers",
-                title: "Серверы",
+                title: lang.menu.servers,
             },
             {
                 icon: "Gem",
                 pathname: "/admin/tariffs",
-                title: "Тарифы",
+                title: lang.menu.tariffs,
             },
             {
                 icon: "Activity",
                 pathname: "/admin/icon",
-                title: "Иконки",
+                title: lang.menu.icons,
             },
             {
                 icon: "FileArchive",
                 pathname: "/admin/logs",
-                title: "Логи",
+                title: lang.menu.logs,
                 mark: "experimental",
             },
         ],

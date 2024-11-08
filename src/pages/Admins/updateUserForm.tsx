@@ -20,6 +20,7 @@ import { Status } from "@/stores/reducers/types";
 import Loader from "@/components/Custom/Loader/Loader";
 import { Tab } from "@/components/Base/Headless";
 import ValidationErrorNotification from "@/components/Custom/ValidationErrorNotification";
+import { useTranslation } from "react-i18next";
 
 interface UserUpdateFormProps {
     onUpdate: (userData: UserUpdateType) => void;
@@ -36,6 +37,8 @@ function UserUpdateForm({
     setIsLoaderOpen,
     isLoaderOpen,
 }: UserUpdateFormProps) {
+    const { t } = useTranslation();
+    const { language } = useAppSelector((state) => state.language);
     const [tel, setTel] = useState<string>();
     const [maskLengthValidation, setMaskLengthValidation] = useState(false);
 
@@ -55,10 +58,10 @@ function UserUpdateForm({
         };
 
         if (maskLengthValidation) {
-            errors.tel = "Введите корректный номер телефона";
+            errors.tel = t("forms.validation.phone");
         }
         if (!tel) {
-            errors.tel = "Обязательно введите телефон пользователя";
+            errors.tel = t("forms.validation.required");
         }
 
         Object.keys(errors).forEach((key) => {
@@ -73,11 +76,11 @@ function UserUpdateForm({
 
     const schema = yup
         .object({
-            name: yup.string().required("'Название' это обязательное поле"),
+            name: yup.string().required(t("forms.validation.required")),
             email: yup
                 .string()
-                .email("Введите корректный email")
-                .required("'Email' это обязательное поле"),
+                .email(t("forms.validation.email"))
+                .required(t("forms.validation.required")),
         })
         .required();
 
@@ -123,9 +126,9 @@ function UserUpdateForm({
                         htmlFor="validation-form-name"
                         className="flex flex-col w-full sm:flex-row"
                     >
-                        ФИО
+                        {t("forms.fullname")}
                         <span className="mt-1 text-xs sm:ml-auto sm:mt-0 text-slate-500">
-                            Обязательное
+                            {t("forms.required")}
                         </span>
                     </FormLabel>
                     <FormInput
@@ -136,7 +139,7 @@ function UserUpdateForm({
                         className={clsx({
                             "border-danger": errors.name,
                         })}
-                        placeholder="Иванов И.И."
+                        placeholder={t("forms.fullname_placeholder")}
                         defaultValue={userOne?.fullname}
                     />
                     {errors.name && (
@@ -151,15 +154,15 @@ function UserUpdateForm({
                         htmlFor="validation-form-tel"
                         className="flex flex-col w-full sm:flex-row"
                     >
-                        Номер телефона клиента
+                        {t("forms.phone")}
                         <span className="mt-1 text-xs sm:ml-auto sm:mt-0 text-slate-500">
-                            Обязательное
+                            {t("forms.required")}
                         </span>
                     </FormLabel>
                     <div className="custom-phone-input relative">
                         <PhoneInput
-                            country="ru"
-                            localization={ru}
+                            country={language == "en" ? "us" : "ru"}
+                            localization={language == "en" ? undefined : ru}
                             value={tel}
                             onChange={(value, country, e, formattedValue) => {
                                 setTel(formattedValue);
@@ -211,7 +214,7 @@ function UserUpdateForm({
                     >
                         Email
                         <span className="mt-1 text-xs sm:ml-auto sm:mt-0 text-slate-500">
-                            Обязательное
+                            {t("forms.required")}
                         </span>
                     </FormLabel>
                     <FormInput
@@ -233,7 +236,7 @@ function UserUpdateForm({
                     )}
                 </div>
                 <Button type="submit" variant="primary" className="w-full mt-5">
-                    Обновить
+                    {t("btns.update")}
                 </Button>
             </form>
             <ValidationErrorNotification

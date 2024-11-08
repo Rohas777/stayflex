@@ -17,9 +17,12 @@ import TippyContent from "@/components/Base/TippyContent";
 import { preferencesSlice } from "@/stores/preferencesSlice";
 import Icon from "../Custom/Icon";
 import LanguageSwitcher from "../Custom/LangSwitcher";
+import { useTranslation } from "react-i18next";
 
 function Main() {
     const dispatch = useAppDispatch();
+
+    const { t } = useTranslation();
 
     const activeColorScheme = useAppSelector(selectColorScheme);
     const activeDarkMode = useAppSelector(selectDarkMode);
@@ -47,30 +50,12 @@ function Main() {
     };
     setDarkModeClass();
 
-    const themes: Array<Themes["name"]> = [
-        "rubick",
-        "icewall",
-        "tinker",
-        "enigma",
-    ];
-    const layouts: Array<Themes["layout"]> = [
-        "side-menu",
-        "simple-menu",
-        "top-menu",
-    ];
     const colorSchemes: Array<ColorSchemes> = [
         "default",
         "theme-1",
         "theme-2",
         "theme-3",
     ];
-
-    const themeImages = import.meta.glob<{
-        default: string;
-    }>("/src/assets/images/themes/*.{jpg,jpeg,png,svg}", { eager: true });
-    const layoutImages = import.meta.glob<{
-        default: string;
-    }>("/src/assets/images/layouts/*.{jpg,jpeg,png,svg}", { eager: true });
 
     return (
         <div>
@@ -93,66 +78,11 @@ function Main() {
                     </a>
                     <Slideover.Description className="p-0">
                         <div className="flex flex-col">
-                            {/* <div className="px-8 pt-6 pb-8">
-                                <div className="text-base font-medium">
-                                    Язык системы
-                                </div>
-                                <div className="mt-5 grid grid-cols-3 sm:grid-cols-5 gap-3.5">
-                                    <div>
-                                        <a
-                                            // onClick={() =>
-                                            //     switchDarkMode(false)
-                                            // }
-                                            className={clsx([
-                                                "aspect-square overflow-hidden rounded-md cursor-pointer bg-slate-200 box p-1 border-slate-300/80 block",
-                                                "[&.active]:border-2 [&.active]:border-theme-1/60",
-                                                !activeDarkMode ? "active" : "",
-                                            ])}
-                                        >
-                                            <div className="h-full image-fit">
-                                                <img src={ruFlag} alt="Ru" />
-                                            </div>
-                                        </a>
-                                        <div className="mt-2.5 text-center text-xs capitalize">
-                                            Русский
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <Tippy content="В разработке">
-                                            <a
-                                                // onClick={() => switchDarkMode(true)}
-                                                className={clsx([
-                                                    "aspect-square rounded-md overflow-hidden cursor-not-allowed bg-slate-200 box p-1 border-slate-300/80 block",
-                                                    "[&.active]:border-2 [&.active]:border-theme-1/60",
-                                                    activeDarkMode
-                                                        ? "active"
-                                                        : "",
-                                                ])}
-                                            >
-                                                <div className="h-full image-fit">
-                                                    <img
-                                                        src={enFlag}
-                                                        alt="En"
-                                                    />
-                                                </div>
-                                                <div className="absolute inset-0 size-full bg-slate-200 bg-opacity-70"></div>
-                                                <Icon
-                                                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-6 stroke-2"
-                                                    icon="Wrench"
-                                                />
-                                            </a>
-                                        </Tippy>
-                                        <div className="mt-2.5 text-center text-xs capitalize">
-                                            Английский
-                                        </div>
-                                    </div>
-                                </div>
-                            </div> */}
                             <LanguageSwitcher />
                             <div className="border-b border-dashed"></div>
                             <div className="px-8 pt-6 pb-8">
                                 <div className="text-base font-medium">
-                                    Тема
+                                    {t("theme_switcher.theme.system_theme")}
                                 </div>
                                 <div className="mt-5 grid grid-cols-2 gap-3.5">
                                     <div>
@@ -169,7 +99,7 @@ function Main() {
                                             <div className="h-full overflow-hidden rounded-md bg-slate-200"></div>
                                         </a>
                                         <div className="mt-2.5 text-center text-xs capitalize">
-                                            Светлая
+                                            {t("theme_switcher.theme.light")}
                                         </div>
                                     </div>
                                     <div>
@@ -184,7 +114,7 @@ function Main() {
                                             <div className="h-full overflow-hidden rounded-md bg-slate-900"></div>
                                         </a>
                                         <div className="mt-2.5 text-center text-xs capitalize">
-                                            Тёмная
+                                            {t("theme_switcher.theme.dark")}
                                         </div>
                                     </div>
                                 </div>
@@ -192,7 +122,7 @@ function Main() {
                             <div className="border-b border-dashed"></div>
                             <div className="px-8 pt-6 pb-8">
                                 <div className="text-base font-medium">
-                                    Цвета
+                                    {t("theme_switcher.colors.system_color")}
                                 </div>
                                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-3.5 mt-5">
                                     {colorSchemes.map(

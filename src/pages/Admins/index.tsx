@@ -54,10 +54,6 @@ interface Response {
 
 function Main() {
     const { t, i18n } = useTranslation();
-    const [userData, setUserData] = useState<{
-        name: string;
-        id: number;
-    } | null>(null);
     const [isLoaderOpen, setIsLoaderOpen] = useState(false);
     const [createModalPreview, setCreateModalPreview] = useState(false);
     const [updateModalPreview, setUpdateModalPreview] = useState(false);
@@ -81,8 +77,6 @@ function Main() {
         cancelLabel: null,
         is_danger: true,
     });
-
-    const navigate = useNavigate();
 
     const tableRef = createRef<HTMLDivElement>();
     const tabulator = useRef<Tabulator>();
@@ -109,11 +103,11 @@ function Main() {
                 paginationSizeSelector: [10, 20, 50, 100],
                 layout: "fitColumns",
                 responsiveLayout: "collapse",
-                placeholder: "Записи не найдены",
+                placeholder: t("table.empty"),
                 columns: [
                     {
                         title: "",
-                        field: "id",
+                        field: "",
                         formatter: "responsiveCollapse",
                         width: 40,
                         minWidth: 30,
@@ -140,7 +134,7 @@ function Main() {
                         },
                     },
                     {
-                        title: "Имя",
+                        title: t("table.name"),
                         minWidth: 200,
                         responsive: 0,
                         field: "name",
@@ -156,7 +150,7 @@ function Main() {
                         },
                     },
                     {
-                        title: "Действия",
+                        title: t("table.actions"),
                         minWidth: 200,
                         field: "id",
                         responsive: 1,
@@ -179,12 +173,12 @@ function Main() {
                                 <i data-lucide="trash-2"></i>
                               </a>`);
                             tippy(editA, {
-                                content: "Редактировать",
+                                content: t("btns.edit"),
                                 placement: "bottom",
                                 animation: "shift-away",
                             });
                             tippy(deleteA, {
-                                content: "Удалить",
+                                content: t("btns.delete"),
                                 placement: "bottom",
                                 animation: "shift-away",
                             });
@@ -197,7 +191,7 @@ function Main() {
                                 </label>`
                             );
                             tippy(switcher, {
-                                content: "Активен?",
+                                content: t("btns.switcher_is_active"),
                                 placement: "bottom",
                                 animation: "shift-away",
                             });
@@ -205,13 +199,18 @@ function Main() {
                             a.addEventListener("hover", function () {});
                             deleteA.addEventListener("click", function () {
                                 setConfirmModalContent({
-                                    title: "Удалить пользователя?",
-                                    description: `Вы уверены, что хотите удалить пользователя "${response.name?.trim()}"?<br/>Это действие нельзя будет отменить.`,
+                                    title: t("pages.users.delete_title"),
+                                    description: t(
+                                        "pages.users.delete_description",
+                                        {
+                                            name: response.name?.trim(),
+                                        }
+                                    ),
                                     onConfirm: () => {
                                         onDelete(response.id!);
                                     },
-                                    confirmLabel: "Удалить",
-                                    cancelLabel: "Отмена",
+                                    confirmLabel: t("btns.delete"),
+                                    cancelLabel: t("btns.cancel"),
                                     is_danger: true,
                                 });
                                 setConfirmationModalPreview(true);
@@ -228,16 +227,23 @@ function Main() {
                                 if (!target.checked) {
                                     target.checked = true;
                                     setConfirmModalContent({
-                                        title: "Деактивировать пользователя?",
-                                        description: `Вы уверены, что хотите деактивировать пользователя "${response.name?.trim()}"?<br/>Он больше не будет иметь доступа к сервису.`,
+                                        title: t(
+                                            "pages.users.deactivate_title"
+                                        ),
+                                        description: t(
+                                            "pages.users.deactivate_description",
+                                            {
+                                                name: response.name?.trim(),
+                                            }
+                                        ),
                                         onConfirm: () => {
                                             onUpdateIsActive(
                                                 target,
                                                 response.id!
                                             );
                                         },
-                                        confirmLabel: "Деактивировать",
-                                        cancelLabel: "Отмена",
+                                        confirmLabel: t("btns.deactivate"),
+                                        cancelLabel: t("btns.cancel"),
                                         is_danger: false,
                                     });
                                     setConfirmationModalPreview(true);
@@ -383,9 +389,7 @@ function Main() {
         isActiveStatusUpdated,
         statusOne,
     } = useAppSelector((state) => state.user);
-    const tariffState = useAppSelector((state) => state.tariff);
     const userActions = userSlice.actions;
-    const tariffActions = tariffSlice.actions;
     const dispatch = useAppDispatch();
 
     const onDelete = async (id: number) => {
@@ -434,10 +438,10 @@ function Main() {
                 .querySelectorAll("#success-notification-content")[0]
                 .cloneNode(true) as HTMLElement;
             successEl.querySelector(".text-content")!.textContent = isCreated
-                ? "Администратор успешно создан"
+                ? t("pages.users.admins.created")
                 : isDeleted
-                ? "Администратор успешно удалён"
-                : "Администратор успешно обновлен";
+                ? t("pages.users.admins.deleted")
+                : t("pages.users.admins.updated");
             successEl.classList.remove("hidden");
             Toastify({
                 node: successEl,
@@ -472,11 +476,6 @@ function Main() {
     useEffect(() => {
         if (users && users.length) {
             const formattedData = users.map((user) => {
-                if (!i18n.hasResourceBundle(i18n.language, "translation")) {
-                    i18n.addResourceBundle(i18n.language, "translation", {
-                        [user.fullname]: user.fullname,
-                    });
-                }
                 return {
                     id: user.id,
                     name: user.fullname,
@@ -497,7 +496,7 @@ function Main() {
         <>
             <div className="flex flex-col items-center mt-8 intro-y sm:flex-row">
                 <h2 className="mr-auto text-lg font-medium">
-                    {t("admins_title")}
+                    {t("pages.users.admins.title")}
                 </h2>
                 <div className="flex w-full mt-4 sm:w-auto sm:mt-0">
                     <Button
@@ -512,7 +511,7 @@ function Main() {
                         }}
                     >
                         <ListPlus className="size-5 mr-2" />
-                        {t("add")}
+                        {t("btns.add")}
                     </Button>
                 </div>
             </div>
@@ -549,7 +548,7 @@ function Main() {
                                 }}
                                 type="text"
                                 className="mt-2 sm:w-40 2xl:w-full sm:mt-0"
-                                placeholder="Поиск..."
+                                placeholder={t("search.placeholder") + "..."}
                             />
                         </div>
                         <div className="mt-2 xl:mt-0">
@@ -560,7 +559,7 @@ function Main() {
                                 className="w-full sm:w-16"
                                 onClick={onFilter}
                             >
-                                Начать
+                                {t("btns.start")}
                             </Button>
                             <Button
                                 id="tabulator-html-filter-reset"
@@ -569,7 +568,7 @@ function Main() {
                                 className="w-full mt-2 sm:w-20 sm:mt-0 sm:ml-1"
                                 onClick={onResetFilter}
                             >
-                                Сбросить
+                                {t("btns.reset")}
                             </Button>
                         </div>
                     </form>
@@ -584,7 +583,7 @@ function Main() {
                                     icon="FileText"
                                     className="w-4 h-4 mr-2"
                                 />{" "}
-                                Экспорт
+                                {t("btns.export")}
                                 <Lucide
                                     icon="ChevronDown"
                                     className="w-4 h-4 ml-auto sm:ml-2"
@@ -596,28 +595,28 @@ function Main() {
                                         icon="FileText"
                                         className="w-4 h-4 mr-2"
                                     />{" "}
-                                    Экспорт CSV
+                                    {t("btns.export")} CSV
                                 </Menu.Item>
                                 <Menu.Item onClick={onExportJson}>
                                     <Lucide
                                         icon="FileText"
                                         className="w-4 h-4 mr-2"
                                     />{" "}
-                                    Экспорт JSON
+                                    {t("btns.export")} JSON
                                 </Menu.Item>
                                 <Menu.Item onClick={onExportXlsx}>
                                     <Lucide
                                         icon="FileText"
                                         className="w-4 h-4 mr-2"
                                     />{" "}
-                                    Экспорт XLSX
+                                    {t("btns.export")} XLSX
                                 </Menu.Item>
                                 <Menu.Item onClick={onExportHtml}>
                                     <Lucide
                                         icon="FileText"
                                         className="w-4 h-4 mr-2"
                                     />{" "}
-                                    Экспорт HTML
+                                    {t("btns.export")} HTML
                                 </Menu.Item>
                             </Menu.Items>
                         </Menu>
@@ -755,9 +754,7 @@ function Main() {
             >
                 <Lucide icon="CheckCircle" className="text-success" />
                 <div className="ml-4 mr-4">
-                    <div className="font-medium text-content">
-                        Пользователь успешно добавлен
-                    </div>
+                    <div className="font-medium text-content"></div>
                 </div>
             </Notification>
             {/* END: Success Notification Content */}
