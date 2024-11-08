@@ -27,7 +27,7 @@ import ClientReservations from "../pages/ClientReservations";
 import Channels from "../pages/Channels";
 import Widget from "../pages/Widget";
 import Tariffs from "../pages/Tariffs";
-import Logs from "../pages/Logs";
+import Logs from "../pages/LogsPage";
 import TariffsClient from "../pages/TariffsClient";
 import Icon from "../pages/Icon";
 import PrivacyPolicy from "../pages/PrivacyPolicy";
