@@ -65,6 +65,7 @@ type CustomErrors = {
     email: string | null;
     name: string | null;
     date: string | null;
+    child_count: string | null;
 };
 
 function ReservationForm({
@@ -109,7 +110,25 @@ function ReservationForm({
         tel: null,
         email: null,
         name: null,
+        child_count: null,
     });
+
+    const childCountValidation = yup
+        .number()
+        .lessThan(
+            selectedObject ? selectedObject.child_places + 1 : -1,
+            ` ${
+                selectedObject
+                    ? "Максимальное количество детских спальных мест:" +
+                      selectedObject.adult_places
+                    : "Сначала выберите объект"
+            }`
+        )
+        .typeError("Количество спальных мест должно быть числовым значением")
+        .positive("Количество спальных мест не может быть отрицательным")
+        .integer("Количество спальных мест должно быть целым числом")
+        .moreThan(-1, "Минимальное количество детских спальных мест: 0")
+        .required("'Количество детских спальных мест' это обязательное поле");
 
     const vaildateWithoutYup = async (formData: FormData) => {
         const errors: CustomErrors = {
@@ -121,6 +140,7 @@ function ReservationForm({
             email: null,
             name: null,
             date: null,
+            child_count: null,
         };
         if (selectedObjectID === "-1") {
             errors.object = "Обязательно выберите объект";
@@ -157,6 +177,14 @@ function ReservationForm({
                 });
         }
 
+        if (!!selectedObject && selectedObject.child_places > 0) {
+            await childCountValidation
+                .validate(formData.get("child_count"))
+                .catch((err) => {
+                    errors.child_count = err.message;
+                });
+        }
+
         Object.keys(errors).forEach((key) => {
             if (errors[key as keyof CustomErrors] && key != "isValid") {
                 errors.isValid = false;
@@ -174,6 +202,29 @@ function ReservationForm({
             letter: yup
                 .string()
                 .required("'Служебная информация' это обязательное поле"),
+
+            adult_count: yup
+                .number()
+                .lessThan(
+                    selectedObject ? selectedObject.adult_places + 1 : -1,
+                    ` ${
+                        selectedObject
+                            ? "Максимальное количество взрослых спальных мест:" +
+                              selectedObject.adult_places
+                            : "Сначала выберите объект"
+                    }`
+                )
+                .typeError(
+                    "Количество спальных мест должно быть числовым значением"
+                )
+                .positive(
+                    "Количество спальных мест не может быть отрицательным"
+                )
+                .integer("Количество спальных мест должно быть целым числом")
+                .moreThan(0, "Минимальное количество взрослых спальных мест: 1")
+                .required(
+                    "'Количество взрослых спальных мест' это обязательное поле"
+                ),
         })
         .required();
 
@@ -223,6 +274,9 @@ function ReservationForm({
                 description: String(formData?.get("description")),
                 letter: String(formData?.get("letter")),
                 status: selectedStatus,
+                guest_count:
+                    Number(formData?.get("adult_count")) +
+                    Number(formData?.get("child_count")), //FIXME -
             };
             if (isCreate) {
                 onCreate(reservationData);
@@ -244,6 +298,9 @@ function ReservationForm({
                 description: String(formData?.get("description")),
                 letter: String(formData?.get("letter")),
                 status: selectedStatus,
+                guest_count:
+                    Number(formData?.get("adult_count")) +
+                    Number(formData?.get("child_count")), //FIXME -
             };
             if (isCreate) {
                 onCreate(reservationData);
@@ -680,6 +737,79 @@ function ReservationForm({
                             </ul>
                         </>
                     )}
+                    <div className="grid grid-cols-2 gap-4 mt-3">
+                        <div className="input-form col-span-1">
+                            <FormLabel
+                                htmlFor="validation-form-adult_count"
+                                className="flex flex-col w-full sm:flex-row"
+                            >
+                                Взрослых
+                                <span className="mt-1 text-xs sm:ml-auto sm:mt-0 text-slate-500">
+                                    Обязательное
+                                </span>
+                            </FormLabel>
+                            <FormInput
+                                {...register("adult_count")}
+                                id="validation-form-adult_count"
+                                type="number"
+                                name="adult_count"
+                                className={clsx({
+                                    "border-danger": errors.adult_count,
+                                })}
+                                placeholder="2"
+                            />
+                            {errors.adult_count && (
+                                <div className="mt-2 text-danger">
+                                    {typeof errors.adult_count.message ===
+                                        "string" && errors.adult_count.message}
+                                </div>
+                            )}
+                        </div>
+                        <div className="col-span-1 input-form">
+                            <FormLabel
+                                htmlFor="validation-form-child_count"
+                                className="flex flex-col w-full sm:flex-row"
+                            >
+                                Детей
+                                <span className="mt-1 text-xs sm:ml-auto sm:mt-0 text-slate-500">
+                                    Обязательное
+                                </span>
+                            </FormLabel>
+                            <FormInput
+                                id="validation-form-child_count"
+                                type="number"
+                                name="child_count"
+                                className={clsx({
+                                    "border-danger": customErrors.child_count,
+                                })}
+                                disabled={
+                                    selectedObject
+                                        ? selectedObject.child_places <= 0
+                                        : false
+                                }
+                                value={
+                                    selectedObject
+                                        ? selectedObject.child_places <= 0
+                                            ? 0
+                                            : undefined
+                                        : undefined
+                                }
+                                onChange={(e) => {
+                                    setCustomErrors({
+                                        ...customErrors,
+                                        child_count: null,
+                                    });
+                                }}
+                                placeholder="1"
+                            />
+                            {customErrors.child_count && (
+                                <div className="mt-2 text-danger">
+                                    {typeof customErrors.child_count ===
+                                        "string" && customErrors.child_count}
+                                </div>
+                            )}
+                        </div>
+                    </div>
                     <div className="input-form mt-3">
                         <FormLabel
                             htmlFor="validation-form-description"

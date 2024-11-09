@@ -206,6 +206,9 @@ function ReservationForm({
                 email: String(formData.get("email")),
             },
             reservation_data: {
+                guest_count:
+                    Number(formData.get("adult_count")) +
+                    Number(formData.get("child_count")),
                 // adult_count: Number(formData.get("adult_count")), //FIXME -
                 // child_count: Number(formData.get("child_count")), //FIXME -
                 start_date: formatDate(new Date(startDate)),
@@ -484,19 +487,12 @@ function ReservationForm({
                         )}
                     </div>
                     <div className="grid grid-cols-2 gap-4 mt-3">
-                        <div
-                            className={clsx("input-form", {
-                                "col-span-1": object.child_places > 0,
-                                "col-span-2": object.child_places <= 0,
-                            })}
-                        >
+                        <div className="input-form col-span-1">
                             <FormLabel
                                 htmlFor="validation-form-adult_count"
                                 className="flex flex-col w-full sm:flex-row"
                             >
-                                {object.child_places > 0
-                                    ? "Взрослых"
-                                    : "Гостей"}
+                                Взрослых
                                 <span className="mt-1 text-xs sm:ml-auto sm:mt-0 text-slate-500">
                                     Обязательное
                                 </span>
@@ -518,42 +514,40 @@ function ReservationForm({
                                 </div>
                             )}
                         </div>
-                        {object.child_places > 0 && (
-                            <div className="col-span-1 input-form">
-                                <FormLabel
-                                    htmlFor="validation-form-child_count"
-                                    className="flex flex-col w-full sm:flex-row"
-                                >
-                                    Детей
-                                    <span className="mt-1 text-xs sm:ml-auto sm:mt-0 text-slate-500">
-                                        Обязательное
-                                    </span>
-                                </FormLabel>
-                                <FormInput
-                                    id="validation-form-child_count"
-                                    type="number"
-                                    name="child_count"
-                                    className={clsx({
-                                        "border-danger":
-                                            customErrors.child_count,
-                                    })}
-                                    onChange={(e) => {
-                                        setCustomErrors({
-                                            ...customErrors,
-                                            child_count: null,
-                                        });
-                                    }}
-                                    placeholder="1"
-                                />
-                                {customErrors.child_count && (
-                                    <div className="mt-2 text-danger">
-                                        {typeof customErrors.child_count ===
-                                            "string" &&
-                                            customErrors.child_count}
-                                    </div>
-                                )}
-                            </div>
-                        )}
+                        <div className="col-span-1 input-form">
+                            <FormLabel
+                                htmlFor="validation-form-child_count"
+                                className="flex flex-col w-full sm:flex-row"
+                            >
+                                Детей
+                                <span className="mt-1 text-xs sm:ml-auto sm:mt-0 text-slate-500">
+                                    Обязательное
+                                </span>
+                            </FormLabel>
+                            <FormInput
+                                id="validation-form-child_count"
+                                type="number"
+                                name="child_count"
+                                className={clsx({
+                                    "border-danger": customErrors.child_count,
+                                })}
+                                disabled={object.child_places <= 0}
+                                value={object.child_places <= 0 ? 0 : undefined}
+                                onChange={(e) => {
+                                    setCustomErrors({
+                                        ...customErrors,
+                                        child_count: null,
+                                    });
+                                }}
+                                placeholder="1"
+                            />
+                            {customErrors.child_count && (
+                                <div className="mt-2 text-danger">
+                                    {typeof customErrors.child_count ===
+                                        "string" && customErrors.child_count}
+                                </div>
+                            )}
+                        </div>
                     </div>
                     <div className="input-form mt-3">
                         <FormLabel

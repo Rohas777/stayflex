@@ -66,7 +66,7 @@ function ClientForm({
 }: ClientFormProps) {
     const [tel, setTel] = useState<string>("");
 
-    const { clientByPhone, statusByPhone, errorByPhone, isFound } =
+    const { clientByPhone, statusByPhone, errorByPhone, isFound, clients } =
         useAppSelector((state) => state.client);
     const { authorizedUser } = useAppSelector((state) => state.user);
     const [isTelChecking, setIsTelChecking] = useState(false);
@@ -330,24 +330,32 @@ function ClientForm({
                         </>
                     )}
                     <div className="flex gap-3">
-                        {isFound && !authorizedUser?.is_admin && (
-                            <Button
-                                variant="primary"
-                                className="w-full mt-5"
-                                onClick={addClient}
-                            >
-                                Сохранить
-                            </Button>
-                        )}
-                        {isFound && authorizedUser?.is_admin && (
-                            <div className="w-full mt-5 flex items-center justify-center">
-                                <Icon
-                                    icon="CheckCircle"
-                                    className="size-6 mr-2 text-success"
-                                />
-                                Такой клиент уже существует
-                            </div>
-                        )}
+                        {isFound &&
+                            !authorizedUser?.is_admin &&
+                            !clients.find(
+                                (client) => client.id === clientByPhone?.id
+                            ) && (
+                                <Button
+                                    variant="primary"
+                                    className="w-full mt-5"
+                                    onClick={addClient}
+                                >
+                                    Сохранить
+                                </Button>
+                            )}
+                        {isFound &&
+                            (authorizedUser?.is_admin ||
+                                clients.find(
+                                    (client) => client.id === clientByPhone?.id
+                                )) && (
+                                <div className="w-full mt-5 flex items-center justify-center">
+                                    <Icon
+                                        icon="CheckCircle"
+                                        className="size-6 mr-2 text-success"
+                                    />
+                                    Такой клиент уже существует
+                                </div>
+                            )}
                         {!isFound && (
                             <Button
                                 type="submit"

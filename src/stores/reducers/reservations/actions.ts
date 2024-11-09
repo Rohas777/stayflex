@@ -129,6 +129,9 @@ export const updateReservationStatus = createAsyncThunk(
             if (!!checkErrorsBase(error)) {
                 return thunkAPI.rejectWithValue(checkErrorsBase(error));
             }
+            if (error.response.status === 409) {
+                return thunkAPI.rejectWithValue("Выбранная дата занята");
+            }
             if (error.response.status === 404) {
                 return thunkAPI.rejectWithValue("Бронь не найдена"); //TODO -
             }
@@ -158,6 +161,10 @@ export const updateReservation = createAsyncThunk(
             }
             if (error.response.status === 404) {
                 return thunkAPI.rejectWithValue("Бронь не найдена"); //TODO -
+            }
+
+            if (error.response.status === 409) {
+                return thunkAPI.rejectWithValue("Выбранная дата занята");
             }
 
             return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
@@ -203,6 +210,9 @@ export const createClientReservation = createAsyncThunk(
             }
             if (error.response.status === 404) {
                 return thunkAPI.rejectWithValue("Бронь не создана"); //TODO -
+            }
+            if (error.response.status === 409) {
+                return thunkAPI.rejectWithValue("Выбранная дата занята");
             }
 
             return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");

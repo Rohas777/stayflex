@@ -42,6 +42,7 @@ import { di } from "@fullcalendar/core/internal-common";
 import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
 import clsx from "clsx";
 import { errorToastSlice } from "@/stores/errorToastSlice";
+import { reservationStatus, reservationStatuses } from "@/vars";
 
 window.DateTime = DateTime;
 interface Response {
@@ -55,10 +56,12 @@ interface Response {
 }
 
 function Main() {
-    const [buttonModalInfo, setButtonModalInfo] = useState(false);
     const [buttonModalCreate, setButtonModalCreate] = useState(false);
-    const [rowAcionFocus, setRowAcionFocus] = useState<Response | null>(null);
     const [isLoaderOpen, setIsLoaderOpen] = useState(false);
+    const [statusSelector, setStatusSelector] =
+        useState<HTMLSelectElement | null>(null);
+    const [selectedStatus, setSelectedStatus] =
+        useState<reservationStatus>("new");
     const [confirmationModal, setConfirmationModal] = useState(false);
     const [confirmModalContent, setConfirmModalContent] = useState<{
         title: string | null;
@@ -227,14 +230,22 @@ function Main() {
                                     `<span class="text-green-500">Завершена</span>`
                                 );
                             }
+                            const prevStatus = response.status;
                             a.append(selector);
                             a.addEventListener("hover", function () {});
-                            selector.addEventListener("change", function () {
-                                const value = (this as HTMLSelectElement).value;
+                            selector.addEventListener("change", function (e) {
+                                e.preventDefault();
+                                const target = this as HTMLSelectElement;
+                                setStatusSelector(target);
+                                setSelectedStatus(
+                                    target.value as reservationStatus
+                                );
+
                                 onUpdateStatus({
                                     id: response.id!,
-                                    status: value,
+                                    status: target.value,
                                 });
+                                target.value = prevStatus!;
                             });
                             return a;
                         },
@@ -511,6 +522,9 @@ function Main() {
         }
     }, [statusAll, error, statusOne]);
     useEffect(() => {
+        if (statusSelector) {
+            statusSelector.value = selectedStatus;
+        }
         if (isCreated || isUpdated || isDeleted) {
             dispatch(fetchReservations());
             setButtonModalCreate(false);

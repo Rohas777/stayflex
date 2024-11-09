@@ -49,6 +49,7 @@ import {
 } from "@/vars";
 import { IObject } from "@/stores/models/IObject";
 import ValidationErrorNotification from "@/components/Custom/ValidationErrorNotification";
+import { IClient } from "@/stores/models/IClient";
 
 interface ReservationFormProps {
     onCreate: (reservation: ReservationCreateType) => void;
@@ -61,10 +62,8 @@ type CustomErrors = {
     object: string | null;
     start_date: string | null;
     end_date: string | null;
-    tel: string | null;
-    email: string | null;
-    name: string | null;
     date: string | null;
+    child_count: string | null;
 };
 
 function ReservationForm({
@@ -79,24 +78,14 @@ function ReservationForm({
         useState<reservationStatus>("new");
     const [startDate, setStartDate] = useState("");
     const [endDate, setEndDate] = useState("");
-    const [tel, setTel] = useState<string>("");
-    const [isTelChecking, setIsTelChecking] = useState(false);
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [formData, setFormData] = useState<FormData | null>(null);
+    const [client, setClient] = useState<IClient | null>(null);
     const [isCreate, setIsCreate] = useState(true);
 
     const reservationState = useAppSelector((state) => state.reservation);
     const objectsState = useAppSelector((state) => state.object);
     const clientsState = useAppSelector((state) => state.client);
-    const clientActions = clientSlice.actions;
 
     const dispatch = useAppDispatch();
-
-    const nameValidation = yup.string().required("'Имя' это обязательное поле");
-    const emailValidation = yup
-        .string()
-        .email("Введите корректный email")
-        .required("'Email' это обязательное поле");
 
     const [showValidationNotification, setShowValidationNotification] =
         useState(false);
@@ -105,11 +94,26 @@ function ReservationForm({
         object: null,
         start_date: null,
         end_date: null,
-        tel: null,
-        email: null,
-        name: null,
         date: null,
+        child_count: null,
     });
+
+    const childCountValidation = yup
+        .number()
+        .lessThan(
+            selectedObject ? selectedObject.child_places + 1 : -1,
+            ` ${
+                selectedObject
+                    ? "Максимальное количество детских спальных мест:" +
+                      selectedObject.adult_places
+                    : "Сначала выберите объект"
+            }`
+        )
+        .typeError("Количество спальных мест должно быть числовым значением")
+        .positive("Количество спальных мест не может быть отрицательным")
+        .integer("Количество спальных мест должно быть целым числом")
+        .moreThan(-1, "Минимальное количество детских спальных мест: 0")
+        .required("'Количество детских спальных мест' это обязательное поле");
 
     const vaildateWithoutYup = async (formData: FormData) => {
         const errors: CustomErrors = {
@@ -117,10 +121,8 @@ function ReservationForm({
             object: null,
             start_date: null,
             end_date: null,
-            tel: null,
-            email: null,
-            name: null,
             date: null,
+            child_count: null,
         };
         if (selectedObjectID === "-1") {
             errors.object = "Обязательно выберите объект";
@@ -143,17 +145,11 @@ function ReservationForm({
                 " " +
                 dayTitle(selectedObject?.min_ded!);
         }
-        if (!tel) {
-            errors.tel = "Обязательно введите телефон клиента";
-        }
-        if (!clientsState.isFound && clientsState.isFound !== null) {
-            await nameValidation.validate(formData.get("name")).catch((err) => {
-                errors.name = err.message;
-            });
-            await emailValidation
-                .validate(formData.get("email"))
+        if (!!selectedObject && selectedObject.child_places > 0) {
+            await childCountValidation
+                .validate(formData.get("child_count"))
                 .catch((err) => {
-                    errors.email = err.message;
+                    errors.child_count = err.message;
                 });
         }
 
@@ -174,6 +170,29 @@ function ReservationForm({
             letter: yup
                 .string()
                 .required("'Служебная информация' это обязательное поле"),
+
+            adult_count: yup
+                .number()
+                .lessThan(
+                    selectedObject ? selectedObject.adult_places + 1 : -1,
+                    ` ${
+                        selectedObject
+                            ? "Максимальное количество взрослых спальных мест:" +
+                              selectedObject.adult_places
+                            : "Сначала выберите объект"
+                    }`
+                )
+                .typeError(
+                    "Количество спальных мест должно быть числовым значением"
+                )
+                .positive(
+                    "Количество спальных мест не может быть отрицательным"
+                )
+                .integer("Количество спальных мест должно быть целым числом")
+                .moreThan(0, "Минимальное количество взрослых спальных мест: 1")
+                .required(
+                    "'Количество взрослых спальных мест' это обязательное поле"
+                ),
         })
         .required();
 
@@ -187,96 +206,56 @@ function ReservationForm({
     });
     const onSubmit = async (event: React.ChangeEvent<HTMLFormElement>) => {
         event.preventDefault();
-        setIsSubmitting(true);
         startLoader(setIsLoaderOpen);
 
-        const form = new FormData(event.target);
-        const customResult = await vaildateWithoutYup(form);
+        const formData = new FormData(event.target);
+        const customResult = await vaildateWithoutYup(formData);
         const result = await trigger();
         if (!result || !customResult.isValid) {
             setShowValidationNotification(true);
             stopLoader(setIsLoaderOpen);
             return;
         }
-        setFormData(form);
-
-        if (!clientsState.isFound) {
-            await dispatch(
-                createClient({
-                    fullname: String(form.get("name")),
-                    email: String(form.get("email")),
-                    phone: tel!,
-                    reiting: 0,
-                })
-            );
+        const reservationData: ReservationCreateType = {
+            start_date: formatDate(new Date(startDate)),
+            end_date: formatDate(new Date(endDate)),
+            object_id: Number(selectedObjectID),
+            client_id: client!.id,
+            description: String(formData?.get("description")),
+            letter: String(formData?.get("letter")),
+            status: selectedStatus,
+            guest_count:
+                Number(formData?.get("adult_count")) +
+                Number(formData?.get("child_count")), //FIXME -
+        };
+        console.log(reservationData);
+        if (isCreate) {
+            onCreate(reservationData);
+        } else {
+            onUpdate({
+                id: reservationState.reservationOne?.id!,
+                ...reservationData,
+            });
         }
     };
 
     useEffect(() => {
-        if (!formData || !isSubmitting) return;
-        if (clientsState.isCreated) {
-            const reservationData: ReservationCreateType = {
-                start_date: formatDate(new Date(startDate)),
-                end_date: formatDate(new Date(endDate)),
-                object_id: Number(selectedObjectID),
-                client_id: clientsState.createdClient?.id!,
-                description: String(formData?.get("description")),
-                letter: String(formData?.get("letter")),
-                status: selectedStatus,
-            };
-            if (isCreate) {
-                onCreate(reservationData);
-            } else {
-                onUpdate({
-                    id: reservationState.reservationOne?.id!,
-                    ...reservationData,
-                });
-            }
-            dispatch(clientActions.resetIsCreated());
-            setIsSubmitting(false);
-        }
-        if (clientsState.isFound) {
-            const reservationData: ReservationCreateType = {
-                start_date: formatDate(new Date(startDate)),
-                end_date: formatDate(new Date(endDate)),
-                object_id: Number(selectedObjectID),
-                client_id: clientsState.clientByPhone?.id!,
-                description: String(formData?.get("description")),
-                letter: String(formData?.get("letter")),
-                status: selectedStatus,
-            };
-            if (isCreate) {
-                onCreate(reservationData);
-            } else {
-                onUpdate({
-                    id: reservationState.reservationOne?.id!,
-                    ...reservationData,
-                });
-            }
-            dispatch(clientActions.resetIsCreated());
-            setIsSubmitting(false);
-        }
-    }, [clientsState.isFound, clientsState.isCreated, isSubmitting, formData]);
-
-    useEffect(() => {
         if (!reservationState.reservationOne) return;
         setIsCreate(false);
-        setIsTelChecking(true);
         setSelectedObjectID(String(reservationState.reservationOne.object.id));
         setStartDate(reservationState.reservationOne.start_date);
         setEndDate(reservationState.reservationOne.end_date);
         setSelectedStatus(reservationState.reservationOne.status);
-        setTel(reservationState.reservationOne.client.phone);
+        setClient({
+            ...reservationState.reservationOne.client,
+            reiting: 0,
+            reservation_count: 0,
+        });
         dispatch(
             fetchClientByPhone(reservationState.reservationOne.client.phone)
         );
     }, [reservationState.reservationOne]);
 
-    useEffect(() => {
-        if (clientsState.statusByPhone !== Status.LOADING) {
-            setIsTelChecking(false);
-        }
-    }, [clientsState.statusByPhone]);
     useEffect(() => {
         if (Number(selectedObjectID) <= 0) return;
         setSelectedObject(
@@ -510,176 +489,113 @@ function ReservationForm({
                             </div>
                         )}
                     </div>
-                    <div className="input-form mt-3">
-                        <FormLabel
-                            htmlFor="validation-form-tel"
-                            className="flex flex-col w-full sm:flex-row"
-                        >
-                            Номер телефона клиента
-                            <span className="mt-1 text-xs sm:ml-auto sm:mt-0 text-slate-500">
-                                Обязательное
-                            </span>
-                        </FormLabel>
-                        <div className="custom-phone-input relative">
-                            {clientsState.statusByPhone === Status.LOADING &&
-                                isTelChecking && <OpacityLoader />}
-                            <PhoneInput
-                                country="ru"
-                                localization={ru}
-                                value={tel}
-                                disabled={isTelChecking}
-                                onChange={(
-                                    value,
-                                    country,
-                                    e,
-                                    formattedValue
-                                ) => {
-                                    setTel(formattedValue);
-                                    setCustomErrors((prev) => ({
-                                        ...prev,
-                                        tel: null,
-                                    }));
-                                    const typedCountry = country as {
-                                        countryCode: string;
-                                        dialCode: string;
-                                        format: string;
-                                        name: string;
-                                    };
-                                    const maskLength = typedCountry.format
-                                        .split("")
-                                        .filter((char) => char === ".").length;
-                                    if (
-                                        maskLength > value.length &&
-                                        clientsState.statusByPhone !==
-                                            Status.LOADING
-                                    ) {
-                                        dispatch(
-                                            clientActions.resetClientByPhone()
-                                        );
-                                    }
-                                    if (maskLength === value.length) {
-                                        setIsTelChecking(true);
-                                        dispatch(
-                                            fetchClientByPhone(formattedValue)
-                                        );
-                                    }
-                                }}
-                                inputClass={clsx({
-                                    "border-danger-important": customErrors.tel,
-                                })}
-                                inputProps={{
-                                    id: "validation-form-tel",
-                                }}
-                                isValid={(value, country, formattedValue) => {
-                                    return true;
-                                }}
-                            />
-                        </div>
-                        {customErrors.tel && (
-                            <div className="mt-2 text-danger">
-                                {typeof customErrors.tel === "string" &&
-                                    customErrors.tel}
-                            </div>
-                        )}
-                    </div>
-
-                    {!clientsState.isFound && clientsState.isFound !== null && (
-                        <>
-                            <div className="input-form mt-3">
-                                <FormLabel
-                                    htmlFor="validation-form-email"
-                                    className="flex flex-col w-full sm:flex-row"
-                                >
-                                    Email
-                                    <span className="mt-1 text-xs sm:ml-auto sm:mt-0 text-slate-500">
-                                        Обязательное
-                                    </span>
-                                </FormLabel>
-                                <FormInput
-                                    id="validation-form-email"
-                                    type="text"
-                                    name="email"
-                                    onChange={() => {
-                                        setCustomErrors((prev) => ({
-                                            ...prev,
-                                            email: null,
-                                        }));
-                                    }}
-                                    className={clsx({
-                                        "border-danger": customErrors.email,
-                                    })}
-                                    placeholder="example@ex.com"
-                                />
-                                {customErrors.email && (
-                                    <div className="mt-2 text-danger">
-                                        {typeof customErrors.email ===
-                                            "string" && customErrors.email}
-                                    </div>
-                                )}
-                            </div>
-                            <div className="input-form mt-3">
-                                <FormLabel
-                                    htmlFor="validation-form-name"
-                                    className="flex flex-col w-full sm:flex-row"
-                                >
-                                    ФИО
-                                    <span className="mt-1 text-xs sm:ml-auto sm:mt-0 text-slate-500">
-                                        Обязательное
-                                    </span>
-                                </FormLabel>
-                                <FormInput
-                                    id="validation-form-name"
-                                    type="text"
-                                    name="name"
-                                    onChange={() => {
-                                        setCustomErrors((prev) => ({
-                                            ...prev,
-                                            name: null,
-                                        }));
-                                    }}
-                                    className={clsx({
-                                        "border-danger": customErrors.name,
-                                    })}
-                                    placeholder="Иванов И.И."
-                                />
-                                {customErrors.name && (
-                                    <div className="mt-2 text-danger">
-                                        {typeof customErrors.name ===
-                                            "string" && customErrors.name}
-                                    </div>
-                                )}
-                            </div>
-                        </>
-                    )}
                     {clientsState.isFound && (
                         <>
-                            <ul className="mt-3 ml-2">
+                            <FormLabel className="mt-3">Клиент</FormLabel>
+                            <ul className="ml-2">
+                                <li>
+                                    <strong className="inline-block w-20">
+                                        Телефон:
+                                    </strong>
+                                    {client?.phone}
+                                </li>
                                 <li className="mt-1">
                                     <strong className="inline-block w-20">
                                         Email:
                                     </strong>
-                                    {clientsState.clientByPhone?.email}
+                                    {client?.email}
                                 </li>
                                 <li className="mt-1">
                                     <strong className="inline-block w-20">
                                         ФИО:
                                     </strong>
-                                    {clientsState.clientByPhone?.fullname}
+                                    {client?.fullname}
                                 </li>
                                 <li className="mt-1">
                                     <strong className="inline-block w-20">
                                         Оценка:
                                     </strong>
-                                    {clientsState.clientByPhone?.reiting
-                                        ? "★".repeat(
-                                              clientsState.clientByPhone
-                                                  ?.reiting
-                                          )
+                                    {client?.reiting
+                                        ? "★".repeat(client?.reiting)
                                         : "Без оценки"}
                                 </li>
                             </ul>
                         </>
                     )}
+
+                    <div className="grid grid-cols-2 gap-4 mt-3">
+                        <div className="input-form col-span-1">
+                            <FormLabel
+                                htmlFor="validation-form-adult_count"
+                                className="flex flex-col w-full sm:flex-row"
+                            >
+                                Взрослых
+                                <span className="mt-1 text-xs sm:ml-auto sm:mt-0 text-slate-500">
+                                    Обязательное
+                                </span>
+                            </FormLabel>
+                            <FormInput
+                                {...register("adult_count")}
+                                id="validation-form-adult_count"
+                                type="number"
+                                name="adult_count"
+                                className={clsx({
+                                    "border-danger": errors.adult_count,
+                                })}
+                                placeholder="2"
+                            />
+                            {errors.adult_count && (
+                                <div className="mt-2 text-danger">
+                                    {typeof errors.adult_count.message ===
+                                        "string" && errors.adult_count.message}
+                                </div>
+                            )}
+                        </div>
+                        <div className="col-span-1 input-form">
+                            <FormLabel
+                                htmlFor="validation-form-child_count"
+                                className="flex flex-col w-full sm:flex-row"
+                            >
+                                Детей
+                                <span className="mt-1 text-xs sm:ml-auto sm:mt-0 text-slate-500">
+                                    Обязательное
+                                </span>
+                            </FormLabel>
+                            <FormInput
+                                id="validation-form-child_count"
+                                type="number"
+                                name="child_count"
+                                className={clsx({
+                                    "border-danger": customErrors.child_count,
+                                })}
+                                disabled={
+                                    selectedObject
+                                        ? selectedObject.child_places <= 0
+                                        : false
+                                }
+                                value={
+                                    selectedObject
+                                        ? selectedObject.child_places <= 0
+                                            ? 0
+                                            : undefined
+                                        : undefined
+                                }
+                                onChange={(e) => {
+                                    setCustomErrors({
+                                        ...customErrors,
+                                        child_count: null,
+                                    });
+                                }}
+                                placeholder="1"
+                            />
+                            {customErrors.child_count && (
+                                <div className="mt-2 text-danger">
+                                    {typeof customErrors.child_count ===
+                                        "string" && customErrors.child_count}
+                                </div>
+                            )}
+                        </div>
+                    </div>
                     <div className="input-form mt-3">
                         <FormLabel
                             htmlFor="validation-form-description"

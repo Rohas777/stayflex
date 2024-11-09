@@ -106,6 +106,14 @@ export const deleteServer = createAsyncThunk<string, string>(
             if (error.response.status === 404) {
                 return thunkAPI.rejectWithValue("Сервер не найден");
             }
+            if (
+                error.response.status === 409 &&
+                error.response.data.detail === "Server is default"
+            ) {
+                return thunkAPI.rejectWithValue(
+                    "Дефолтный сервер не может быть удален"
+                );
+            }
             if (error.response.status === 409) {
                 return thunkAPI.rejectWithValue(
                     "Сервер не может быть удален, так как к нему уже привязаны элементы системы"

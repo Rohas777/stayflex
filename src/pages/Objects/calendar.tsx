@@ -99,36 +99,6 @@ function ReservationsCalendar({
             setCurrentUnreservedData(null);
             setReservationModal(true);
         },
-        dateClick: (info) => {
-            const foundEvent = (
-                events as [
-                    {
-                        start: string;
-                        end: string;
-                        extendedProps: { reservation: IReservation };
-                    }
-                ]
-            ).find((event) => {
-                return !(
-                    info.dateStr < event.start || info.dateStr > event.end
-                );
-            });
-
-            if (foundEvent) {
-                setCurrentReservation(foundEvent.extendedProps.reservation);
-                setCurrentUnreservedData(null);
-            } else {
-                if (authorizedUser?.id !== objectOne?.author.id) return;
-                if (formatDate(info.date) < formatDate(new Date())) return;
-                setCurrentReservation(null);
-                setCurrentUnreservedData({
-                    start_date: info.dateStr,
-                    objectID: objectID,
-                });
-            }
-
-            setReservationModal(true);
-        },
     };
 
     const reservationEventType = (

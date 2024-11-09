@@ -113,18 +113,19 @@ function ReservationsCalendar({
                 );
             });
 
-            if (foundEvent) {
-                setCurrentReservation(foundEvent.extendedProps.reservation);
-                setCurrentUnreservedData(null);
-            } else {
-                if (authorizedUser?.id !== objectOne?.author.id) return;
-                if (formatDate(info.date) < formatDate(new Date())) return;
-                setCurrentReservation(null);
-                setCurrentUnreservedData({
-                    start_date: info.dateStr,
-                    objectID: objectID,
-                });
-            }
+            if (
+                foundEvent &&
+                foundEvent.extendedProps.reservation.status === "approved"
+            )
+                return;
+
+            if (authorizedUser?.id !== objectOne?.author.id) return;
+            if (formatDate(info.date) < formatDate(new Date())) return;
+            setCurrentReservation(null);
+            setCurrentUnreservedData({
+                start_date: info.dateStr,
+                objectID: objectID,
+            });
 
             setReservationModal(true);
         },
