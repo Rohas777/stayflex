@@ -22,6 +22,19 @@ export interface ReservationCreateType {
     letter: string;
     status: reservationStatus;
 }
+export interface ReservationClientCreateType {
+    client_data: {
+        fullname: string;
+        phone: string;
+        email: string;
+    };
+    reservation_data: {
+        start_date: string;
+        end_date: string;
+        object_id: number;
+        description: string;
+    };
+}
 export interface ReservationUpdateType extends ReservationCreateType {
     id: number;
 }

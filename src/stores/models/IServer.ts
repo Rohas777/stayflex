@@ -3,4 +3,5 @@ export interface IServer {
     name: string;
     default: boolean;
     container_name: string;
+    link: string;
 }

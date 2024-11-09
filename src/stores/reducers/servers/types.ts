@@ -15,6 +15,7 @@ export interface ServerState {
 export interface ServerCreateType {
     name: string;
     container_name: string;
+    link: string;
 }
 
 export interface ServerUpdateType extends ServerCreateType {

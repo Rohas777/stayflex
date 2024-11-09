@@ -368,7 +368,7 @@ function Main() {
                 id: region.id,
                 name: region.name,
                 objects: region.object_count,
-                server: "Stayflex",
+                server: region.servers.name,
                 city_count: region.cities.length,
             }));
             tabulator.current

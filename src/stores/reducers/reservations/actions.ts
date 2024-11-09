@@ -1,6 +1,10 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { instance } from "@/vars";
-import { ReservationCreateType, ReservationUpdateType } from "./types";
+import {
+    ReservationClientCreateType,
+    ReservationCreateType,
+    ReservationUpdateType,
+} from "./types";
 import { checkErrorsBase } from "@/utils/customUtils";
 
 export const fetchReservations = createAsyncThunk(
@@ -172,6 +176,33 @@ export const deleteReservation = createAsyncThunk<string, string>(
             }
             if (error.response.status === 404) {
                 return thunkAPI.rejectWithValue("Бронь не найдена"); //TODO -
+            }
+
+            return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
+        }
+    }
+);
+
+export const createClientReservation = createAsyncThunk(
+    "/reservation/client-create",
+    async (reservationData: ReservationClientCreateType, thunkAPI) => {
+        try {
+            const response = await instance.post(
+                `/reservation/create/client`,
+                reservationData,
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
+            return response.data;
+        } catch (error: any) {
+            if (!!checkErrorsBase(error)) {
+                return thunkAPI.rejectWithValue(checkErrorsBase(error));
+            }
+            if (error.response.status === 404) {
+                return thunkAPI.rejectWithValue("Бронь не создана"); //TODO -
             }
 
             return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");

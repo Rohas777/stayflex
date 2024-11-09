@@ -24,6 +24,10 @@ interface RegionFormProps {
     isLoaderOpened: boolean;
 }
 
+type CustomErrors = {
+    isValid: boolean;
+    server: string | null;
+};
 function RegionForm({
     onCreate,
     setIsLoaderOpened,
@@ -36,7 +40,29 @@ function RegionForm({
     const { servers, status, error } = useAppSelector((state) => state.server);
 
     const dispatch = useAppDispatch();
+    const [customErrors, setCustomErrors] = useState<CustomErrors>({
+        isValid: true,
+        server: null,
+    });
 
+    const vaildateWithoutYup = async () => {
+        const errors: CustomErrors = {
+            isValid: true,
+            server: null,
+        };
+        if (select === "-1") {
+            errors.server = "Обязательно выберите сервер";
+        }
+
+        Object.keys(errors).forEach((key) => {
+            if (errors[key as keyof CustomErrors] && key != "isValid") {
+                errors.isValid = false;
+                return;
+            }
+        });
+        setCustomErrors(errors);
+        return errors;
+    };
     const schema = yup
         .object({
             name: yup.string().required("'Название' это обязательное поле"),
@@ -54,10 +80,10 @@ function RegionForm({
     const onSubmit = async (event: React.ChangeEvent<HTMLFormElement>) => {
         event.preventDefault();
         const result = await trigger();
+        const customResult = await vaildateWithoutYup();
         startLoader(setIsLoaderOpened);
-        if (!result) {
-            const [showValidationNotification, setShowValidationNotification] =
-                useState(false);
+        if (!result || !customResult.isValid) {
+            setShowValidationNotification(true);
             stopLoader(setIsLoaderOpened);
             return;
         }
@@ -65,6 +91,7 @@ function RegionForm({
         const formData = new FormData(event.target);
         const region: RegionCreateType = {
             name: String(formData.get("name")),
+            server_id: Number(select),
         };
         onCreate(region);
     };
@@ -126,25 +153,36 @@ function RegionForm({
                                 Обязательное
                             </span>
                         </FormLabel>
-                        <TomSelect
-                            id="validation-form-server"
-                            value={select}
-                            name="server"
-                            onChange={(e) => {
-                                setSelect(e.target.value);
-                            }}
-                            options={{
-                                controlInput: undefined,
-                                searchField: undefined,
-                            }}
-                            className="w-full"
+                        <div
+                            className={clsx("border rounded-md", {
+                                "border-danger": customErrors.server,
+                            })}
                         >
-                            {servers.map((server) => (
-                                <option key={server.id} value={server.id}>
-                                    {server.name}
-                                </option>
-                            ))}
-                        </TomSelect>
+                            <TomSelect
+                                id="validation-form-server"
+                                value={select}
+                                name="server"
+                                onChange={(e) => {
+                                    setSelect(e.target.value);
+                                }}
+                                options={{
+                                    controlInput: undefined,
+                                    searchField: undefined,
+                                }}
+                                className="w-full"
+                            >
+                                {servers.map((server) => (
+                                    <option key={server.id} value={server.id}>
+                                        {server.name}
+                                    </option>
+                                ))}
+                            </TomSelect>
+                        </div>
+                        {customErrors.server && (
+                            <div className="mt-2 text-danger">
+                                {customErrors.server}
+                            </div>
+                        )}
                     </div>
                     <Button
                         type="submit"

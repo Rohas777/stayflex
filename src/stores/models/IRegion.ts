@@ -8,4 +8,8 @@ export interface IRegion {
         id: number;
         name: string;
     }[];
+    servers: {
+        id: number;
+        name: string;
+    };
 }

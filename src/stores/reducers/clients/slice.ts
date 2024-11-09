@@ -7,6 +7,7 @@ import {
     fetchClientByID,
     fetchClientByPhone,
     fetchClients,
+    saveClient,
 } from "./actions";
 import { error } from "console";
 
@@ -124,6 +125,19 @@ export const clientSlice = createSlice({
                 state.createdClient = null;
             })
             .addCase(createClient.rejected, (state) => {
+                state.isCreated = false;
+                state.createdClient = null;
+            });
+        builder
+            .addCase(saveClient.fulfilled, (state, action) => {
+                state.isCreated = true;
+                state.createdClient = action.payload;
+            })
+            .addCase(saveClient.pending, (state) => {
+                state.isCreated = false;
+                state.createdClient = null;
+            })
+            .addCase(saveClient.rejected, (state) => {
                 state.isCreated = false;
                 state.createdClient = null;
             });

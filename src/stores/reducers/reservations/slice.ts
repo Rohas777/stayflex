@@ -10,6 +10,7 @@ import {
     updateReservationStatus,
     fetchReservationsByObject,
     deleteReservation,
+    createClientReservation,
 } from "./actions";
 
 const initialState: ReservationState = {
@@ -199,6 +200,25 @@ export const reservationSlice = createSlice({
                 deleteReservation.rejected,
                 (state, action: PayloadAction<any>) => {
                     state.isDeleted = false;
+                    state.statusAll = Status.ERROR;
+                    state.error = action.payload;
+                }
+            );
+        builder
+            .addCase(createClientReservation.fulfilled, (state, action) => {
+                state.statusAll = Status.SUCCESS;
+                state.error = null;
+                state.isCreated = true;
+            })
+            .addCase(createClientReservation.pending, (state) => {
+                state.statusAll = Status.LOADING;
+                state.isCreated = false;
+                state.error = null;
+            })
+            .addCase(
+                createClientReservation.rejected,
+                (state, action: PayloadAction<any>) => {
+                    state.isCreated = false;
                     state.statusAll = Status.ERROR;
                     state.error = action.payload;
                 }

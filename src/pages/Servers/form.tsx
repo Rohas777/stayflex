@@ -32,6 +32,9 @@ function ServerForm({
             container_name: yup
                 .string()
                 .required("'Имя контейнера' это обязательное поле"),
+            container_url: yup
+                .string()
+                .required("'Ссылка контейнера' это обязательное поле"),
         })
         .required();
 
@@ -57,6 +60,7 @@ function ServerForm({
         const server: ServerCreateType = {
             name: String(formData.get("name")),
             container_name: String(formData.get("container_name")),
+            link: String(formData.get("container_url")),
         };
         onCreate(server);
     };
@@ -120,6 +124,33 @@ function ServerForm({
                             <div className="mt-2 text-danger">
                                 {typeof errors.container_name.message ===
                                     "string" && errors.container_name.message}
+                            </div>
+                        )}
+                    </div>
+                    <div className="input-form mt-3">
+                        <FormLabel
+                            htmlFor="validation-form-3"
+                            className="flex flex-col w-full sm:flex-row"
+                        >
+                            Ссылка контейнера
+                            <span className="mt-1 text-xs sm:ml-auto sm:mt-0 text-slate-500">
+                                Обязательное
+                            </span>
+                        </FormLabel>
+                        <FormInput
+                            {...register("container_url")}
+                            id="validation-form-3"
+                            type="text"
+                            name="container_url"
+                            className={clsx({
+                                "border-danger": errors.container_url,
+                            })}
+                            placeholder="https://stayflex.container.uri"
+                        />
+                        {errors.container_url && (
+                            <div className="mt-2 text-danger">
+                                {typeof errors.container_url.message ===
+                                    "string" && errors.container_url.message}
                             </div>
                         )}
                     </div>

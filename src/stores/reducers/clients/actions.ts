@@ -105,3 +105,21 @@ export const deleteClient = createAsyncThunk<string, string>(
         }
     }
 );
+export const saveClient = createAsyncThunk(
+    "client/save",
+    async (id: number, thunkAPI) => {
+        try {
+            const response = await instance.put(`/client/save/${id}`);
+            return response.data;
+        } catch (error: any) {
+            if (!!checkErrorsBase(error)) {
+                return thunkAPI.rejectWithValue(checkErrorsBase(error));
+            }
+            if (error.response.status === 404) {
+                return thunkAPI.rejectWithValue("Пользователь не найден");
+            }
+
+            return thunkAPI.rejectWithValue("Внутренняя ошибка сервера");
+        }
+    }
+);

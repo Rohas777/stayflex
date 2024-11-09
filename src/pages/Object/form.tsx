@@ -16,7 +16,10 @@ import {
 } from "@/components/Base/Form";
 import { useEffect, useRef, useState } from "react";
 import TomSelect from "@/components/Base/TomSelect";
-import { ReservationCreateType } from "@/stores/reducers/reservations/types";
+import {
+    ReservationClientCreateType,
+    ReservationCreateType,
+} from "@/stores/reducers/reservations/types";
 import { useAppDispatch, useAppSelector } from "@/stores/hooks";
 import { clientSlice } from "@/stores/reducers/clients/slice";
 import { Status } from "@/stores/reducers/types";
@@ -38,8 +41,7 @@ import { IObject } from "@/stores/models/IObject";
 import ValidationErrorNotification from "@/components/Custom/ValidationErrorNotification";
 
 interface ReservationFormProps {
-    // onCreate: (reservation: ReservationCreateType) => void; //FIXME -
-    onCreate: () => void;
+    onCreate: (reservation: ReservationClientCreateType) => void;
     setIsLoaderOpen: React.Dispatch<React.SetStateAction<boolean>>;
     isLoaderOpen: boolean;
     object: IObject;
@@ -63,7 +65,6 @@ function ReservationForm({
     const [startDate, setStartDate] = useState("");
     const [endDate, setEndDate] = useState("");
     const [tel, setTel] = useState<string>("");
-    const [formData, setFormData] = useState<FormData | null>(null);
     const [selectedDays, setSelectedDays] = useState<number>(1);
     const [isTermsChecked, setIsTermsChecked] = useState<boolean>(false);
 
@@ -190,29 +191,30 @@ function ReservationForm({
         event.preventDefault();
         startLoader(setIsLoaderOpen);
 
-        const form = new FormData(event.target);
-        const customResult = await vaildateWithoutYup(form);
+        const formData = new FormData(event.target);
+        const customResult = await vaildateWithoutYup(formData);
         const result = await trigger();
         if (!result || !customResult.isValid) {
             setShowValidationNotification(true);
             stopLoader(setIsLoaderOpen);
             return;
         }
-        setFormData(form);
         const reservationData = {
-            start_date: formatDate(new Date(startDate)),
-            end_date: formatDate(new Date(endDate)),
-            object_id: object.id,
-            tel: tel,
-            name: String(formData?.get("name")),
-            email: String(formData?.get("email")),
-            adult_count: Number(formData?.get("adult_count")),
-            child_count: Number(formData?.get("child_count")),
-            description: String(formData?.get("description")),
-            status: "new", //FIXME -
+            client_data: {
+                fullname: String(formData.get("name")),
+                phone: tel,
+                email: String(formData.get("email")),
+            },
+            reservation_data: {
+                // adult_count: Number(formData.get("adult_count")), //FIXME -
+                // child_count: Number(formData.get("child_count")), //FIXME -
+                start_date: formatDate(new Date(startDate)),
+                end_date: formatDate(new Date(endDate)),
+                object_id: object.id,
+                description: String(formData.get("description")),
+            },
         };
-        onCreate();
-        dispatch(clientActions.resetIsCreated());
+        onCreate(reservationData);
     };
 
     useEffect(() => {
@@ -399,7 +401,12 @@ function ReservationForm({
                                 country="ru"
                                 localization={ru}
                                 value={tel}
-                                onChange={(formattedValue) => {
+                                onChange={(
+                                    value,
+                                    country,
+                                    e,
+                                    formattedValue
+                                ) => {
                                     setTel(formattedValue);
                                     setCustomErrors((prev) => ({
                                         ...prev,

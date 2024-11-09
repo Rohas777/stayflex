@@ -15,6 +15,8 @@ import Toastify from "toastify-js";
 import { reservationSlice } from "@/stores/reducers/reservations/slice";
 import Notification from "@/components/Base/Notification";
 import Icon from "@/components/Custom/Icon";
+import { ReservationClientCreateType } from "@/stores/reducers/reservations/types";
+import { createClientReservation } from "@/stores/reducers/reservations/actions";
 
 function Main() {
     const [reservationModal, setReservationModal] = useState(false);
@@ -33,28 +35,26 @@ function Main() {
         );
     }, []);
 
-    const onCreate = async () => {
-        stopLoader(setIsLoaderOpen);
-        const successEl = document
-            .querySelectorAll("#success-notification-content")[0]
-            .cloneNode(true) as HTMLElement;
-        successEl.querySelector(".text-content")!.textContent =
-            "Функционал в разработке";
-        successEl.classList.remove("hidden");
-        Toastify({
-            node: successEl,
-            duration: 3000,
-            newWindow: true,
-            close: true,
-            gravity: "top",
-            position: "right",
-            stopOnFocus: true,
-        }).showToast();
-        //FIXME -
+    const onCreate = async (reservationData: ReservationClientCreateType) => {
+        await dispatch(createClientReservation(reservationData));
     };
     const { setErrorToast } = errorToastSlice.actions;
 
     useEffect(() => {
+        if (
+            reservationState.statusAll === Status.ERROR &&
+            reservationState.error
+        ) {
+            dispatch(
+                setErrorToast({
+                    message: reservationState.error,
+                    isError: true,
+                })
+            );
+            stopLoader(setIsLoaderOpen);
+
+            dispatch(reservationActions.resetStatusOne());
+        }
         if (
             reservationState.statusOne === Status.ERROR &&
             reservationState.error
@@ -320,9 +320,7 @@ function Main() {
                 id="success-notification-content"
                 className="flex hidden"
             >
-                {/* //FIXME -  */}
-                <Icon icon="Wrench" className="text-pending" />
-                {/* //FIXME -  */}
+                <Icon icon="CheckCircle" className="text-success" />
                 <div className="ml-4 mr-4">
                     <div className="font-medium text-content"></div>
                 </div>

@@ -11,4 +11,5 @@ export interface RegionState {
 
 export interface RegionCreateType {
     name: string;
+    server_id: number;
 }

@@ -14,7 +14,12 @@ import { deleteUser, fetchUsers } from "@/stores/reducers/users/actions";
 import tippy from "tippy.js";
 import { Link, useNavigate } from "react-router-dom";
 import { clientSlice } from "@/stores/reducers/clients/slice";
-import { deleteClient, fetchClients } from "@/stores/reducers/clients/actions";
+import {
+    createClient,
+    deleteClient,
+    fetchClients,
+    saveClient,
+} from "@/stores/reducers/clients/actions";
 import { Status } from "@/stores/reducers/types";
 import LoadingIcon from "@/components/Base/LoadingIcon";
 import { ListPlus } from "lucide-react";
@@ -24,6 +29,9 @@ import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
 import clsx from "clsx";
 import Toastify from "toastify-js";
 import Notification from "@/components/Base/Notification";
+import Icon from "@/components/Custom/Icon";
+import ClientForm from "./form";
+import { ClientCreateType } from "@/stores/reducers/clients/types";
 
 window.DateTime = DateTime;
 interface Response {
@@ -37,6 +45,7 @@ interface Response {
 
 function Main() {
     const [isLoaderOpen, setIsLoaderOpen] = useState(false);
+    const [createModal, setCreateModal] = useState(false);
     const [confirmationModalPreview, setConfirmationModalPreview] =
         useState(false);
     const [confirmModalContent, setConfirmModalContent] = useState<{
@@ -423,7 +432,14 @@ function Main() {
         await dispatch(deleteClient(String(id)));
     };
 
-    const { clients, status, error, isDeleted } = useAppSelector(
+    const onCreate = async (clientData: ClientCreateType) => {
+        await dispatch(createClient(clientData));
+    };
+    const onSave = async (client_id: number) => {
+        await dispatch(saveClient(client_id));
+    };
+
+    const { clients, status, error, isDeleted, isCreated } = useAppSelector(
         (state) => state.client
     );
     const clientActions = clientSlice.actions;
@@ -439,14 +455,16 @@ function Main() {
     }, [status, error]);
 
     useEffect(() => {
-        if (isDeleted) {
+        if (isDeleted || isCreated) {
             dispatch(fetchClients());
             setConfirmationModalPreview(false);
+            setCreateModal(false);
             const successEl = document
                 .querySelectorAll("#success-notification-content")[0]
                 .cloneNode(true) as HTMLElement;
-            successEl.querySelector(".text-content")!.textContent =
-                "Пользователь успешно удалён";
+            successEl.querySelector(".text-content")!.textContent = isCreated
+                ? "Пользователь успешно создан"
+                : "Пользователь успешно удалён";
             successEl.classList.remove("hidden");
             Toastify({
                 node: successEl,
@@ -458,9 +476,11 @@ function Main() {
                 stopOnFocus: true,
             }).showToast();
             dispatch(clientActions.resetIsDeleted());
+            dispatch(clientActions.resetIsCreated());
+            dispatch(clientActions.resetClientByPhone());
             stopLoader(setIsLoaderOpen);
         }
-    }, [isDeleted, status]);
+    }, [isDeleted, isCreated, status]);
 
     useEffect(() => {
         initTabulator();
@@ -488,17 +508,19 @@ function Main() {
         <>
             <div className="flex flex-col items-center mt-8 intro-y sm:flex-row">
                 <h2 className="mr-auto text-lg font-medium">Клиенты</h2>
+
+                <Button
+                    onClick={() => setCreateModal(true)}
+                    variant="primary"
+                    className="mr-2 shadow-md"
+                >
+                    <ListPlus className="size-5 mr-2" />
+                    Добавить
+                </Button>
             </div>
             {/* BEGIN: HTML Table Data */}
             <div className="p-5 mt-5 intro-y box">
-                {status === Status.LOADING && (
-                    <div className="absolute z-50 bg-slate-50 bg-opacity-70 flex justify-center items-center w-full h-full">
-                        <div className="w-10 h-10">
-                            <LoadingIcon icon="ball-triangle" />
-                        </div>
-                    </div>
-                )}
-
+                {status === Status.LOADING && <OverlayLoader />}
                 <div className="flex flex-col sm:flex-row sm:items-end xl:items-start">
                     <form
                         id="tabulator-html-filter-form"
@@ -667,6 +689,34 @@ function Main() {
                 </Dialog.Panel>
             </Dialog>
             {/* END: Confirmation Modal */}
+            <Dialog
+                id="form-modal"
+                open={createModal}
+                onClose={() => {
+                    setCreateModal(false);
+                    dispatch(clientActions.resetClientByPhone());
+                }}
+            >
+                <Dialog.Panel>
+                    <a
+                        onClick={(event: React.MouseEvent) => {
+                            event.preventDefault();
+                            setCreateModal(false);
+                            dispatch(clientActions.resetClientByPhone());
+                        }}
+                        className="absolute top-0 right-0 mt-3 mr-3"
+                        href="#"
+                    >
+                        <Icon icon="X" className="w-8 h-8 text-slate-400" />
+                    </a>
+                    <ClientForm
+                        onCreate={onCreate}
+                        onSave={onSave}
+                        setIsLoaderOpen={setIsLoaderOpen}
+                        isLoaderOpen={isLoaderOpen}
+                    />
+                </Dialog.Panel>
+            </Dialog>
             {/* BEGIN: Success Notification Content */}
             <Notification
                 id="success-notification-content"
