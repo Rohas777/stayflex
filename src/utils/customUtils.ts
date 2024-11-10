@@ -148,6 +148,7 @@ export const validateStartDaterange = (startDate: string, endDate: string) => {
             error: error,
         };
     }
+
     return {
         isValid: true,
         error: null,

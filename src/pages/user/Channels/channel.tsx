@@ -1,4 +1,4 @@
-import AccordionWithSwitcher from "../../components/Base/AccordionWithSwitcher";
+import AccordionWithSwitcher from "../../../components/Base/AccordionWithSwitcher";
 import clsx from "clsx";
 import Button from "@/components/Base/Button";
 import * as yup from "yup";

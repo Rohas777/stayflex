@@ -23,6 +23,7 @@ import ReservationForm from "./form";
 import Lucide from "@/components/Base/Lucide";
 import { IReservation } from "@/stores/models/IReservation";
 import Notification from "@/components/Base/Notification";
+import { fetchObjectById } from "@/stores/reducers/objects/actions";
 
 interface ReservationsCalendarProps {
     isLoaderOpen: boolean;
@@ -172,6 +173,7 @@ function ReservationsCalendar({
                 onClose={() => {
                     setReservationModal(false);
                     dispatch(clientActions.resetClientByPhone());
+                    dispatch(fetchObjectById(objectID));
                 }}
             >
                 <Dialog.Panel>
@@ -180,6 +182,7 @@ function ReservationsCalendar({
                             event.preventDefault();
                             setReservationModal(false);
                             dispatch(clientActions.resetClientByPhone());
+                            dispatch(fetchObjectById(objectID));
                         }}
                         className="absolute top-0 right-0 mt-3 mr-3"
                         href="#"

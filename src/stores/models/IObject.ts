@@ -37,4 +37,9 @@ export interface IObject {
         name: string;
         icon: string;
     }[];
+    approve_reservation?: {
+        id: number;
+        start_date: string;
+        end_date: string;
+    }[];
 }

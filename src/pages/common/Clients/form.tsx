@@ -23,10 +23,7 @@ import {
 import { useAppDispatch, useAppSelector } from "@/stores/hooks";
 import { clientSlice } from "@/stores/reducers/clients/slice";
 import { Status } from "@/stores/reducers/types";
-import Litepicker, { LitepickerElement } from "@/components/Base/Litepicker";
-import Lucide from "@/components/Base/Lucide";
 import PhoneInput from "react-phone-input-2";
-import Loader from "@/components/Custom/Loader/Loader";
 import {
     dayTitle,
     formatDate,

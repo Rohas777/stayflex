@@ -4,64 +4,69 @@ import { Dialog, Menu } from "@/components/Base/Headless";
 import Button from "@/components/Base/Button";
 import { FormInput, FormSelect } from "@/components/Base/Form";
 import * as xlsx from "xlsx";
-import { useEffect, useRef, createRef, useState, ChangeEvent } from "react";
+import { useEffect, useRef, createRef, useState } from "react";
 import { createIcons, icons } from "lucide";
 import { TabulatorFull as Tabulator } from "tabulator-tables";
 import { stringToHTML } from "@/utils/helper";
 import { DateTime } from "luxon";
 import { useAppDispatch, useAppSelector } from "@/stores/hooks";
-import { deleteUser, fetchUserById } from "@/stores/reducers/users/actions";
 import tippy from "tippy.js";
-import { Link, useNavigate } from "react-router-dom";
-import { Status } from "@/stores/reducers/types";
-import LoadingIcon from "@/components/Base/LoadingIcon";
-import { ListPlus } from "lucide-react";
-import {
-    deleteObject,
-    fetchObjects,
-    fetchObjectsByUser,
-    updateObiectIsActive,
-} from "@/stores/reducers/objects/actions";
-import { objectSlice } from "@/stores/reducers/objects/slice";
-import clsx from "clsx";
-import Toastify from "toastify-js";
-import { startLoader, stopLoader } from "@/utils/customUtils";
-import Notification from "@/components/Base/Notification";
-import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
-import Calendar from "@/components/Calendar";
-import ReservationsCalendar from "./calendar";
+import { Link } from "react-router-dom";
 import { reservationSlice } from "@/stores/reducers/reservations/slice";
 import {
     createReservation,
     deleteReservation,
-    fetchReservationsByObject,
+    fetchReservationById,
+    fetchReservations,
     updateReservation,
+    updateReservationStatus,
 } from "@/stores/reducers/reservations/actions";
+import { Status } from "@/stores/reducers/types";
+import LoadingIcon from "@/components/Base/LoadingIcon";
+import { ListPlus } from "lucide-react";
+import {
+    convertDateString,
+    startLoader,
+    stopLoader,
+} from "@/utils/customUtils";
+import ReservationForm from "./form";
 import {
     ReservationCreateType,
     ReservationUpdateType,
 } from "@/stores/reducers/reservations/types";
+import Toastify from "toastify-js";
+import Notification from "@/components/Base/Notification";
+import {
+    fetchObjectById,
+    fetchObjects,
+} from "@/stores/reducers/objects/actions";
 import { clientSlice } from "@/stores/reducers/clients/slice";
+import { di } from "@fullcalendar/core/internal-common";
+import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
+import clsx from "clsx";
 import { errorToastSlice } from "@/stores/errorToastSlice";
-import { userSlice } from "@/stores/reducers/users/slice";
+import { reservationStatus, reservationStatuses } from "@/vars";
+import { objectSlice } from "@/stores/reducers/objects/slice";
 
 window.DateTime = DateTime;
 interface Response {
     id?: number;
+    object?: { name: string; id: number };
+    date?: string;
     name?: string;
-    owner?: string;
-    active?: boolean;
-    type?: string;
+    status?: string;
+    phone?: string;
+    email?: string;
 }
 
 function Main() {
-    const [confirmationModal, setConfirmationModal] = useState(false);
-    const [reservationModal, setReservationModal] = useState(false);
-    const [calendarModal, setCalendarModal] = useState(false);
+    const [buttonModalCreate, setButtonModalCreate] = useState(false);
     const [isLoaderOpen, setIsLoaderOpen] = useState(false);
-    const [currentObjectID, setCurrentObjectID] = useState<number | null>(null);
-    const [switcherIsActive, setSwitcherIsActive] =
-        useState<HTMLInputElement | null>(null);
+    const [statusSelector, setStatusSelector] =
+        useState<HTMLSelectElement | null>(null);
+    const [selectedStatus, setSelectedStatus] =
+        useState<reservationStatus>("new");
+    const [confirmationModal, setConfirmationModal] = useState(false);
     const [confirmModalContent, setConfirmModalContent] = useState<{
         title: string | null;
         description: string | null;
@@ -78,8 +83,6 @@ function Main() {
         is_danger: true,
     });
 
-    const navigate = useNavigate();
-
     const tableRef = createRef<HTMLDivElement>();
     const tabulator = useRef<Tabulator>();
     const [filter, setFilter] = useState({
@@ -88,7 +91,6 @@ function Main() {
         value: "",
     });
 
-    const { authorizedUser } = useAppSelector((state) => state.user);
     const [tableData, setTableData] = useState<Response[]>([]);
 
     const initTabulator = () => {
@@ -99,8 +101,6 @@ function Main() {
                 paginationMode: "local",
                 filterMode: "local",
                 sortMode: "local",
-                printAsHtml: true,
-                printStyled: true,
                 pagination: true,
                 paginationSize: 10,
                 paginationSizeSelector: [10, 20, 50, 100],
@@ -137,65 +137,148 @@ function Main() {
                         },
                     },
                     {
-                        title: "Название",
+                        title: "Объект",
                         minWidth: 200,
                         responsive: 0,
-                        field: "name",
+                        field: "object",
+                        headerHozAlign: "center",
                         vertAlign: "middle",
                         print: false,
                         download: false,
                         sorter: "string",
                         formatter(cell) {
                             const response: Response = cell.getData();
-                            return `<a href="/object/${response.id}" target="_blank" class="absolute inset-0 h-full items-center justify-between flex w-full font-medium whitespace-nowrap hover:text-primary">${response.name}<i data-lucide="external-link" class="size-4"></i></a>`;
+                            return `<div>
+                                        <div class="font-medium whitespace-nowrap">${response.object?.name}</div>
+                                    </div>`;
                         },
                     },
                     {
-                        title: "Тип",
+                        title: "Дата",
                         minWidth: 200,
-                        field: "type",
+                        field: "date",
                         hozAlign: "center",
                         headerHozAlign: "center",
                         vertAlign: "middle",
                         print: false,
                         download: false,
-                        sorter: "number",
+                        sorter: "string",
                         formatter(cell) {
                             const response: Response = cell.getData();
-                            return `<div class="flex lg:justify-center">
-                                        <div class="font-medium whitespace-nowrap">${response.type}</div>
+                            return `<div>
+                                        <div class="font-medium whitespace-nowrap">${response.date}</div>
                                     </div>`;
                         },
                     },
                     {
+                        title: "Имя",
+                        minWidth: 200,
+                        field: "name",
+                        hozAlign: "center",
+                        headerHozAlign: "center",
+                        vertAlign: "middle",
+                        print: false,
+                        download: false,
+                        sorter: "string",
+                        formatter(cell) {
+                            const response: Response = cell.getData();
+                            return `<div>
+                                        <div class="font-medium whitespace-nowrap">${response.name}</div>
+                                    </div>`;
+                        },
+                    },
+                    {
+                        title: "Статус",
+                        minWidth: 200,
+                        field: "status",
+                        hozAlign: "center",
+                        headerHozAlign: "center",
+                        vertAlign: "middle",
+                        print: false,
+                        download: false,
+                        sorter: "string",
+                        formatter(cell) {
+                            const response: Response = cell.getData();
+                            const a = stringToHTML(
+                                `<div class="flex lg:justify-center items-center"></div>`
+                            );
+                            const statuses = [
+                                {
+                                    value: "new",
+                                    label: "Новая",
+                                },
+                                {
+                                    value: "approved",
+                                    label: "Одобрена",
+                                },
+                                {
+                                    value: "rejected",
+                                    label: "Отклонена",
+                                },
+                            ];
+
+                            const options = statuses.map((status) => {
+                                return `<option value="${status.value}" ${
+                                    response.status === status.value
+                                        ? "selected"
+                                        : ""
+                                }>${status.label}</option>`;
+                            });
+
+                            let selector =
+                                stringToHTML(`<select class="min-w-40 cursor-pointer bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                    ${options.join("")}
+                                    </select>`);
+                            if (response.status === "completed") {
+                                selector = stringToHTML(
+                                    `<span class="text-green-500">Завершена</span>`
+                                );
+                            }
+                            const prevStatus = response.status;
+                            a.append(selector);
+                            a.addEventListener("hover", function () {});
+                            selector.addEventListener("change", function (e) {
+                                e.preventDefault();
+                                const target = this as HTMLSelectElement;
+                                setStatusSelector(target);
+                                setSelectedStatus(
+                                    target.value as reservationStatus
+                                );
+
+                                onUpdateStatus({
+                                    id: response.id!,
+                                    status: target.value,
+                                });
+                                target.value = prevStatus!;
+                            });
+                            return a;
+                        },
+                    },
+                    {
+                        minWidth: 50,
+                        maxWidth: 150,
                         title: "Действия",
-                        minWidth: 30,
                         field: "id",
                         responsive: 1,
                         hozAlign: "right",
                         headerHozAlign: "right",
                         resizable: false,
                         headerSort: false,
-                        vertAlign: "middle",
                         formatter(cell) {
                             const response: Response = cell.getData();
                             const a = stringToHTML(
-                                `<div class="flex lg:justify-center items-center"></div>`
+                                `<div class="flex justify-end h-full items-center"></div>`
                             );
-                            const dateA =
-                                stringToHTML(`<a class="flex items-center mr-3 w-7 h-7 p-1 border border-black rounded-md hover:opacity-70" href="javascript:;">
-                                <i data-lucide="calendar"></i>
+                            const deleteA =
+                                stringToHTML(`<a class="flex items-center text-danger w-7 h-7 p-1 border border-danger rounded-md hover:opacity-70" href="javascript:;">
+                                <i data-lucide="trash-2"></i>
                               </a>`);
                             const editA =
                                 stringToHTML(`<a class="flex items-center mr-3 w-7 h-7 p-1 border border-black rounded-md hover:opacity-70" href="javascript:;">
                                 <i data-lucide="pencil"></i>
                               </a>`);
-                            const deleteA =
-                                stringToHTML(`<a class="flex items-center text-danger w-7 h-7 p-1 border border-danger rounded-md hover:opacity-70" href="javascript:;">
-                                <i data-lucide="trash-2"></i>
-                              </a>`);
-                            tippy(dateA, {
-                                content: "Брони",
+                            tippy(deleteA, {
+                                content: "Удалить",
                                 placement: "bottom",
                                 animation: "shift-away",
                             });
@@ -204,44 +287,17 @@ function Main() {
                                 placement: "bottom",
                                 animation: "shift-away",
                             });
-                            tippy(deleteA, {
-                                content: "Удалить",
-                                placement: "bottom",
-                                animation: "shift-away",
-                            });
-                            const switcher = stringToHTML(
-                                `<label class="inline-flex items-center cursor-pointer mr-3">
-                                    <input type="checkbox" ${
-                                        response.active ? "checked" : ""
-                                    } class="sr-only peer">
-                                    <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-                                </label>`
-                            );
-                            tippy(switcher, {
-                                content: "Активен?",
-                                placement: "bottom",
-                                animation: "shift-away",
-                            });
-                            a.append(switcher, dateA, editA, deleteA);
-                            a.addEventListener("hover", function () {});
-                            dateA.addEventListener("click", function () {
-                                dispatch(
-                                    fetchReservationsByObject(response.id!)
-                                );
-                                setCurrentObjectID(response.id!);
-                                setCalendarModal(true);
-                            });
                             editA.addEventListener("click", function () {
-                                navigate(
-                                    `${
-                                        authorizedUser?.is_admin ? "/admin" : ""
-                                    }/objects/update/${response.id}`
-                                );
+                                dispatch(fetchReservationById(response.id!));
+                                dispatch(fetchObjectById(response.object!.id));
+
+                                dispatch(fetchObjects());
+                                setButtonModalCreate(true);
                             });
                             deleteA.addEventListener("click", function () {
                                 setConfirmModalContent({
-                                    title: "Удалить объект?",
-                                    description: `Вы уверены, что хотите удалить объект "${response.name?.trim()}"?<br/>Это действие нельзя будет отменить.`,
+                                    title: "Удалить бронь?",
+                                    description: `Вы уверены, что хотите удалить бронь "${response.object!.name.trim()} - ${response.date?.trim()}"?<br/>Это действие нельзя будет отменить.`,
                                     onConfirm: () => {
                                         console.log("first");
                                         onDelete(response.id!);
@@ -252,37 +308,36 @@ function Main() {
                                 });
                                 setConfirmationModal(true);
                             });
-                            switcher.addEventListener("change", (e) => {
-                                const target = e.target as HTMLInputElement;
-                                setSwitcherIsActive(target);
-                                if (!target.checked) {
-                                    target.checked = true;
-                                    setConfirmModalContent({
-                                        title: "Деактивировать объект?",
-                                        description: `Вы уверены, что хотите деактивировать объект "${response.name?.trim()}"?<br/>Он больше не будет выводится в виджете.`,
-                                        onConfirm: () => {
-                                            onUpdateIsActive(
-                                                target,
-                                                response.id!
-                                            );
-                                        },
-                                        confirmLabel: "Деактивировать",
-                                        cancelLabel: "Отмена",
-                                        is_danger: false,
-                                    });
-                                    setConfirmationModal(true);
-                                } else {
-                                    onUpdateIsActive(target, response.id!);
-                                }
-                            });
+                            a.append(editA, deleteA);
                             return a;
                         },
                     },
 
                     // For print format
                     {
-                        title: "НАЗВАНИЕ",
+                        title: "OBJECT",
+                        field: "object",
+                        visible: false,
+                        print: true,
+                        download: true,
+                    },
+                    {
+                        title: "DATE",
+                        field: "date",
+                        visible: false,
+                        print: true,
+                        download: true,
+                    },
+                    {
+                        title: "NAME",
                         field: "name",
+                        visible: false,
+                        print: true,
+                        download: true,
+                    },
+                    {
+                        title: "STATUS",
+                        field: "status",
                         visible: false,
                         print: true,
                         download: true,
@@ -336,7 +391,7 @@ function Main() {
             tabulator.current.setFilter([
                 [
                     {
-                        field: "name",
+                        field: "object",
                         type: "like",
                         value: filter.value,
                     },
@@ -352,12 +407,12 @@ function Main() {
     const onResetFilter = () => {
         setFilter({
             ...filter,
-            field: "name",
+            field: "object",
             type: "like",
             value: "",
         });
         if (tabulator.current) {
-            tabulator.current.setFilter("name", "like", "");
+            tabulator.current.setFilter("object", "like", "");
         }
     };
 
@@ -387,245 +442,153 @@ function Main() {
         }
     };
 
-    const onCreateReservation = async (
-        reservationData: ReservationCreateType
-    ) => {
-        await dispatch(createReservation(reservationData));
-    };
-    const onUpdateReservation = async (
-        reservationData: ReservationUpdateType
-    ) => {
-        await dispatch(updateReservation(reservationData));
-    };
-    const onDeleteReservation = async (id: number) => {
-        await dispatch(deleteReservation(String(id)));
-    };
-
-    const onDelete = async (id: number) => {
-        startLoader(setIsLoaderOpen);
-        await dispatch(deleteObject(id));
-    };
-    const onUpdateIsActive = async (target: HTMLInputElement, id: number) => {
-        startLoader(setIsLoaderOpen);
-        await dispatch(updateObiectIsActive({ id: id }));
-    };
-
     const {
-        objects,
-        status,
-        error,
+        reservations,
+        reservationOne,
+        statusOne,
+        statusAll,
         isCreated,
         isUpdated,
-        isActiveStatusUpdated,
         isDeleted,
-    } = useAppSelector((state) => state.object);
-    const objectActions = objectSlice.actions;
-    const reservationState = useAppSelector((state) => state.reservation);
-    const reservationActions = reservationSlice.actions;
-    const clientActions = clientSlice.actions;
-    const userActions = userSlice.actions;
-    const userOne = useAppSelector((state) => state.user.userOne);
-    const userState = useAppSelector((state) => state.user);
-    const dispatch = useAppDispatch();
-    const clientsState = useAppSelector((state) => state.client);
-    const { setErrorToast } = errorToastSlice.actions;
-
-    useEffect(() => {
-        if (status === Status.ERROR && error) {
-            dispatch(setErrorToast({ message: error, isError: true }));
-            stopLoader(setIsLoaderOpen);
-
-            dispatch(objectActions.resetStatus());
-        }
-        if (
-            reservationState.statusAll === Status.ERROR &&
-            reservationState.error
-        ) {
-            dispatch(
-                setErrorToast({
-                    message: reservationState.error,
-                    isError: true,
-                })
-            );
-            stopLoader(setIsLoaderOpen);
-
-            dispatch(reservationActions.resetStatus());
-        }
-        if (
-            reservationState.statusOne === Status.ERROR &&
-            reservationState.error
-        ) {
-            dispatch(
-                setErrorToast({
-                    message: reservationState.error,
-                    isError: true,
-                })
-            );
-            stopLoader(setIsLoaderOpen);
-
-            dispatch(reservationActions.resetStatusOne());
-        }
-        if (
-            clientsState.statusByPhone === Status.ERROR &&
-            clientsState.errorByPhone
-        ) {
-            dispatch(
-                setErrorToast({
-                    message: clientsState.errorByPhone,
-                    isError: true,
-                })
-            );
-            stopLoader(setIsLoaderOpen);
-
-            dispatch(clientActions.resetClientByPhone());
-        }
-        if (userState.statusOne === Status.ERROR && userState.error) {
-            dispatch(
-                setErrorToast({
-                    message: userState.error,
-                    isError: true,
-                })
-            );
-            stopLoader(setIsLoaderOpen);
-
-            dispatch(userActions.resetStatusOne());
-        }
-    }, [
-        status,
         error,
-        reservationState.statusAll,
-        reservationState.error,
-        reservationState.statusOne,
-        clientsState.statusByPhone,
-        clientsState.errorByPhone,
-        userState.statusOne,
-        userState.error,
-    ]);
+    } = useAppSelector((state) => state.reservation);
+    const {
+        resetIsCreated,
+        resetIsUpdated,
+        resetIsDeleted,
+        resetReservationOne,
+        resetStatus,
+        resetStatusOne,
+    } = reservationSlice.actions;
+    const { authorizedUser } = useAppSelector((state) => state.user);
 
-    useEffect(() => {
-        if (!isCreated && !isUpdated && !isActiveStatusUpdated && !isDeleted) {
-            stopLoader(setIsLoaderOpen);
-        }
-        if (isActiveStatusUpdated) {
-            switcherIsActive!.checked = !switcherIsActive!.checked;
-        }
-        if (isCreated || isUpdated || isActiveStatusUpdated || isDeleted) {
-            dispatch(fetchObjects());
-            setConfirmationModal(false);
-            const successEl = document
-                .querySelectorAll("#success-notification-content")[0]
-                .cloneNode(true) as HTMLElement;
-            successEl.querySelector(".text-content")!.textContent = isCreated
-                ? "Объект успешно создан"
-                : isDeleted
-                ? "Объект успешно удалён"
-                : "Объект успешно обновлен";
-            successEl.classList.remove("hidden");
-            Toastify({
-                node: successEl,
-                duration: 3000,
-                newWindow: true,
-                close: true,
-                gravity: "top",
-                position: "right",
-                stopOnFocus: true,
-            }).showToast();
-            stopLoader(setIsLoaderOpen);
-            dispatch(objectActions.resetIsCreated());
-            dispatch(objectActions.resetIsUpdated());
-            dispatch(objectActions.resetIsDeleted());
-            dispatch(objectActions.resetIsActiveStatusUpdated());
-        }
-    }, [isCreated, isUpdated, isActiveStatusUpdated, isDeleted]);
-
-    useEffect(() => {
-        if (
-            !reservationState.isCreated &&
-            !reservationState.isUpdated &&
-            !reservationState.isDeleted
-        ) {
-            stopLoader(setIsLoaderOpen);
-        }
-
-        if (
-            reservationState.isCreated ||
-            reservationState.isUpdated ||
-            reservationState.isDeleted
-        ) {
-            dispatch(fetchReservationsByObject(currentObjectID!));
-            setReservationModal(false);
-            const successEl = document
-                .querySelectorAll("#success-notification-content")[0]
-                .cloneNode(true) as HTMLElement;
-            successEl.querySelector(".text-content")!.textContent =
-                reservationState.isCreated
-                    ? "Бронь успешно создана"
-                    : reservationState.isDeleted
-                    ? "Бронь успешно удалена"
-                    : "Бронь успешно обновлена";
-            successEl.classList.remove("hidden");
-            Toastify({
-                node: successEl,
-                duration: 3000,
-                newWindow: true,
-                close: true,
-                gravity: "top",
-                position: "right",
-                stopOnFocus: true,
-            }).showToast();
-            stopLoader(setIsLoaderOpen);
-            dispatch(reservationActions.resetIsCreated());
-            dispatch(reservationActions.resetIsUpdated());
-            dispatch(reservationActions.resetIsDeleted());
-            dispatch(clientActions.resetClientByPhone());
-        }
-    }, [
-        reservationState.isCreated,
-        reservationState.isUpdated,
-        reservationState.isDeleted,
-    ]);
+    const { resetClientByPhone } = clientSlice.actions;
+    const dispatch = useAppDispatch();
 
     useEffect(() => {
         initTabulator();
         reInitOnResizeWindow();
 
-        const userId = Number(
-            location.pathname.replace("/admin/objects/user/", "")
-        );
-
-        dispatch(fetchObjectsByUser(userId));
-        dispatch(fetchUserById(userId));
-        dispatch(objectActions.resetObjectOne());
+        dispatch(fetchReservations());
     }, []);
 
     useEffect(() => {
-        if (objects.length) {
-            const formattedData = objects.map((object) => ({
-                id: object.id,
-                name: object.name,
-                owner: object.author.fullname,
-                active: object.active,
-                type: object.apartment.name,
+        if (reservations.length) {
+            const formattedData = reservations.map((reservation) => ({
+                id: reservation.id,
+                object: reservation.object,
+                date:
+                    convertDateString(reservation.start_date) +
+                    " - " +
+                    convertDateString(reservation.end_date),
+                name: reservation.client.fullname,
+                status: reservation.status,
             }));
             tabulator.current
                 ?.setData(formattedData.reverse())
                 .then(function () {
                     reInitTabulator();
                 });
+        } else {
+            tabulator.current?.setData([]).then(function () {
+                reInitTabulator();
+            });
         }
-    }, [objects]);
+    }, [reservations]);
+
+    const onCreate = async (reservationData: ReservationCreateType) => {
+        await dispatch(createReservation(reservationData));
+    };
+    const onUpdate = async (reservationData: ReservationUpdateType) => {
+        await dispatch(updateReservation(reservationData));
+    };
+    const onDelete = async (id: number) => {
+        startLoader(setIsLoaderOpen);
+        await dispatch(deleteReservation(String(id)));
+    };
+    const onUpdateStatus = async (reservationData: {
+        id: number;
+        status: string;
+    }) => {
+        await dispatch(updateReservationStatus(reservationData));
+    };
+    const { setErrorToast } = errorToastSlice.actions;
+    useEffect(() => {
+        if (statusAll === Status.ERROR && error) {
+            dispatch(setErrorToast({ message: error, isError: true }));
+            stopLoader(setIsLoaderOpen);
+
+            dispatch(resetStatus());
+        }
+        if (statusOne === Status.ERROR && error) {
+            dispatch(setErrorToast({ message: error, isError: true }));
+            stopLoader(setIsLoaderOpen);
+
+            dispatch(resetStatusOne());
+        }
+    }, [statusAll, error, statusOne]);
+    useEffect(() => {
+        if (statusSelector) {
+            statusSelector.value = selectedStatus;
+        }
+        if (isCreated || isUpdated || isDeleted) {
+            dispatch(fetchReservations());
+            setButtonModalCreate(false);
+            setConfirmationModal(false);
+            const successEl = document
+                .querySelectorAll("#success-notification-content")[0]
+                .cloneNode(true) as HTMLElement;
+            successEl.querySelector(".text-content")!.textContent = isCreated
+                ? "Бронь успешно добавлена"
+                : isDeleted
+                ? "Бронь успешно удалена"
+                : "Бронь успешно обновлена";
+            successEl.classList.remove("hidden");
+            Toastify({
+                node: successEl,
+                duration: 3000,
+                newWindow: true,
+                close: true,
+                gravity: "top",
+                position: "right",
+                stopOnFocus: true,
+            }).showToast();
+            stopLoader(setIsLoaderOpen);
+            dispatch(resetReservationOne());
+            dispatch(resetIsCreated());
+            dispatch(resetIsUpdated());
+            dispatch(resetIsDeleted());
+            dispatch(resetClientByPhone());
+            dispatch(objectSlice.actions.resetObjectOne());
+        }
+    }, [isCreated, isUpdated, isDeleted]);
 
     return (
         <>
-            {isLoaderOpen && <OverlayLoader />}
             <div className="flex flex-col items-center mt-8 intro-y sm:flex-row">
-                <h2 className="mr-auto text-lg font-medium">
-                    Объекты пользователя - {userOne?.fullname}
-                </h2>
+                <h2 className="mr-auto text-lg font-medium">Брони</h2>
+                {!authorizedUser?.is_admin && (
+                    <div className="flex w-full mt-4 sm:w-auto sm:mt-0">
+                        <Button
+                            as="a"
+                            href="#"
+                            variant="primary"
+                            className="mr-2 shadow-md"
+                            onClick={(event: React.MouseEvent) => {
+                                event.preventDefault();
+                                setButtonModalCreate(true);
+                                dispatch(fetchObjects());
+                            }}
+                        >
+                            <ListPlus className="size-5 mr-2" />
+                            Добавить
+                        </Button>
+                    </div>
+                )}
             </div>
             {/* BEGIN: HTML Table Data */}
             <div className="p-5 mt-5 intro-y box">
-                {status === Status.LOADING && (
+                {statusAll === Status.LOADING && (
                     <div className="absolute z-50 bg-slate-50 bg-opacity-70 flex justify-center items-center w-full h-full">
                         <div className="w-10 h-10">
                             <LoadingIcon icon="ball-triangle" />
@@ -736,38 +699,41 @@ function Main() {
             </div>
             {/* END: HTML Table Data */}
 
-            {/* BEGIN: Calendar Modal */}
+            {/* BEGIN: Form Modal */}
             <Dialog
-                open={calendarModal}
+                size="lg"
+                id="reservation-form-modal"
+                open={buttonModalCreate}
                 onClose={() => {
-                    setCalendarModal(false);
+                    setButtonModalCreate(false);
+                    dispatch(resetClientByPhone());
+                    dispatch(resetReservationOne());
+                    dispatch(objectSlice.actions.resetObjectOne());
                 }}
-                size="xl"
             >
                 <Dialog.Panel>
                     <a
                         onClick={(event: React.MouseEvent) => {
                             event.preventDefault();
-                            setCalendarModal(false);
+                            setButtonModalCreate(false);
+                            dispatch(resetClientByPhone());
+                            dispatch(resetReservationOne());
+                            dispatch(objectSlice.actions.resetObjectOne());
                         }}
                         className="absolute top-0 right-0 mt-3 mr-3"
                         href="#"
                     >
                         <Lucide icon="X" className="w-8 h-8 text-slate-400" />
                     </a>
-                    <ReservationsCalendar
-                        isLoaderOpen={isLoaderOpen}
+                    <ReservationForm
+                        onCreate={onCreate}
+                        onUpdate={onUpdate}
                         setIsLoaderOpen={setIsLoaderOpen}
-                        objectID={currentObjectID!}
-                        onCreate={onCreateReservation}
-                        onUpdate={onUpdateReservation}
-                        onDelete={onDeleteReservation}
-                        reservationModal={reservationModal}
-                        setReservationModal={setReservationModal}
+                        isLoaderOpen={isLoaderOpen}
                     />
                 </Dialog.Panel>
             </Dialog>
-            {/* END: Calendar Modal */}
+            {/* END: Form Modal */}
             {/* BEGIN: Confirmation Modal */}
             <Dialog
                 open={confirmationModal}
@@ -776,6 +742,7 @@ function Main() {
                 }}
             >
                 <Dialog.Panel>
+                    {isLoaderOpen && <OverlayLoader />}
                     <div className="p-5 text-center">
                         <Lucide
                             icon={
@@ -840,7 +807,7 @@ function Main() {
                 <Lucide icon="CheckCircle" className="text-success" />
                 <div className="ml-4 mr-4">
                     <div className="font-medium text-content">
-                        Объект успешно добавлен
+                        Бронь успешно добавлена
                     </div>
                 </div>
             </Notification>

@@ -6,6 +6,7 @@ import themeReducer from "./themeSlice";
 import userReducer from "./reducers/users/slice";
 import regionReducer from "./reducers/regions/slice";
 import cityReducer from "./reducers/cities/slice";
+import logsReducer from "./reducers/logsReducer/slice";
 import propertyTypeReducer from "./reducers/property-types/slice";
 import amenityReducer from "./reducers/amenities/slice";
 import objectReducer from "./reducers/objects/slice";
@@ -38,6 +39,7 @@ export const store = configureStore({
         preferences: preferencesReducer,
         server: serverReducer,
         language: languageReducer,
+        logs: logsReducer,
     },
 });
 

@@ -77,7 +77,6 @@ const menu: Array<Menu | "divider"> = [
                 icon: "FileArchive",
                 pathname: "/admin/logs",
                 title: lang.menu.logs,
-                mark: "experimental",
             },
         ],
     },

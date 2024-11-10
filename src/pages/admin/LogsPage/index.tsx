@@ -10,59 +10,38 @@ import { TabulatorFull as Tabulator } from "tabulator-tables";
 import { stringToHTML } from "@/utils/helper";
 import { DateTime } from "luxon";
 import { useAppDispatch, useAppSelector } from "@/stores/hooks";
+import { deleteUser, fetchUsers } from "@/stores/reducers/users/actions";
 import tippy from "tippy.js";
-import { Link } from "react-router-dom";
-import { reservationSlice } from "@/stores/reducers/reservations/slice";
-import {
-    createReservation,
-    deleteReservation,
-    fetchReservationById,
-    fetchReservations,
-    updateReservation,
-    updateReservationStatus,
-} from "@/stores/reducers/reservations/actions";
+import { Link, useNavigate } from "react-router-dom";
+import { clientSlice } from "@/stores/reducers/clients/slice";
+import { deleteClient, fetchClients } from "@/stores/reducers/clients/actions";
 import { Status } from "@/stores/reducers/types";
 import LoadingIcon from "@/components/Base/LoadingIcon";
 import { ListPlus } from "lucide-react";
-import {
-    convertDateString,
-    startLoader,
-    stopLoader,
-} from "@/utils/customUtils";
-import ReservationForm from "./form";
-import {
-    ReservationCreateType,
-    ReservationUpdateType,
-} from "@/stores/reducers/reservations/types";
-import Toastify from "toastify-js";
-import Notification from "@/components/Base/Notification";
-import { fetchObjects } from "@/stores/reducers/objects/actions";
-import { clientSlice } from "@/stores/reducers/clients/slice";
-import { di } from "@fullcalendar/core/internal-common";
+import { errorToastSlice } from "@/stores/errorToastSlice";
+import { startLoader, stopLoader } from "@/utils/customUtils";
 import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
 import clsx from "clsx";
-import { errorToastSlice } from "@/stores/errorToastSlice";
-import { reservationStatus, reservationStatuses } from "@/vars";
+import Toastify from "toastify-js";
+import Notification from "@/components/Base/Notification";
+import Icon from "@/components/Custom/Icon";
+import PageStatusMark from "@/components/Custom/PageStatusMark";
+import { fetchLogs } from "@/stores/reducers/logsReducer/actions";
+import { logSlice } from "@/stores/reducers/logsReducer/slice";
 
 window.DateTime = DateTime;
 interface Response {
     id?: number;
-    object?: string;
-    date?: string;
-    name?: string;
-    status?: string;
-    phone?: string;
-    email?: string;
+    user?: { id: number; fullname: string };
+    role?: string;
+    action?: string;
+    created_at?: DateTime;
 }
 
 function Main() {
-    const [buttonModalCreate, setButtonModalCreate] = useState(false);
     const [isLoaderOpen, setIsLoaderOpen] = useState(false);
-    const [statusSelector, setStatusSelector] =
-        useState<HTMLSelectElement | null>(null);
-    const [selectedStatus, setSelectedStatus] =
-        useState<reservationStatus>("new");
-    const [confirmationModal, setConfirmationModal] = useState(false);
+    const [confirmationModalPreview, setConfirmationModalPreview] =
+        useState(false);
     const [confirmModalContent, setConfirmModalContent] = useState<{
         title: string | null;
         description: string | null;
@@ -79,6 +58,8 @@ function Main() {
         is_danger: true,
     });
 
+    const { authorizedUser } = useAppSelector((state) => state.user);
+
     const tableRef = createRef<HTMLDivElement>();
     const tabulator = useRef<Tabulator>();
     const [filter, setFilter] = useState({
@@ -89,6 +70,8 @@ function Main() {
 
     const [tableData, setTableData] = useState<Response[]>([]);
 
+    const navigate = useNavigate();
+
     const initTabulator = () => {
         if (tableRef.current) {
             tabulator.current = new Tabulator(tableRef.current, {
@@ -97,6 +80,8 @@ function Main() {
                 paginationMode: "local",
                 filterMode: "local",
                 sortMode: "local",
+                printAsHtml: true,
+                printStyled: true,
                 pagination: true,
                 paginationSize: 10,
                 paginationSizeSelector: [10, 20, 50, 100],
@@ -133,205 +118,100 @@ function Main() {
                         },
                     },
                     {
-                        title: "Объект",
-                        minWidth: 200,
+                        title: "Пользователь",
+                        minWidth: 100,
                         responsive: 0,
-                        field: "object",
-                        headerHozAlign: "center",
+                        field: "user",
                         vertAlign: "middle",
                         print: false,
                         download: false,
                         sorter: "string",
                         formatter(cell) {
                             const response: Response = cell.getData();
+                            return `<div class="absolute inset-0 h-full items-center justify-between flex w-full font-medium whitespace-nowrap hover:text-primary">
+                                        <span class="whitespace-nowrap">${response.user?.fullname}</span>
+                                        <span class="rounded-md px-2 py-1 text-xs bg-primary/10">ID: ${response.user?.id}</span>
+                                    </div>`;
+                        },
+                    },
+                    {
+                        title: "Роль",
+                        minWidth: 200,
+                        field: "role",
+                        vertAlign: "middle",
+                        hozAlign: "center",
+                        headerHozAlign: "center",
+                        print: false,
+                        download: false,
+                        sorter: "string",
+                        formatter(cell) {
+                            const response: Response = cell.getData();
                             return `<div>
-                                        <div class="font-medium whitespace-nowrap">${response.object}</div>
+                                        <div class="font-medium whitespace-nowrap">${response.role}</div>
+                                    </div>`;
+                        },
+                    },
+
+                    {
+                        title: "Действие",
+                        minWidth: 200,
+                        field: "action",
+                        hozAlign: "center",
+                        headerHozAlign: "center",
+                        vertAlign: "middle",
+                        print: false,
+                        download: false,
+                        sorter: "number",
+                        formatter(cell) {
+                            const response: Response = cell.getData();
+                            return `<div class="flex lg:justify-center">
+                                        <div class="font-medium whitespace-nowrap">${response.action}</div>
                                     </div>`;
                         },
                     },
                     {
                         title: "Дата",
                         minWidth: 200,
-                        field: "date",
+                        field: "created_at",
                         hozAlign: "center",
                         headerHozAlign: "center",
                         vertAlign: "middle",
                         print: false,
                         download: false,
-                        sorter: "string",
+                        sorter: "number",
                         formatter(cell) {
                             const response: Response = cell.getData();
-                            return `<div>
-                                        <div class="font-medium whitespace-nowrap">${response.date}</div>
+                            return `<div class="flex lg:justify-center">
+                                        <div class="font-medium whitespace-nowrap">${response.created_at}</div>
                                     </div>`;
-                        },
-                    },
-                    {
-                        title: "Имя",
-                        minWidth: 200,
-                        field: "name",
-                        hozAlign: "center",
-                        headerHozAlign: "center",
-                        vertAlign: "middle",
-                        print: false,
-                        download: false,
-                        sorter: "string",
-                        formatter(cell) {
-                            const response: Response = cell.getData();
-                            return `<div>
-                                        <div class="font-medium whitespace-nowrap">${response.name}</div>
-                                    </div>`;
-                        },
-                    },
-                    {
-                        title: "Статус",
-                        minWidth: 200,
-                        field: "status",
-                        hozAlign: "center",
-                        headerHozAlign: "center",
-                        vertAlign: "middle",
-                        print: false,
-                        download: false,
-                        sorter: "string",
-                        formatter(cell) {
-                            const response: Response = cell.getData();
-                            const a = stringToHTML(
-                                `<div class="flex lg:justify-center items-center"></div>`
-                            );
-                            const statuses = [
-                                {
-                                    value: "new",
-                                    label: "Новая",
-                                },
-                                {
-                                    value: "approved",
-                                    label: "Одобрена",
-                                },
-                                {
-                                    value: "rejected",
-                                    label: "Отклонена",
-                                },
-                            ];
-
-                            const options = statuses.map((status) => {
-                                return `<option value="${status.value}" ${
-                                    response.status === status.value
-                                        ? "selected"
-                                        : ""
-                                }>${status.label}</option>`;
-                            });
-
-                            let selector =
-                                stringToHTML(`<select class="min-w-40 cursor-pointer bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                                    ${options.join("")}
-                                    </select>`);
-                            if (response.status === "completed") {
-                                selector = stringToHTML(
-                                    `<span class="text-green-500">Завершена</span>`
-                                );
-                            }
-                            const prevStatus = response.status;
-                            a.append(selector);
-                            a.addEventListener("hover", function () {});
-                            selector.addEventListener("change", function (e) {
-                                e.preventDefault();
-                                const target = this as HTMLSelectElement;
-                                setStatusSelector(target);
-                                setSelectedStatus(
-                                    target.value as reservationStatus
-                                );
-
-                                onUpdateStatus({
-                                    id: response.id!,
-                                    status: target.value,
-                                });
-                                target.value = prevStatus!;
-                            });
-                            return a;
-                        },
-                    },
-                    {
-                        minWidth: 50,
-                        maxWidth: 150,
-                        title: "Действия",
-                        field: "id",
-                        responsive: 1,
-                        hozAlign: "right",
-                        headerHozAlign: "right",
-                        resizable: false,
-                        headerSort: false,
-                        formatter(cell) {
-                            const response: Response = cell.getData();
-                            const a = stringToHTML(
-                                `<div class="flex justify-end h-full items-center"></div>`
-                            );
-                            const deleteA =
-                                stringToHTML(`<a class="flex items-center text-danger w-7 h-7 p-1 border border-danger rounded-md hover:opacity-70" href="javascript:;">
-                                <i data-lucide="trash-2"></i>
-                              </a>`);
-                            const editA =
-                                stringToHTML(`<a class="flex items-center mr-3 w-7 h-7 p-1 border border-black rounded-md hover:opacity-70" href="javascript:;">
-                                <i data-lucide="pencil"></i>
-                              </a>`);
-                            tippy(deleteA, {
-                                content: "Удалить",
-                                placement: "bottom",
-                                animation: "shift-away",
-                            });
-                            tippy(editA, {
-                                content: "Редактировать",
-                                placement: "bottom",
-                                animation: "shift-away",
-                            });
-                            editA.addEventListener("click", function () {
-                                dispatch(fetchReservationById(response.id!));
-                                dispatch(fetchObjects());
-                                setButtonModalCreate(true);
-                            });
-                            deleteA.addEventListener("click", function () {
-                                setConfirmModalContent({
-                                    title: "Удалить бронь?",
-                                    description: `Вы уверены, что хотите удалить бронь "${response.object?.trim()} - ${response.date?.trim()}"?<br/>Это действие нельзя будет отменить.`,
-                                    onConfirm: () => {
-                                        console.log("first");
-                                        onDelete(response.id!);
-                                    },
-                                    confirmLabel: "Удалить",
-                                    cancelLabel: "Отмена",
-                                    is_danger: true,
-                                });
-                                setConfirmationModal(true);
-                            });
-                            a.append(editA, deleteA);
-                            return a;
                         },
                     },
 
                     // For print format
                     {
-                        title: "OBJECT",
-                        field: "object",
+                        title: "ID",
+                        field: "id",
+                        visible: false,
+                        print: true,
+                        download: true,
+                    },
+                    {
+                        title: "USER",
+                        field: "user",
+                        visible: false,
+                        print: true,
+                        download: true,
+                    },
+                    {
+                        title: "ACTION",
+                        field: "action",
                         visible: false,
                         print: true,
                         download: true,
                     },
                     {
                         title: "DATE",
-                        field: "date",
-                        visible: false,
-                        print: true,
-                        download: true,
-                    },
-                    {
-                        title: "NAME",
-                        field: "name",
-                        visible: false,
-                        print: true,
-                        download: true,
-                    },
-                    {
-                        title: "STATUS",
-                        field: "status",
+                        field: "created_at",
                         visible: false,
                         print: true,
                         download: true,
@@ -385,7 +265,7 @@ function Main() {
             tabulator.current.setFilter([
                 [
                     {
-                        field: "object",
+                        field: "name",
                         type: "like",
                         value: filter.value,
                     },
@@ -401,12 +281,12 @@ function Main() {
     const onResetFilter = () => {
         setFilter({
             ...filter,
-            field: "object",
+            field: "name",
             type: "like",
             value: "",
         });
         if (tabulator.current) {
-            tabulator.current.setFilter("object", "like", "");
+            tabulator.current.setFilter("name", "like", "");
         }
     };
 
@@ -436,158 +316,63 @@ function Main() {
         }
     };
 
-    const {
-        reservations,
-        reservationOne,
-        statusOne,
-        statusAll,
-        isCreated,
-        isUpdated,
-        isDeleted,
-        error,
-    } = useAppSelector((state) => state.reservation);
-    const {
-        resetIsCreated,
-        resetIsUpdated,
-        resetIsDeleted,
-        resetReservationOne,
-        resetStatus,
-        resetStatusOne,
-    } = reservationSlice.actions;
-    const { authorizedUser } = useAppSelector((state) => state.user);
+    const onDelete = async (id: number) => {
+        startLoader(setIsLoaderOpen);
+        await dispatch(deleteClient(String(id)));
+    };
 
-    const { resetClientByPhone } = clientSlice.actions;
+    const { logs, status, error } = useAppSelector((state) => state.logs);
+    const logsActions = logSlice.actions;
     const dispatch = useAppDispatch();
+    const { setErrorToast } = errorToastSlice.actions;
+
+    useEffect(() => {
+        if (status === Status.ERROR && error) {
+            dispatch(setErrorToast({ message: error, isError: true }));
+            stopLoader(setIsLoaderOpen);
+            dispatch(logsActions.resetStatus());
+        }
+    }, [status, error]);
 
     useEffect(() => {
         initTabulator();
         reInitOnResizeWindow();
 
-        dispatch(fetchReservations());
+        dispatch(fetchLogs());
     }, []);
-
     useEffect(() => {
-        if (reservations.length) {
-            const formattedData = reservations.map((reservation) => ({
-                id: reservation.id,
-                object: reservation.object.name,
-                date:
-                    convertDateString(reservation.start_date) +
-                    " - " +
-                    convertDateString(reservation.end_date),
-                name: reservation.client.fullname,
-                status: reservation.status,
+        if (logs.length) {
+            const formattedData = logs.map((log) => ({
+                id: log.id,
+                created_at:
+                    new Date(log.created_at).toLocaleDateString() +
+                    " " +
+                    log.created_at.split("T")[1].split(".")[0],
+                user: log.user,
+                action: log.description,
+                role: log.user?.is_admin ? "Администратор" : "Пользователь",
             }));
-            tabulator.current
-                ?.setData(formattedData.reverse())
-                .then(function () {
-                    reInitTabulator();
-                });
-        } else {
-            tabulator.current?.setData([]).then(function () {
+            tabulator.current?.setData(formattedData).then(function () {
                 reInitTabulator();
             });
         }
-    }, [reservations]);
-
-    const onCreate = async (reservationData: ReservationCreateType) => {
-        await dispatch(createReservation(reservationData));
-    };
-    const onUpdate = async (reservationData: ReservationUpdateType) => {
-        await dispatch(updateReservation(reservationData));
-    };
-    const onDelete = async (id: number) => {
-        startLoader(setIsLoaderOpen);
-        await dispatch(deleteReservation(String(id)));
-    };
-    const onUpdateStatus = async (reservationData: {
-        id: number;
-        status: string;
-    }) => {
-        await dispatch(updateReservationStatus(reservationData));
-    };
-    const { setErrorToast } = errorToastSlice.actions;
-    useEffect(() => {
-        if (statusAll === Status.ERROR && error) {
-            dispatch(setErrorToast({ message: error, isError: true }));
-            stopLoader(setIsLoaderOpen);
-
-            dispatch(resetStatus());
-        }
-        if (statusOne === Status.ERROR && error) {
-            dispatch(setErrorToast({ message: error, isError: true }));
-            stopLoader(setIsLoaderOpen);
-
-            dispatch(resetStatusOne());
-        }
-    }, [statusAll, error, statusOne]);
-    useEffect(() => {
-        if (statusSelector) {
-            statusSelector.value = selectedStatus;
-        }
-        if (isCreated || isUpdated || isDeleted) {
-            dispatch(fetchReservations());
-            setButtonModalCreate(false);
-            setConfirmationModal(false);
-            const successEl = document
-                .querySelectorAll("#success-notification-content")[0]
-                .cloneNode(true) as HTMLElement;
-            successEl.querySelector(".text-content")!.textContent = isCreated
-                ? "Бронь успешно добавлена"
-                : isDeleted
-                ? "Бронь успешно удалена"
-                : "Бронь успешно обновлена";
-            successEl.classList.remove("hidden");
-            Toastify({
-                node: successEl,
-                duration: 3000,
-                newWindow: true,
-                close: true,
-                gravity: "top",
-                position: "right",
-                stopOnFocus: true,
-            }).showToast();
-            stopLoader(setIsLoaderOpen);
-            dispatch(resetReservationOne());
-            dispatch(resetIsCreated());
-            dispatch(resetIsUpdated());
-            dispatch(resetIsDeleted());
-            dispatch(resetClientByPhone());
-        }
-    }, [isCreated, isUpdated, isDeleted]);
+    }, [logs]);
 
     return (
         <>
             <div className="flex flex-col items-center mt-8 intro-y sm:flex-row">
-                <h2 className="mr-auto text-lg font-medium">Брони</h2>
-                {!authorizedUser?.is_admin && (
-                    <div className="flex w-full mt-4 sm:w-auto sm:mt-0">
-                        <Button
-                            as="a"
-                            href="#"
-                            variant="primary"
-                            className="mr-2 shadow-md"
-                            onClick={(event: React.MouseEvent) => {
-                                event.preventDefault();
-                                setButtonModalCreate(true);
-                                dispatch(fetchObjects());
-                            }}
-                        >
-                            <ListPlus className="size-5 mr-2" />
-                            Добавить
-                        </Button>
-                    </div>
-                )}
+                <h2 className="mr-auto text-lg font-medium">Логи</h2>
             </div>
             {/* BEGIN: HTML Table Data */}
             <div className="p-5 mt-5 intro-y box">
-                {statusAll === Status.LOADING && (
+                {status === Status.LOADING && (
                     <div className="absolute z-50 bg-slate-50 bg-opacity-70 flex justify-center items-center w-full h-full">
                         <div className="w-10 h-10">
                             <LoadingIcon icon="ball-triangle" />
                         </div>
                     </div>
                 )}
+
                 <div className="flex flex-col sm:flex-row sm:items-end xl:items-start">
                     <form
                         id="tabulator-html-filter-form"
@@ -691,45 +476,11 @@ function Main() {
                 </div>
             </div>
             {/* END: HTML Table Data */}
-
-            {/* BEGIN: Form Modal */}
-            <Dialog
-                size="lg"
-                id="reservation-form-modal"
-                open={buttonModalCreate}
-                onClose={() => {
-                    setButtonModalCreate(false);
-                    dispatch(resetClientByPhone());
-                    dispatch(resetReservationOne());
-                }}
-            >
-                <Dialog.Panel>
-                    <a
-                        onClick={(event: React.MouseEvent) => {
-                            event.preventDefault();
-                            setButtonModalCreate(false);
-                            dispatch(resetClientByPhone());
-                            dispatch(resetReservationOne());
-                        }}
-                        className="absolute top-0 right-0 mt-3 mr-3"
-                        href="#"
-                    >
-                        <Lucide icon="X" className="w-8 h-8 text-slate-400" />
-                    </a>
-                    <ReservationForm
-                        onCreate={onCreate}
-                        onUpdate={onUpdate}
-                        setIsLoaderOpen={setIsLoaderOpen}
-                        isLoaderOpen={isLoaderOpen}
-                    />
-                </Dialog.Panel>
-            </Dialog>
-            {/* END: Form Modal */}
             {/* BEGIN: Confirmation Modal */}
             <Dialog
-                open={confirmationModal}
+                open={confirmationModalPreview}
                 onClose={() => {
-                    setConfirmationModal(false);
+                    setConfirmationModalPreview(false);
                 }}
             >
                 <Dialog.Panel>
@@ -763,7 +514,7 @@ function Main() {
                             variant="outline-secondary"
                             type="button"
                             onClick={() => {
-                                setConfirmationModal(false);
+                                setConfirmationModalPreview(false);
                             }}
                             disabled={isLoaderOpen}
                             className="col-span-6 mr-1"
@@ -798,7 +549,7 @@ function Main() {
                 <Lucide icon="CheckCircle" className="text-success" />
                 <div className="ml-4 mr-4">
                     <div className="font-medium text-content">
-                        Бронь успешно добавлена
+                        Пользователь успешно добавлен
                     </div>
                 </div>
             </Notification>

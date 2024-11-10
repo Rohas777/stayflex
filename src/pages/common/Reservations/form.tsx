@@ -42,23 +42,20 @@ import {
 } from "@/utils/customUtils";
 import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
 import { IReservation } from "@/stores/models/IReservation";
-import { reservationStatus, reservationStatusesWithNames } from "@/vars";
-import { reservationSlice } from "@/stores/reducers/reservations/slice";
-import { errorToastSlice } from "@/stores/errorToastSlice";
+import {
+    reservationStatus,
+    reservationStatuses,
+    reservationStatusesWithNames,
+} from "@/vars";
 import { IObject } from "@/stores/models/IObject";
 import ValidationErrorNotification from "@/components/Custom/ValidationErrorNotification";
+import { fetchObjectById } from "@/stores/reducers/objects/actions";
 
 interface ReservationFormProps {
     onCreate: (reservation: ReservationCreateType) => void;
     onUpdate: (reservation: ReservationUpdateType) => void;
-    onDelete: (id: number) => void;
     setIsLoaderOpen: React.Dispatch<React.SetStateAction<boolean>>;
     isLoaderOpen: boolean;
-    currentUnreservedData?: {
-        start_date: string;
-        objectID: number;
-    } | null;
-    currentReservation?: IReservation;
 }
 type CustomErrors = {
     isValid: boolean;
@@ -75,39 +72,22 @@ type CustomErrors = {
 function ReservationForm({
     onCreate,
     onUpdate,
-    onDelete,
     setIsLoaderOpen,
     isLoaderOpen,
-    currentReservation,
-    currentUnreservedData,
 }: ReservationFormProps) {
-    console.log(currentUnreservedData);
-    const [selectedObjectID, setSelectedObjectID] = useState(
-        currentReservation?.object.id
-            ? String(currentReservation?.object.id)
-            : currentUnreservedData?.objectID
-            ? String(currentUnreservedData?.objectID)
-            : "-1"
-    );
+    const [selectedObjectID, setSelectedObjectID] = useState("-1");
     const [selectedObject, setSelectedObject] = useState<IObject | null>(null);
-
-    const [selectedStatus, setSelectedStatus] = useState<reservationStatus>(
-        currentReservation?.status ? currentReservation.status : "new"
-    );
-    const [startDate, setStartDate] = useState(
-        currentReservation?.start_date ||
-            currentUnreservedData?.start_date ||
-            ""
-    );
-    const [endDate, setEndDate] = useState(currentReservation?.end_date || "");
-    const [tel, setTel] = useState<string>(
-        currentReservation?.client?.phone || ""
-    );
+    const [selectedStatus, setSelectedStatus] =
+        useState<reservationStatus>("new");
+    const [startDate, setStartDate] = useState("");
+    const [endDate, setEndDate] = useState("");
+    const [tel, setTel] = useState<string>("");
     const [isTelChecking, setIsTelChecking] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [formData, setFormData] = useState<FormData | null>(null);
     const [isCreate, setIsCreate] = useState(true);
 
+    const reservationState = useAppSelector((state) => state.reservation);
     const objectsState = useAppSelector((state) => state.object);
     const clientsState = useAppSelector((state) => state.client);
     const clientActions = clientSlice.actions;
@@ -127,10 +107,10 @@ function ReservationForm({
         object: null,
         start_date: null,
         end_date: null,
+        date: null,
         tel: null,
         email: null,
         name: null,
-        date: null,
         child_count: null,
     });
 
@@ -184,7 +164,6 @@ function ReservationForm({
                 " " +
                 dayTitle(selectedObject?.min_ded!);
         }
-
         if (!tel) {
             errors.tel = "Обязательно введите телефон клиента";
         }
@@ -223,7 +202,7 @@ function ReservationForm({
                 .required("'Дополнительная информация' это обязательное поле"),
             letter: yup
                 .string()
-                .required("'Дополнительная информация' это обязательное поле"),
+                .required("'Служебная информация' это обязательное поле"),
 
             adult_count: yup
                 .number()
@@ -273,7 +252,7 @@ function ReservationForm({
         }
         setFormData(form);
 
-        if (!clientsState.isFound && clientsState.isFound !== null) {
+        if (!clientsState.isFound) {
             await dispatch(
                 createClient({
                     fullname: String(form.get("name")),
@@ -304,7 +283,7 @@ function ReservationForm({
                 onCreate(reservationData);
             } else {
                 onUpdate({
-                    id: currentReservation?.id!,
+                    id: reservationState.reservationOne?.id!,
                     ...reservationData,
                 });
             }
@@ -328,7 +307,7 @@ function ReservationForm({
                 onCreate(reservationData);
             } else {
                 onUpdate({
-                    id: currentReservation?.id!,
+                    id: reservationState.reservationOne?.id!,
                     ...reservationData,
                 });
             }
@@ -338,30 +317,50 @@ function ReservationForm({
     }, [clientsState.isFound, clientsState.isCreated, isSubmitting, formData]);
 
     useEffect(() => {
-        if (!currentReservation) return;
+        if (!reservationState.reservationOne) return;
         setIsCreate(false);
         setIsTelChecking(true);
-        dispatch(fetchClientByPhone(currentReservation.client.phone));
-    }, [currentReservation]);
+        setSelectedObjectID(String(reservationState.reservationOne.object.id));
+        setStartDate(reservationState.reservationOne.start_date);
+        setEndDate(reservationState.reservationOne.end_date);
+        setSelectedStatus(reservationState.reservationOne.status);
+        setTel(reservationState.reservationOne.client.phone);
+        dispatch(
+            fetchClientByPhone(reservationState.reservationOne.client.phone)
+        );
+    }, [reservationState.reservationOne]);
 
     useEffect(() => {
         if (clientsState.statusByPhone !== Status.LOADING) {
             setIsTelChecking(false);
         }
     }, [clientsState.statusByPhone]);
-
     useEffect(() => {
         if (Number(selectedObjectID) <= 0) return;
+        dispatch(fetchObjectById(Number(selectedObjectID)));
         setSelectedObject(
             objectsState.objects.find(
                 (object) => object.id === Number(selectedObjectID)
             )!
         );
     }, [selectedObjectID]);
+    useEffect(() => {
+        if (
+            reservationState.reservationOne?.object.id !==
+            Number(selectedObjectID)
+        ) {
+            setStartDate("");
+            setEndDate("");
+        }
+    }, [objectsState.objectOne]);
+
     if (
         objectsState.status === Status.LOADING &&
         clientsState.statusByPhone !== Status.LOADING
     ) {
+        return <Loader />;
+    }
+    if (reservationState.statusOne === Status.LOADING) {
         return <Loader />;
     }
     return (
@@ -426,158 +425,208 @@ function ReservationForm({
                             </div>
                         )}
                     </div>
-                    <div className="mt-3">
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="input-form col-span-1">
-                                <FormLabel
-                                    htmlFor="validation-form-start-date"
-                                    className="flex flex-col w-full sm:flex-row"
-                                >
-                                    Дата заезда
-                                    <span className="mt-1 text-xs sm:ml-auto sm:mt-0 text-slate-500">
-                                        Обязательное
-                                    </span>
-                                </FormLabel>
-                                <div className="flex gap-1 items-center">
-                                    <div className="litepicker-wrapper relative w-full">
-                                        <FormLabel
-                                            className={clsx(
-                                                "absolute flex items-center justify-center w-10 h-full border rounded-l bg-slate-100 text-slate-500 dark:bg-darkmode-700 dark:border-darkmode-800 dark:text-slate-400",
-                                                {
-                                                    "border-danger-important":
-                                                        customErrors.start_date ||
-                                                        customErrors.date,
-                                                }
-                                            )}
-                                            htmlFor="validation-form-start-date"
-                                        >
-                                            <Lucide icon="CalendarDays" />
-                                        </FormLabel>
-                                        <Litepicker
-                                            value={startDate}
-                                            id="validation-form-start-date"
-                                            name="date"
-                                            options={{
-                                                lang: "RU-ru",
-                                                autoApply: true,
-                                                singleMode: true,
-                                                showWeekNumbers: false,
-                                                dropdowns: {
-                                                    minYear:
-                                                        new Date().getFullYear(),
-                                                    maxYear:
-                                                        new Date().getFullYear() +
-                                                        2,
-                                                    months: true,
-                                                    years: true,
-                                                },
-                                            }}
-                                            onChange={(e) => {
-                                                setStartDate(e.target.value);
-                                                setCustomErrors((prev) => ({
-                                                    ...prev,
-                                                    start_date: null,
-                                                    date: null,
-                                                }));
-                                            }}
-                                            className={clsx(
-                                                "pl-12 block w-full rounded-md border",
-                                                {
-                                                    "border-danger-important":
-                                                        customErrors.start_date ||
-                                                        customErrors.date,
-                                                }
-                                            )}
-                                            placeholder="Выберите дату заезда"
-                                        />
+                    {objectsState.statusOne === Status.SUCCESS ||
+                    (isCreate && !!objectsState.objectOne) ? (
+                        <div className="mt-3">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="input-form col-span-1">
+                                    <FormLabel
+                                        htmlFor="validation-form-start-date"
+                                        className="flex flex-col w-full sm:flex-row"
+                                    >
+                                        Дата заезда
+                                        <span className="mt-1 text-xs sm:ml-auto sm:mt-0 text-slate-500">
+                                            Обязательное
+                                        </span>
+                                    </FormLabel>
+                                    <div className="flex gap-1 items-center">
+                                        <div className="litepicker-wrapper relative w-full">
+                                            <FormLabel
+                                                className={clsx(
+                                                    "absolute flex items-center justify-center w-10 h-full border rounded-l bg-slate-100 text-slate-500 dark:bg-darkmode-700 dark:border-darkmode-800 dark:text-slate-400",
+                                                    {
+                                                        "border-danger-important":
+                                                            customErrors.start_date ||
+                                                            customErrors.date,
+                                                    }
+                                                )}
+                                                htmlFor="validation-form-start-date"
+                                            >
+                                                <Lucide icon="CalendarDays" />
+                                            </FormLabel>
+                                            <Litepicker
+                                                value={startDate}
+                                                id="validation-form-start-date"
+                                                name="date"
+                                                options={{
+                                                    lang: "RU-ru",
+                                                    autoApply: true,
+                                                    singleMode: true,
+                                                    showWeekNumbers: false,
+                                                    lockDays: objectsState
+                                                        .objectOne
+                                                        ?.approve_reservation
+                                                        ? objectsState.objectOne?.approve_reservation.map(
+                                                              (reservation) => {
+                                                                  if (
+                                                                      reservation.id ===
+                                                                      reservationState
+                                                                          .reservationOne
+                                                                          ?.id
+                                                                  ) {
+                                                                      return null;
+                                                                  }
+                                                                  return [
+                                                                      reservation.start_date,
+                                                                      reservation.end_date,
+                                                                  ];
+                                                              }
+                                                          )
+                                                        : [],
+                                                    dropdowns: {
+                                                        minYear:
+                                                            new Date().getFullYear(),
+                                                        maxYear:
+                                                            new Date().getFullYear() +
+                                                            2,
+                                                        months: true,
+                                                        years: true,
+                                                    },
+                                                }}
+                                                onChange={(e) => {
+                                                    setStartDate(
+                                                        e.target.value
+                                                    );
+                                                    setCustomErrors((prev) => ({
+                                                        ...prev,
+                                                        start_date: null,
+                                                        date: null,
+                                                    }));
+                                                }}
+                                                className={clsx(
+                                                    "pl-12 block w-full border rounded-md border",
+                                                    {
+                                                        "border-danger-important":
+                                                            customErrors.start_date ||
+                                                            customErrors.date,
+                                                    }
+                                                )}
+                                                placeholder="Выберите дату заезда"
+                                            />
+                                        </div>
                                     </div>
+                                    {customErrors.start_date && (
+                                        <div className="mt-2 text-danger">
+                                            {typeof customErrors.start_date ===
+                                                "string" &&
+                                                customErrors.start_date}
+                                        </div>
+                                    )}
                                 </div>
-                                {customErrors.start_date && (
-                                    <div className="mt-2 text-danger">
-                                        {typeof customErrors.start_date ===
-                                            "string" && customErrors.start_date}
+                                <div className="input-form col-span-1">
+                                    <FormLabel
+                                        htmlFor="validation-form-end-date"
+                                        className="flex flex-col w-full sm:flex-row"
+                                    >
+                                        Дата выезда
+                                        <span className="mt-1 text-xs sm:ml-auto sm:mt-0 text-slate-500">
+                                            Обязательное
+                                        </span>
+                                    </FormLabel>
+                                    <div className="flex gap-1 items-center">
+                                        <div className="litepicker-wrapper relative w-full">
+                                            <FormLabel
+                                                htmlFor="validation-form-end-date"
+                                                className={clsx(
+                                                    "absolute flex items-center justify-center w-10 h-full border rounded-l bg-slate-100 text-slate-500 dark:bg-darkmode-700 dark:border-darkmode-800 dark:text-slate-400",
+                                                    {
+                                                        "border-danger-important":
+                                                            customErrors.end_date ||
+                                                            customErrors.date,
+                                                    }
+                                                )}
+                                            >
+                                                <Lucide icon="CalendarDays" />
+                                            </FormLabel>
+                                            <Litepicker
+                                                value={endDate}
+                                                id="validation-form-end-date"
+                                                name="date"
+                                                options={{
+                                                    lang: "RU-ru",
+                                                    autoApply: true,
+                                                    singleMode: true,
+                                                    showWeekNumbers: false,
+                                                    format: "D MMM, YYYY",
+                                                    lockDays: objectsState
+                                                        .objectOne
+                                                        ?.approve_reservation
+                                                        ? objectsState.objectOne?.approve_reservation.map(
+                                                              (reservation) => {
+                                                                  if (
+                                                                      reservation.id ===
+                                                                      reservationState
+                                                                          .reservationOne
+                                                                          ?.id
+                                                                  ) {
+                                                                      return null;
+                                                                  }
+                                                                  return [
+                                                                      reservation.start_date,
+                                                                      reservation.end_date,
+                                                                  ];
+                                                              }
+                                                          )
+                                                        : [],
+                                                    dropdowns: {
+                                                        minYear:
+                                                            new Date().getFullYear(),
+                                                        maxYear:
+                                                            new Date().getFullYear() +
+                                                            2,
+                                                        months: true,
+                                                        years: true,
+                                                    },
+                                                }}
+                                                onChange={(e) => {
+                                                    setEndDate(e.target.value);
+                                                    setCustomErrors((prev) => ({
+                                                        ...prev,
+                                                        end_date: null,
+                                                        date: null,
+                                                    }));
+                                                }}
+                                                className={clsx(
+                                                    "pl-12 block w-full border rounded-md border",
+                                                    {
+                                                        "border-danger-important":
+                                                            customErrors.end_date ||
+                                                            customErrors.date,
+                                                    }
+                                                )}
+                                                placeholder="Выберите дату выезда"
+                                            />
+                                        </div>
                                     </div>
-                                )}
-                            </div>
-                            <div className="input-form col-span-1">
-                                <FormLabel
-                                    htmlFor="validation-form-end-date"
-                                    className="flex flex-col w-full sm:flex-row"
-                                >
-                                    Дата выезда
-                                    <span className="mt-1 text-xs sm:ml-auto sm:mt-0 text-slate-500">
-                                        Обязательное
-                                    </span>
-                                </FormLabel>
-                                <div className="flex gap-1 items-center">
-                                    <div className="litepicker-wrapper relative w-full">
-                                        <FormLabel
-                                            htmlFor="validation-form-end-date"
-                                            className={clsx(
-                                                "absolute flex items-center justify-center w-10 h-full border rounded-l bg-slate-100 text-slate-500 dark:bg-darkmode-700 dark:border-darkmode-800 dark:text-slate-400",
-                                                {
-                                                    "border-danger-important":
-                                                        customErrors.end_date ||
-                                                        customErrors.date,
-                                                }
-                                            )}
-                                        >
-                                            <Lucide icon="CalendarDays" />
-                                        </FormLabel>
-                                        <Litepicker
-                                            value={endDate}
-                                            id="validation-form-end-date"
-                                            name="date"
-                                            options={{
-                                                lang: "RU-ru",
-                                                autoApply: true,
-                                                singleMode: true,
-                                                showWeekNumbers: false,
-                                                dropdowns: {
-                                                    minYear:
-                                                        new Date().getFullYear(),
-                                                    maxYear:
-                                                        new Date().getFullYear() +
-                                                        2,
-                                                    months: true,
-                                                    years: true,
-                                                },
-                                            }}
-                                            onChange={(e) => {
-                                                setEndDate(e.target.value);
-                                                setCustomErrors((prev) => ({
-                                                    ...prev,
-                                                    end_date: null,
-                                                    date: null,
-                                                }));
-                                            }}
-                                            className={clsx(
-                                                "pl-12 block w-full border rounded-md border",
-                                                {
-                                                    "border-danger-important":
-                                                        customErrors.end_date ||
-                                                        customErrors.date,
-                                                }
-                                            )}
-                                            placeholder="Выберите дату выезда"
-                                        />
-                                    </div>
+                                    {customErrors.end_date && (
+                                        <div className="mt-2 text-danger">
+                                            {typeof customErrors.end_date ===
+                                                "string" &&
+                                                customErrors.end_date}
+                                        </div>
+                                    )}
                                 </div>
-                                {customErrors.end_date && (
-                                    <div className="mt-2 text-danger">
-                                        {typeof customErrors.end_date ===
-                                            "string" && customErrors.end_date}
-                                    </div>
-                                )}
                             </div>
+                            {customErrors.date && (
+                                <div className="mt-2 text-danger">
+                                    {typeof customErrors.date === "string" &&
+                                        customErrors.date}
+                                </div>
+                            )}
                         </div>
-                        {customErrors.date && (
-                            <div className="mt-2 text-danger">
-                                {typeof customErrors.date === "string" &&
-                                    customErrors.date}
-                            </div>
-                        )}
-                    </div>
+                    ) : (
+                        <Loader />
+                    )}
                     <div className="input-form mt-3">
                         <FormLabel
                             htmlFor="validation-form-tel"
@@ -839,8 +888,8 @@ function ReservationForm({
                                 "border-danger": errors.description,
                             })}
                             defaultValue={
-                                currentReservation &&
-                                currentReservation.description
+                                reservationState.reservationOne?.description ||
+                                ""
                             }
                             placeholder="Дополнительная информация о брони"
                         ></FormTextarea>
@@ -869,7 +918,8 @@ function ReservationForm({
                                 "border-danger": errors.letter,
                             })}
                             defaultValue={
-                                currentReservation && currentReservation.letter
+                                reservationState.reservationOne?.letter ||
+                                selectedObject?.letter
                             }
                             placeholder="Ключи под ковриком"
                         ></FormTextarea>
@@ -909,29 +959,13 @@ function ReservationForm({
                             ))}
                         </TomSelect>
                     </div>
-                    <div className="flex gap-3">
-                        {!isCreate && (
-                            <Button
-                                type="button"
-                                variant="danger"
-                                className="w-full mt-5"
-                                onClick={() => {
-                                    startLoader(setIsLoaderOpen);
-                                    currentReservation &&
-                                        onDelete(currentReservation?.id);
-                                }}
-                            >
-                                Удалить
-                            </Button>
-                        )}
-                        <Button
-                            type="submit"
-                            variant="primary"
-                            className="w-full mt-5"
-                        >
-                            {isCreate ? "Добавить" : "Обновить"}
-                        </Button>
-                    </div>
+                    <Button
+                        type="submit"
+                        variant="primary"
+                        className="w-full mt-5"
+                    >
+                        {isCreate ? "Добавить" : "Обновить"}
+                    </Button>
                 </form>
             </div>
             <ValidationErrorNotification

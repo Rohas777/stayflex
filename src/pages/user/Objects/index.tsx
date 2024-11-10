@@ -516,7 +516,9 @@ function Main() {
             reservationState.isDeleted
         ) {
             dispatch(fetchReservationsByObject(currentObjectID!));
+            dispatch(fetchObjectById(currentObjectID!));
             setReservationModal(false);
+
             const successEl = document
                 .querySelectorAll("#success-notification-content")[0]
                 .cloneNode(true) as HTMLElement;

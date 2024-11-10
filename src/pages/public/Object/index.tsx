@@ -78,6 +78,11 @@ function Main() {
     useEffect(() => {
         if (reservationState.isCreated) {
             setReservationModal(false);
+            dispatch(
+                fetchObjectById(
+                    Number(location.pathname.replace("/object/", ""))
+                )
+            );
             const successEl = document
                 .querySelectorAll("#success-notification-content")[0]
                 .cloneNode(true) as HTMLElement;
