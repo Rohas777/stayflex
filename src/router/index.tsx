@@ -17,6 +17,7 @@ import PropertyTypes from "../pages/admin/PropertyTypes";
 import Amenities from "../pages/admin/Amenities";
 import Objects from "../pages/admin/Objects";
 import Object from "../pages/public/Object";
+import PublicUserObjects from "../pages/public/UserObjects";
 import UserObjects from "../pages/admin/UserObjects";
 import ObjectsClient from "../pages/user/Objects";
 import CreateObject from "../pages/user/CreateObject";
@@ -184,6 +185,10 @@ function Router() {
                 {
                     path: "/object/:id",
                     element: <Object />,
+                },
+                {
+                    path: "/objects/:user_id",
+                    element: <PublicUserObjects />,
                 },
                 {
                     path: "/terms",

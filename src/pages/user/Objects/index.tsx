@@ -43,6 +43,8 @@ import {
 } from "@/stores/reducers/reservations/types";
 import { clientSlice } from "@/stores/reducers/clients/slice";
 import { errorToastSlice } from "@/stores/errorToastSlice";
+import useCopyToClipboard from "@/utils/useCopy";
+import Icon from "@/components/Custom/Icon";
 
 window.DateTime = DateTime;
 interface Response {
@@ -77,6 +79,8 @@ function Main() {
         is_danger: true,
     });
 
+    const [isCopied, copyToClipboard] = useCopyToClipboard();
+    const { authorizedUser } = useAppSelector((state) => state.user);
     const navigate = useNavigate();
 
     const tableRef = createRef<HTMLDivElement>();
@@ -575,6 +579,31 @@ function Main() {
         }
     }, [objects]);
 
+    const onCopy = () => {
+        copyToClipboard(
+            window.location.origin + "/objects/" + authorizedUser?.id
+        );
+    };
+
+    useEffect(() => {
+        if (!isCopied) return;
+
+        const successEl = document
+            .querySelectorAll("#success-notification-content")[0]
+            .cloneNode(true) as HTMLElement;
+        successEl.querySelector(".text-content")!.textContent =
+            "Текст скопирован в буфрер обмена";
+        successEl.classList.remove("hidden");
+        Toastify({
+            node: successEl,
+            duration: 3000,
+            newWindow: true,
+            close: true,
+            gravity: "top",
+            position: "right",
+            stopOnFocus: true,
+        }).showToast();
+    }, [isCopied]);
     return (
         <>
             {isLoaderOpen && <OverlayLoader />}
@@ -587,6 +616,21 @@ function Main() {
                             Добавить
                         </Button>
                     </Link>
+                </div>
+                <div className="flex items-center w-full mt-4 sm:w-auto sm:mt-0">
+                    <Link to={"/objects/" + authorizedUser?.id} target="_blank">
+                        <Button variant="secondary" className="mr-2 shadow-md">
+                            Публичная версия
+                            <Icon icon="ExternalLink" className="size-5 ml-2" />
+                        </Button>
+                    </Link>
+                    <Button
+                        variant="secondary"
+                        className="shadow-md"
+                        onClick={onCopy}
+                    >
+                        <Icon icon="Copy" className="size-5" />
+                    </Button>
                 </div>
             </div>
             {/* BEGIN: HTML Table Data */}

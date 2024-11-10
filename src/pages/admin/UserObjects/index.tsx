@@ -12,7 +12,7 @@ import { DateTime } from "luxon";
 import { useAppDispatch, useAppSelector } from "@/stores/hooks";
 import { deleteUser, fetchUserById } from "@/stores/reducers/users/actions";
 import tippy from "tippy.js";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { Status } from "@/stores/reducers/types";
 import LoadingIcon from "@/components/Base/LoadingIcon";
 import { ListPlus } from "lucide-react";
@@ -45,6 +45,8 @@ import {
 import { clientSlice } from "@/stores/reducers/clients/slice";
 import { errorToastSlice } from "@/stores/errorToastSlice";
 import { userSlice } from "@/stores/reducers/users/slice";
+import Icon from "@/components/Custom/Icon";
+import useCopyToClipboard from "@/utils/useCopy";
 
 window.DateTime = DateTime;
 interface Response {
@@ -78,6 +80,7 @@ function Main() {
         cancelLabel: null,
         is_danger: true,
     });
+    const [isCopied, copyToClipboard] = useCopyToClipboard();
 
     const navigate = useNavigate();
 
@@ -588,16 +591,14 @@ function Main() {
         reservationState.isDeleted,
     ]);
 
+    const params = useParams();
+
     useEffect(() => {
         initTabulator();
         reInitOnResizeWindow();
 
-        const userId = Number(
-            location.pathname.replace("/admin/objects/user/", "")
-        );
-
-        dispatch(fetchObjectsByUser(userId));
-        dispatch(fetchUserById(userId));
+        dispatch(fetchObjectsByUser(Number(params.id)));
+        dispatch(fetchUserById(Number(params.id)));
         dispatch(objectActions.resetObjectOne());
     }, []);
 
@@ -618,6 +619,30 @@ function Main() {
         }
     }, [objects]);
 
+    const onCopy = () => {
+        copyToClipboard(window.location.origin + "/objects/" + params.id);
+    };
+
+    useEffect(() => {
+        if (!isCopied) return;
+
+        const successEl = document
+            .querySelectorAll("#success-notification-content")[0]
+            .cloneNode(true) as HTMLElement;
+        successEl.querySelector(".text-content")!.textContent =
+            "Текст скопирован в буфрер обмена";
+        successEl.classList.remove("hidden");
+        Toastify({
+            node: successEl,
+            duration: 3000,
+            newWindow: true,
+            close: true,
+            gravity: "top",
+            position: "right",
+            stopOnFocus: true,
+        }).showToast();
+    }, [isCopied]);
+
     return (
         <>
             {isLoaderOpen && <OverlayLoader />}
@@ -625,6 +650,21 @@ function Main() {
                 <h2 className="mr-auto text-lg font-medium">
                     Объекты пользователя - {userOne?.fullname}
                 </h2>
+                <div className="flex items-center w-full mt-4 sm:w-auto sm:mt-0">
+                    <Link to={"/objects/" + params.id} target="_blank">
+                        <Button variant="secondary" className="mr-2 shadow-md">
+                            Публичная версия
+                            <Icon icon="ExternalLink" className="size-5 ml-2" />
+                        </Button>
+                    </Link>
+                    <Button
+                        variant="secondary"
+                        className="shadow-md"
+                        onClick={onCopy}
+                    >
+                        <Icon icon="Copy" className="size-5" />
+                    </Button>
+                </div>
             </div>
             {/* BEGIN: HTML Table Data */}
             <div className="p-5 mt-5 intro-y box">
