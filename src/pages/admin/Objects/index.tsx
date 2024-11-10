@@ -494,7 +494,6 @@ function Main() {
         }
         if (isCreated || isUpdated || isActiveStatusUpdated || isDeleted) {
             dispatch(fetchObjects());
-            dispatch(fetchObjectById(currentObjectID!));
             setConfirmationModal(false);
             const successEl = document
                 .querySelectorAll("#success-notification-content")[0]

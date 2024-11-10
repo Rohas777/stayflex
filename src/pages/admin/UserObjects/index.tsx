@@ -508,9 +508,6 @@ function Main() {
     ]);
 
     useEffect(() => {
-        if (!isCreated && !isUpdated && !isActiveStatusUpdated && !isDeleted) {
-            stopLoader(setIsLoaderOpen);
-        }
         if (isActiveStatusUpdated) {
             switcherIsActive!.checked = !switcherIsActive!.checked;
         }
