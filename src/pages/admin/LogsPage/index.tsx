@@ -25,7 +25,7 @@ import clsx from "clsx";
 import Toastify from "toastify-js";
 import Notification from "@/components/Base/Notification";
 import Icon from "@/components/Custom/Icon";
-import PageStatusMark from "@/components/Custom/PageStatusMark";
+import PageStatusMark from "@/components/Custom/OnDevMark";
 import { fetchLogs } from "@/stores/reducers/logsReducer/actions";
 import { logSlice } from "@/stores/reducers/logsReducer/slice";
 

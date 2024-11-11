@@ -15,7 +15,8 @@
         "icons": "Icons",
         "logs": "Logs",
         "channels": "Channels",
-        "widget": "Widget"
+        "widget": "Widget",
+        "mails": "Mails"
     },
     "theme_switcher": {
         "lang": {

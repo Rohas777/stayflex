@@ -29,6 +29,7 @@ import ClientReservations from "../pages/common/ClientReservations";
 import Channels from "../pages/user/Channels";
 import Widget from "../pages/user/Widget";
 import Tariffs from "../pages/admin/Tariffs";
+import Mails from "../pages/admin/Mails";
 import Logs from "../pages/admin/LogsPage";
 import TariffsClient from "../pages/user/Tariffs";
 import Icon from "../pages/admin/Icon";
@@ -176,6 +177,10 @@ function Router() {
                 {
                     path: "/admin/logs",
                     element: <Logs />,
+                },
+                {
+                    path: "/admin/mails",
+                    element: <Mails />,
                 },
             ],
         },

@@ -74,6 +74,12 @@ const menu: Array<Menu | "divider"> = [
                 title: lang.menu.tariffs,
             },
             {
+                icon: "Mail",
+                pathname: "/admin/mails",
+                title: lang.menu.mails,
+                mark: "experimental",
+            },
+            {
                 icon: "Activity",
                 pathname: "/admin/icon",
                 title: lang.menu.icons,

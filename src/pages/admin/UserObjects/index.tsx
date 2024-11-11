@@ -627,7 +627,7 @@ function Main() {
             .querySelectorAll("#success-notification-content")[0]
             .cloneNode(true) as HTMLElement;
         successEl.querySelector(".text-content")!.textContent =
-            "Текст скопирован в буфрер обмена";
+            "Ссылка на страницу скопирована в буфрер обмена";
         successEl.classList.remove("hidden");
         Toastify({
             node: successEl,

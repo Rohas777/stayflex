@@ -15,7 +15,8 @@
         "icons": "Иконки",
         "logs": "Логи",
         "channels": "Каналы",
-        "widget": "Виджет"
+        "widget": "Виджет",
+        "mails": "Письма"
     },
     "theme_switcher": {
         "lang": {
