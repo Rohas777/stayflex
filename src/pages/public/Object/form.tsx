@@ -88,8 +88,13 @@ function ReservationForm({
     const childCountValidation = yup
         .number()
         .lessThan(
-            object.child_places + 1,
-            `Максимальное количество детских спальных мест: ${object.child_places}`
+            object ? object.child_places + 1 : -1,
+            ` ${
+                object
+                    ? "Максимальное количество детских спальных мест:" +
+                      object.adult_places
+                    : "Сначала выберите объект"
+            }`
         )
         .typeError("Количество спальных мест должно быть числовым значением")
         .positive("Количество спальных мест не может быть отрицательным")
@@ -161,9 +166,15 @@ function ReservationForm({
                 .required("'Дополнительная информация' это обязательное поле"),
             adult_count: yup
                 .number()
+
                 .lessThan(
-                    object.adult_places + 1,
-                    `Максимальное количество взрослых спальных мест: ${object.adult_places}`
+                    object ? object.adult_places + 1 : -1,
+                    ` ${
+                        object
+                            ? "Максимальное количество взрослых спальных мест:" +
+                              object.adult_places
+                            : "Сначала выберите объект"
+                    }`
                 )
                 .typeError(
                     "Количество спальных мест должно быть числовым значением"
@@ -232,8 +243,8 @@ function ReservationForm({
         <>
             {isLoaderOpen && <OverlayLoader />}
 
-            <div className="p-5">
-                <div className="mt-5 text-lg font-bold text-center">
+            <div className="px-5 pb-5">
+                <div className="text-lg font-bold text-center">
                     Забронировать
                 </div>
                 <form className="validate-form mt-5" onSubmit={onSubmit}>

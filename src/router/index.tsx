@@ -5,6 +5,7 @@ import Login from "../pages/common/Login";
 import Register from "../pages/common/Register";
 import ActivateCode from "../pages/common/ActivateCode";
 import ErrorPage from "../pages/public/ErrorPage";
+import SuccessReservation from "../pages/public/SuccessReservation";
 
 import Layout from "../themes";
 
@@ -193,6 +194,10 @@ function Router() {
                 {
                     path: "/terms",
                     element: <PrivacyPolicy />,
+                },
+                {
+                    path: "/reservation-success",
+                    element: <SuccessReservation />,
                 },
             ],
         },

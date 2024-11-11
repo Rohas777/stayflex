@@ -620,7 +620,7 @@ function Main() {
                 <div className="flex items-center w-full mt-4 sm:w-auto sm:mt-0">
                     <Link to={"/objects/" + authorizedUser?.id} target="_blank">
                         <Button variant="secondary" className="mr-2 shadow-md">
-                            Публичная версия
+                            Страница объектов
                             <Icon icon="ExternalLink" className="size-5 ml-2" />
                         </Button>
                     </Link>

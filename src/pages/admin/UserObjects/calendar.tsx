@@ -67,7 +67,7 @@ function ReservationsCalendar({
         headerToolbar: {
             left: "prev,next today",
             center: "title",
-            right: "dayGridMonth,timeGridWeek,timeGridDay,listWeek",
+            right: "dayGridMonth,timeGridWeek,timeGridDay,listYear",
         },
         locale: ruLocale,
         weekNumberCalculation: "ISO",
@@ -91,8 +91,8 @@ function ReservationsCalendar({
         },
         dayCellClassNames: (props) => {
             if (formatDate(props.date) < formatDate(new Date()))
-                return ["bg-slate-100 cursor-not-allowed"];
-            return ["cursor-pointer"];
+                return ["bg-slate-100"];
+            return [];
         },
         eventClick: (info) => {
             setCurrentReservation(info.event.extendedProps.reservation);

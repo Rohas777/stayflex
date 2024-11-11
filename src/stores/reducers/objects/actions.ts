@@ -141,7 +141,7 @@ export const fetchObjectsByUser = createAsyncThunk(
     "object/fetchByUser",
     async (id: number, thunkAPI) => {
         try {
-            const response = await instance.get(`/admin/object/userid/${id}`);
+            const response = await instance.get(`/object/userid/${id}`);
             return response.data;
         } catch (error: any) {
             if (!!checkErrorsBase(error)) {

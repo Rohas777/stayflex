@@ -32,7 +32,8 @@ import { logSlice } from "@/stores/reducers/logsReducer/slice";
 window.DateTime = DateTime;
 interface Response {
     id?: number;
-    user?: { id: number; fullname: string };
+    user_id?: number;
+    user?: string;
     role?: string;
     action?: string;
     created_at?: DateTime;
@@ -120,34 +121,30 @@ function Main() {
                     {
                         title: "Пользователь",
                         minWidth: 100,
+                        maxWidth: 250,
                         responsive: 0,
                         field: "user",
+                        headerHozAlign: "left",
                         vertAlign: "middle",
                         print: false,
                         download: false,
                         sorter: "string",
                         formatter(cell) {
                             const response: Response = cell.getData();
-                            return `<div class="absolute inset-0 h-full items-center justify-between flex w-full font-medium whitespace-nowrap hover:text-primary">
-                                        <span class="whitespace-nowrap">${response.user?.fullname}</span>
-                                        <span class="rounded-md px-2 py-1 text-xs bg-primary/10">ID: ${response.user?.id}</span>
-                                    </div>`;
-                        },
-                    },
-                    {
-                        title: "Роль",
-                        minWidth: 200,
-                        field: "role",
-                        vertAlign: "middle",
-                        hozAlign: "center",
-                        headerHozAlign: "center",
-                        print: false,
-                        download: false,
-                        sorter: "string",
-                        formatter(cell) {
-                            const response: Response = cell.getData();
-                            return `<div>
-                                        <div class="font-medium whitespace-nowrap">${response.role}</div>
+                            return `<div class="absolute px-5 inset-0 h-full items-center justify-between flex w-full font-medium whitespace-nowrap hover:text-primary">
+                                        <span class="whitespace-nowrap truncate">${
+                                            response.user
+                                        }</span>
+                                        <div>
+                                            <span class="rounded-md px-2 py-1 text-xs ${
+                                                response.role === "A"
+                                                    ? "bg-danger/40"
+                                                    : "bg-primary/10"
+                                            }">${response.role}</span>
+                                            <span class="rounded-md px-2 py-1 text-xs bg-primary/10">ID: ${
+                                                response.user_id
+                                            }</span>
+                                        </div>
                                     </div>`;
                         },
                     },
@@ -156,22 +153,32 @@ function Main() {
                         title: "Действие",
                         minWidth: 200,
                         field: "action",
-                        hozAlign: "center",
-                        headerHozAlign: "center",
+                        hozAlign: "left",
+                        headerHozAlign: "left",
                         vertAlign: "middle",
                         print: false,
                         download: false,
                         sorter: "number",
                         formatter(cell) {
                             const response: Response = cell.getData();
-                            return `<div class="flex lg:justify-center">
-                                        <div class="font-medium whitespace-nowrap">${response.action}</div>
-                                    </div>`;
+                            const output =
+                                stringToHTML(`<div class="flex lg:justify-start truncate w-full">
+                                        <div class="font-medium truncate">${response.action}</div>
+                                    </div>`);
+
+                            tippy(output, {
+                                content: response.action,
+                                placement: "bottom",
+                                animation: "shift-away",
+                                trigger: "mouseenter click",
+                            });
+                            return output;
                         },
                     },
                     {
                         title: "Дата",
                         minWidth: 200,
+                        maxWidth: 200,
                         field: "created_at",
                         hozAlign: "center",
                         headerHozAlign: "center",
@@ -265,7 +272,7 @@ function Main() {
             tabulator.current.setFilter([
                 [
                     {
-                        field: "name",
+                        field: "user",
                         type: "like",
                         value: filter.value,
                     },
@@ -348,9 +355,10 @@ function Main() {
                     new Date(log.created_at).toLocaleDateString() +
                     " " +
                     log.created_at.split("T")[1].split(".")[0],
-                user: log.user,
+                user: log.user.fullname,
+                user_id: log.user.id,
                 action: log.description,
-                role: log.user?.is_admin ? "Администратор" : "Пользователь",
+                role: log.user?.is_admin ? "A" : "U",
             }));
             tabulator.current?.setData(formattedData).then(function () {
                 reInitTabulator();

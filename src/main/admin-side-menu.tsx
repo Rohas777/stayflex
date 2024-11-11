@@ -35,6 +35,11 @@ const menu: Array<Menu | "divider"> = [
         title: lang.menu.reservations,
     },
     {
+        icon: "FileArchive",
+        pathname: "/admin/logs",
+        title: lang.menu.logs,
+    },
+    {
         icon: "Wrench",
         title: lang.menu.settings,
         subMenu: [
@@ -72,11 +77,6 @@ const menu: Array<Menu | "divider"> = [
                 icon: "Activity",
                 pathname: "/admin/icon",
                 title: lang.menu.icons,
-            },
-            {
-                icon: "FileArchive",
-                pathname: "/admin/logs",
-                title: lang.menu.logs,
             },
         ],
     },

@@ -1,7 +1,7 @@
 import { useAppDispatch, useAppSelector } from "@/stores/hooks";
 import React, { useEffect, useState } from "react";
 import { fetchObjectById } from "@/stores/reducers/objects/actions";
-import { Navigate, useLocation } from "react-router-dom";
+import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { Status } from "@/stores/reducers/types";
 import Loader from "@/components/Custom/Loader/Loader";
 import TinySlider from "@/components/Base/TinySlider";
@@ -27,6 +27,7 @@ function Main() {
     const reservationState = useAppSelector((state) => state.reservation);
     const reservationActions = reservationSlice.actions;
     const dispatch = useAppDispatch();
+    const navigate = useNavigate();
 
     const location = useLocation();
     useEffect(() => {
@@ -83,21 +84,7 @@ function Main() {
                     Number(location.pathname.replace("/object/", ""))
                 )
             );
-            const successEl = document
-                .querySelectorAll("#success-notification-content")[0]
-                .cloneNode(true) as HTMLElement;
-            successEl.querySelector(".text-content")!.textContent =
-                "Бронь успешно оформлена";
-            successEl.classList.remove("hidden");
-            Toastify({
-                node: successEl,
-                duration: 3000,
-                newWindow: true,
-                close: true,
-                gravity: "top",
-                position: "right",
-                stopOnFocus: true,
-            }).showToast();
+            navigate("/reservation-success");
             stopLoader(setIsLoaderOpen);
             dispatch(reservationActions.resetIsCreated());
         }
@@ -226,56 +213,19 @@ function Main() {
                                     {objectOne?.min_ded}
                                 </p>
                             </div>
-                            {objectOne?.active && (
-                                <Button
-                                    variant="primary"
-                                    className="my-5 w-full"
-                                    onClick={() => {
-                                        setReservationModal(true);
-                                    }}
-                                >
-                                    Забронировать
-                                </Button>
-                            )}
                         </div>
                     </div>
                 </div>
             </div>
-            <div className="lg:hidden flex col-span-1 flex-col box intro-y px-5 py-5 mt-5">
-                <div className="mx-6">
-                    <div className="flex items-center mb-4 font-medium text-slate-600 dark:text-slate-300">
-                        Удобства:
-                    </div>
-                    <div className="flex flex-wrap gap-5">
-                        {objectOne?.conveniences.map((amenity) => (
-                            <p className="flex-auto flex items-center text-slate-600 dark:text-slate-300">
-                                <Icon
-                                    icon={amenity.icon as IconType}
-                                    className="size-5 mr-1"
-                                />
-                                {amenity.name}
-                            </p>
-                        ))}
-                    </div>
-                </div>
-            </div>
-            <div className="grid lg:grid-cols-3 xl:grid-cols-2 px-5 pt-5 mt-5 intro-y box">
-                <div
-                    className="ck-insert-data lg:col-span-2 xl:col-span-1 pb-8 mx-6" //TODO -
-                    dangerouslySetInnerHTML={
-                        objectOne?.description
-                            ? { __html: objectOne?.description }
-                            : { __html: "" }
-                    }
-                ></div>
-                <div className="hidden lg:flex col-span-1 flex-col mx-6 border-b border-slate-200/60 dark:border-darkmode-400">
-                    <div className="mb-5">
-                        <div className="flex items-center mb-2 font-medium text-slate-600 dark:text-slate-300">
+            <div className="flex flex-col-reverse xl:flex-row px-5 pt-10 mt-5 intro-y box">
+                <div className="flex-1">
+                    <div className="mx-6">
+                        <div className="flex items-center mb-4 text-lg font-medium text-slate-600 dark:text-slate-300">
                             Удобства:
                         </div>
-                        <div className="grid  lg:grid-cols-1 xl:grid-cols-2 gap-1">
+                        <div className="flex flex-wrap gap-5 gap-y-2">
                             {objectOne?.conveniences.map((amenity) => (
-                                <p className="col-span-1 flex items-center text-slate-600 dark:text-slate-300">
+                                <p className="flex items-center text-slate-600 dark:text-slate-300">
                                     <Icon
                                         icon={amenity.icon as IconType}
                                         className="size-5 mr-1"
@@ -285,41 +235,35 @@ function Main() {
                             ))}
                         </div>
                     </div>
-                </div>
-            </div>
-            {/* END: Profile Info */}
+                    <div className="mx-6 mt-4">
+                        <div className="flex items-center mb-4 text-lg font-medium text-slate-600 dark:text-slate-300">
+                            Описание:
+                        </div>
 
-            {/* BEGIN: Form Modal */}
-            {objectOne?.active && (
-                <Dialog
-                    size="lg"
-                    id="reservation-form-modal"
-                    open={reservationModal}
-                    onClose={() => {
-                        setReservationModal(false);
-                    }}
-                >
-                    <Dialog.Panel>
-                        <a
-                            onClick={(event: React.MouseEvent) => {
-                                event.preventDefault();
-                                setReservationModal(false);
-                            }}
-                            className="absolute top-0 right-0 mt-3 mr-3"
-                            href="#"
-                        >
-                            <Icon icon="X" className="w-8 h-8 text-slate-400" />
-                        </a>
+                        <div
+                            className="ck-insert-data pb-8 mt-2" //TODO -
+                            dangerouslySetInnerHTML={
+                                objectOne?.description
+                                    ? { __html: objectOne?.description }
+                                    : { __html: "" }
+                            }
+                        ></div>
+                    </div>
+                </div>
+
+                {objectOne && (
+                    <div className="flex-1">
                         <ReservationForm
                             object={objectOne!}
                             onCreate={onCreate}
                             setIsLoaderOpen={setIsLoaderOpen}
                             isLoaderOpen={isLoaderOpen}
                         />
-                    </Dialog.Panel>
-                </Dialog>
-            )}
-            {/* END: Form Modal */}
+                    </div>
+                )}
+            </div>
+            {/* END: Profile Info */}
+
             {/* BEGIN: Success Notification Content */}
             <Notification
                 id="success-notification-content"

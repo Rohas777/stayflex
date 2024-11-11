@@ -24,6 +24,7 @@ import Lucide from "@/components/Base/Lucide";
 import { IReservation } from "@/stores/models/IReservation";
 import { objectSlice } from "@/stores/reducers/objects/slice";
 import { fetchObjectById } from "@/stores/reducers/objects/actions";
+import { stringToHTML } from "@/utils/helper";
 
 interface ReservationsCalendarProps {
     isLoaderOpen: boolean;
@@ -63,12 +64,25 @@ function ReservationsCalendar({
     const clientActions = clientSlice.actions;
     const dispatch = useAppDispatch();
 
+    const foundEvent = (date: string) =>
+        (
+            events as [
+                {
+                    start: string;
+                    end: string;
+                    extendedProps: { reservation: IReservation };
+                }
+            ]
+        ).find((event) => {
+            return !(date < event.start || date > event.end);
+        });
+
     const options: CalendarOptions = {
         plugins: [interactionPlugin, dayGridPlugin, timeGridPlugin, listPlugin],
         headerToolbar: {
             left: "prev,next today",
             center: "title",
-            right: "dayGridMonth,timeGridWeek,timeGridDay,listWeek",
+            right: "dayGridMonth,timeGridWeek,timeGridDay,listYear",
         },
         locale: ruLocale,
         weekNumberCalculation: "ISO",
@@ -91,9 +105,23 @@ function ReservationsCalendar({
             return ["cursor-pointer", "transition", "hover:opacity-80"];
         },
         dayCellClassNames: (props) => {
+            const classes: string[] = [];
+            const foundedEvent = foundEvent(formatDate(props.date));
+
+            if (
+                (foundedEvent &&
+                    foundedEvent.extendedProps.reservation.status ===
+                        "approved") ||
+                formatDate(props.date) < formatDate(new Date())
+            ) {
+                classes.push("cursor-not-allowed");
+            } else {
+                classes.push("plus-day");
+            }
             if (formatDate(props.date) < formatDate(new Date()))
-                return ["bg-slate-100 cursor-not-allowed"];
-            return ["cursor-pointer"];
+                classes.push("bg-slate-100");
+
+            return classes;
         },
         eventClick: (info) => {
             setCurrentReservation(info.event.extendedProps.reservation);
@@ -101,23 +129,11 @@ function ReservationsCalendar({
             setReservationModal(true);
         },
         dateClick: (info) => {
-            const foundEvent = (
-                events as [
-                    {
-                        start: string;
-                        end: string;
-                        extendedProps: { reservation: IReservation };
-                    }
-                ]
-            ).find((event) => {
-                return !(
-                    info.dateStr < event.start || info.dateStr > event.end
-                );
-            });
+            const foundedEvent = foundEvent(info.dateStr);
 
             if (
-                foundEvent &&
-                foundEvent.extendedProps.reservation.status === "approved"
+                foundedEvent &&
+                foundedEvent.extendedProps.reservation.status === "approved"
             )
                 return;
 

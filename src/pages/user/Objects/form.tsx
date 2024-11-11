@@ -356,7 +356,10 @@ function ReservationForm({
         );
     }, [selectedObjectID]);
     useEffect(() => {
-        if (currentReservation?.object.id !== Number(selectedObjectID)) {
+        if (
+            currentReservation?.object.id !== Number(selectedObjectID) &&
+            !isCreate
+        ) {
             setStartDate("");
             setEndDate("");
         }

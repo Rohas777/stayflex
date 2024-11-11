@@ -22,6 +22,31 @@ function Main() {
 
     return (
         <>
+            {/* BEGIN: Profile Info */}
+            <div className="px-5 pt-5 mt-5 intro-y box">
+                <div className="flex justify-center pb-5 -mx-5 border-b lg:flex-row border-slate-200/60 dark:border-darkmode-400">
+                    <div className="flex flex-col items-center mt-4">
+                        <div className="flex items-center justify-center sm:whitespace-normal font-medium">
+                            {objects[0]?.author?.fullname}
+                        </div>
+                        <Link
+                            to={`mailto:${objects[0]?.author?.mail}`}
+                            className="flex items-center justify-center mt-3 truncate sm:whitespace-normal"
+                        >
+                            <Icon icon="Mail" className="w-4 h-4 mr-2" />
+                            {objects[0]?.author?.mail}
+                        </Link>
+                        <Link
+                            to={`tel:${objects[0]?.author?.phone}`}
+                            className="flex items-center justify-center mt-3 truncate sm:whitespace-normal"
+                        >
+                            <Icon icon="Phone" className="w-4 h-4 mr-2" />{" "}
+                            {objects[0]?.author?.phone}
+                        </Link>
+                    </div>
+                </div>
+            </div>
+            {/* END: Profile Info */}
             <div className="grid grid-cols-12 gap-6 mt-5">
                 {/* BEGIN: Users Layout */}
                 {objects.map((object) => (
@@ -59,19 +84,28 @@ function Main() {
                                             icon="Layers"
                                             className="w-4 h-4 mr-2"
                                         />{" "}
-                                        Площадь: {object.area} м<sup>2</sup>
+                                        Площадь: {object.area} м²
                                     </div>
                                     <div className="flex mt-2">
                                         <Icon
-                                            icon="stairs"
+                                            icon="Bed"
                                             className="w-4 h-4 mr-2"
                                         />{" "}
-                                        Этаж {object.floor}
+                                        Мест:{" "}
+                                        {object.adult_places +
+                                            object.child_places}
+                                    </div>
+                                    <div className="flex mt-2">
+                                        <Icon
+                                            icon="houses"
+                                            className="w-4 h-4 mr-2"
+                                        />{" "}
+                                        Комнат: {object.room_count}
                                     </div>
                                     <div className="flex mt-2">
                                         <Icon
                                             icon="MapPin"
-                                            className="w-4 h-4 mr-2"
+                                            className="size-5    mr-2"
                                         />{" "}
                                         Адрес: {object.city.region.name},{" "}
                                         {object.city.name}, {object.address}
