@@ -35,6 +35,7 @@ import {
     dayTitle,
     formatDate,
     getDaysBetweenDates,
+    isDateRangeLocked,
     startLoader,
     stopLoader,
     validateEndDaterange,
@@ -163,6 +164,19 @@ function ReservationForm({
                 selectedObject?.min_ded +
                 " " +
                 dayTitle(selectedObject?.min_ded!);
+        }
+        if (
+            isDateRangeLocked(
+                startDate,
+                endDate,
+                objectsState.objectOne?.approve_reservation || [],
+                reservationState.reservationOne
+                    ? reservationState.reservationOne.id
+                    : undefined
+            )
+        ) {
+            errors.date =
+                "В выбранном диапазоне дат уже есть забронированные даты";
         }
         if (!tel) {
             errors.tel = "Обязательно введите телефон клиента";
@@ -344,15 +358,6 @@ function ReservationForm({
             )!
         );
     }, [selectedObjectID]);
-    useEffect(() => {
-        if (
-            reservationState.reservationOne?.object.id !==
-            Number(selectedObjectID)
-        ) {
-            setStartDate("");
-            setEndDate("");
-        }
-    }, [objectsState.objectOne]);
 
     if (
         objectsState.status === Status.LOADING &&
@@ -426,7 +431,7 @@ function ReservationForm({
                         )}
                     </div>
                     {objectsState.statusOne === Status.SUCCESS ||
-                    (isCreate && !!objectsState.objectOne) ? (
+                    (isCreate && selectedObjectID === "-1") ? (
                         <div className="mt-3">
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="input-form col-span-1">

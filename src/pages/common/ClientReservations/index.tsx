@@ -48,6 +48,7 @@ import clsx from "clsx";
 import { errorToastSlice } from "@/stores/errorToastSlice";
 import { fetchClientByID } from "@/stores/reducers/clients/actions";
 import { objectSlice } from "@/stores/reducers/objects/slice";
+import { reservationStatus } from "@/vars";
 
 window.DateTime = DateTime;
 interface Response {
@@ -61,11 +62,13 @@ interface Response {
 }
 
 function Main() {
-    const [buttonModalInfo, setButtonModalInfo] = useState(false);
     const [buttonModalCreate, setButtonModalCreate] = useState(false);
-    const [rowAcionFocus, setRowAcionFocus] = useState<Response | null>(null);
     const [isLoaderOpen, setIsLoaderOpen] = useState(false);
     const [confirmationModal, setConfirmationModal] = useState(false);
+    const [statusSelector, setStatusSelector] =
+        useState<HTMLSelectElement | null>(null);
+    const [selectedStatus, setSelectedStatus] =
+        useState<reservationStatus>("new");
     const [confirmModalContent, setConfirmModalContent] = useState<{
         title: string | null;
         description: string | null;
@@ -172,7 +175,7 @@ function Main() {
                         },
                     },
                     {
-                        title: "СТАТУС",
+                        title: "Статус",
                         minWidth: 200,
                         field: "status",
                         hozAlign: "center",
@@ -183,7 +186,9 @@ function Main() {
                         sorter: "string",
                         formatter(cell) {
                             const response: Response = cell.getData();
-
+                            const a = stringToHTML(
+                                `<div class="flex lg:justify-center items-center"></div>`
+                            );
                             const statuses = [
                                 {
                                     value: "new",
@@ -197,17 +202,43 @@ function Main() {
                                     value: "rejected",
                                     label: "Отклонена",
                                 },
-                                {
-                                    value: "completed",
-                                    label: "Завершена",
-                                },
                             ];
-                            const currentStatus = statuses.find(
-                                (status) => status.value === response.status
-                            );
-                            return `<div>
-                                        <div class="font-medium whitespace-nowrap">${currentStatus?.label}</div>
-                                    </div>`;
+
+                            const options = statuses.map((status) => {
+                                return `<option value="${status.value}" ${
+                                    response.status === status.value
+                                        ? "selected"
+                                        : ""
+                                }>${status.label}</option>`;
+                            });
+
+                            let selector =
+                                stringToHTML(`<select class="min-w-40 cursor-pointer bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                    ${options.join("")}
+                                    </select>`);
+                            if (response.status === "completed") {
+                                selector = stringToHTML(
+                                    `<span class="text-green-500">Завершена</span>`
+                                );
+                            }
+                            const prevStatus = response.status;
+                            a.append(selector);
+                            a.addEventListener("hover", function () {});
+                            selector.addEventListener("change", function (e) {
+                                e.preventDefault();
+                                const target = this as HTMLSelectElement;
+                                setStatusSelector(target);
+                                setSelectedStatus(
+                                    target.value as reservationStatus
+                                );
+
+                                onUpdateStatus({
+                                    id: response.id!,
+                                    status: target.value,
+                                });
+                                target.value = prevStatus!;
+                            });
+                            return a;
                         },
                     },
                     {
@@ -416,6 +447,7 @@ function Main() {
         resetStatusOne,
     } = reservationSlice.actions;
     const clientState = useAppSelector((state) => state.client);
+    const { authorizedUser } = useAppSelector((state) => state.user);
 
     const { resetClientByPhone } = clientSlice.actions;
     const clientActions = clientSlice.actions;
@@ -486,8 +518,11 @@ function Main() {
         }
     }, [statusAll, error, statusOne]);
     useEffect(() => {
+        if (statusSelector) {
+            statusSelector.value = selectedStatus;
+        }
         if (isCreated || isUpdated || isDeleted) {
-            dispatch(fetchReservations());
+            dispatch(fetchReservationsByClient(Number(params.id!)));
             setButtonModalCreate(false);
             setConfirmationModal(false);
             const successEl = document
@@ -524,6 +559,24 @@ function Main() {
                 <h2 className="mr-auto text-lg font-medium">
                     Список броней клиента - {clientState.clientOne?.fullname}
                 </h2>
+                {!authorizedUser?.is_admin && (
+                    <div className="flex w-full mt-4 sm:w-auto sm:mt-0">
+                        <Button
+                            as="a"
+                            href="#"
+                            variant="primary"
+                            className="mr-2 shadow-md"
+                            onClick={(event: React.MouseEvent) => {
+                                event.preventDefault();
+                                setButtonModalCreate(true);
+                                dispatch(fetchObjects());
+                            }}
+                        >
+                            <ListPlus className="size-5 mr-2" />
+                            Добавить
+                        </Button>
+                    </div>
+                )}
             </div>
             {/* BEGIN: HTML Table Data */}
             <div className="p-5 mt-5 intro-y box">

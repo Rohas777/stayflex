@@ -31,6 +31,7 @@ import {
     dayTitle,
     formatDate,
     getDaysBetweenDates,
+    isDateRangeLocked,
     startLoader,
     stopLoader,
     validateEndDaterange,
@@ -128,6 +129,16 @@ function ReservationForm({
                 object.min_ded +
                 " " +
                 dayTitle(object.min_ded!);
+        }
+        if (
+            isDateRangeLocked(
+                startDate,
+                endDate,
+                objectsState.objectOne?.approve_reservation || []
+            )
+        ) {
+            errors.date =
+                "В выбранном диапазоне дат уже есть забронированные даты";
         }
         if (!tel) {
             errors.tel = "Обязательно введите телефон клиента";

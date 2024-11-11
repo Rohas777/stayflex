@@ -35,6 +35,7 @@ import {
     dayTitle,
     formatDate,
     getDaysBetweenDates,
+    isDateRangeLocked,
     startLoader,
     stopLoader,
     validateEndDaterange,
@@ -79,7 +80,6 @@ function ReservationForm({
         useState<reservationStatus>("new");
     const [startDate, setStartDate] = useState("");
     const [endDate, setEndDate] = useState("");
-    const [client, setClient] = useState<IClient | null>(null);
     const [isCreate, setIsCreate] = useState(true);
 
     const reservationState = useAppSelector((state) => state.reservation);
@@ -106,7 +106,7 @@ function ReservationForm({
             ` ${
                 selectedObject
                     ? "Максимальное количество детских спальных мест:" +
-                      selectedObject.adult_places
+                      selectedObject.child_places
                     : "Сначала выберите объект"
             }`
         )
@@ -145,6 +145,19 @@ function ReservationForm({
                 selectedObject?.min_ded +
                 " " +
                 dayTitle(selectedObject?.min_ded!);
+        }
+        if (
+            isDateRangeLocked(
+                startDate,
+                endDate,
+                objectsState.objectOne?.approve_reservation || [],
+                reservationState.reservationOne
+                    ? reservationState.reservationOne.id
+                    : undefined
+            )
+        ) {
+            errors.date =
+                "В выбранном диапазоне дат уже есть забронированные даты";
         }
         if (!!selectedObject && selectedObject.child_places > 0) {
             await childCountValidation
@@ -221,7 +234,7 @@ function ReservationForm({
             start_date: formatDate(new Date(startDate)),
             end_date: formatDate(new Date(endDate)),
             object_id: Number(selectedObjectID),
-            client_id: client!.id,
+            client_id: clientsState.clientOne?.id!,
             description: String(formData?.get("description")),
             letter: String(formData?.get("letter")),
             status: selectedStatus,
@@ -229,7 +242,6 @@ function ReservationForm({
                 Number(formData?.get("adult_count")) +
                 Number(formData?.get("child_count")), //FIXME -
         };
-        console.log(reservationData);
         if (isCreate) {
             onCreate(reservationData);
         } else {
@@ -247,11 +259,6 @@ function ReservationForm({
         setStartDate(reservationState.reservationOne.start_date);
         setEndDate(reservationState.reservationOne.end_date);
         setSelectedStatus(reservationState.reservationOne.status);
-        setClient({
-            ...reservationState.reservationOne.client,
-            reiting: 0,
-            reservation_count: 0,
-        });
         dispatch(
             fetchClientByPhone(reservationState.reservationOne.client.phone)
         );
@@ -266,19 +273,10 @@ function ReservationForm({
             )!
         );
     }, [selectedObjectID]);
-    useEffect(() => {
-        if (
-            reservationState.reservationOne?.object.id !==
-            Number(selectedObjectID)
-        ) {
-            setStartDate("");
-            setEndDate("");
-        }
-    }, [objectsState.objectOne]);
 
     if (
         objectsState.status === Status.LOADING &&
-        clientsState.statusByPhone !== Status.LOADING
+        clientsState.statusOne !== Status.LOADING
     ) {
         return <Loader />;
     }
@@ -348,7 +346,7 @@ function ReservationForm({
                         )}
                     </div>
                     {objectsState.statusOne === Status.SUCCESS ||
-                    (isCreate && !!objectsState.objectOne) ? (
+                    (isCreate && selectedObjectID === "-1") ? (
                         <div className="mt-3">
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="input-form col-span-1">
@@ -420,7 +418,6 @@ function ReservationForm({
                                                     setStartDate(
                                                         e.target.value
                                                     );
-                                                    console.log(e.target.value);
                                                     setCustomErrors((prev) => ({
                                                         ...prev,
                                                         start_date: null,
@@ -559,26 +556,28 @@ function ReservationForm({
                                     <strong className="inline-block w-20">
                                         Телефон:
                                     </strong>
-                                    {client?.phone}
+                                    {clientsState.clientOne?.phone}
                                 </li>
                                 <li className="mt-1">
                                     <strong className="inline-block w-20">
                                         Email:
                                     </strong>
-                                    {client?.email}
+                                    {clientsState.clientOne?.email}
                                 </li>
                                 <li className="mt-1">
                                     <strong className="inline-block w-20">
                                         ФИО:
                                     </strong>
-                                    {client?.fullname}
+                                    {clientsState.clientOne?.fullname}
                                 </li>
                                 <li className="mt-1">
                                     <strong className="inline-block w-20">
                                         Оценка:
                                     </strong>
-                                    {client?.reiting
-                                        ? "★".repeat(client?.reiting)
+                                    {clientsState.clientOne?.reiting
+                                        ? "★".repeat(
+                                              clientsState.clientOne?.reiting
+                                          )
                                         : "Без оценки"}
                                 </li>
                             </ul>

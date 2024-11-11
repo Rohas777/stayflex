@@ -234,6 +234,42 @@ export const getDaysBetweenDates = (startDate: string, endDate: string) => {
 };
 
 /**
+ * @description
+ * Проверяет, находится ли переданный диапазон дат в зоне блокировки.
+ * @param {string} startDate - дата начала
+ * @param {string} endDate - дата конца
+ * @param {Array<{id: number, start_date: string, end_date: string}>} lockDays - массив объектов, каждый из которых
+ *  содержит id, start_date и end_date, которые указывают на зону блокировки
+ * @param {number} [excludeId] - необязательный параметр, который указывает на id, который нужно пропустить
+ * @returns {boolean} true, если диапазон находится в зоне блокировки, false - если нет
+ *
+ */
+
+export const isDateRangeLocked = (
+    startDate: string,
+    endDate: string,
+    lockDays: { id: number; start_date: string; end_date: string }[],
+    excludeId?: number
+): boolean => {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    for (const lock of lockDays) {
+        if (excludeId && lock.id === excludeId) {
+            continue;
+        }
+
+        const lockStart = new Date(lock.start_date);
+        const lockEnd = new Date(lock.end_date);
+
+        if (start <= lockEnd && end >= lockStart) {
+            return true;
+        }
+    }
+    return false;
+};
+
+/**
  * Возвращает строку, соответствующую количеству дней, с
  * правильным склонением.
  *

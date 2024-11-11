@@ -35,6 +35,7 @@ import {
     dayTitle,
     formatDate,
     getDaysBetweenDates,
+    isDateRangeLocked,
     startLoader,
     stopLoader,
     validateEndDaterange,
@@ -183,6 +184,17 @@ function ReservationForm({
                 selectedObject?.min_ded +
                 " " +
                 dayTitle(selectedObject?.min_ded!);
+        }
+        if (
+            isDateRangeLocked(
+                startDate,
+                endDate,
+                objectsState.objectOne?.approve_reservation || [],
+                currentReservation ? currentReservation.id : undefined
+            )
+        ) {
+            errors.date =
+                "В выбранном диапазоне дат уже есть забронированные даты";
         }
         if (!tel) {
             errors.tel = "Обязательно введите телефон клиента";
@@ -356,12 +368,6 @@ function ReservationForm({
             )!
         );
     }, [selectedObjectID]);
-    useEffect(() => {
-        if (currentReservation?.object.id !== Number(selectedObjectID)) {
-            setStartDate("");
-            setEndDate("");
-        }
-    }, [objectsState.objectOne]);
 
     if (
         objectsState.status === Status.LOADING &&

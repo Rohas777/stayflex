@@ -372,14 +372,8 @@ function Main() {
                 <h2 className="mr-auto text-lg font-medium">Логи</h2>
             </div>
             {/* BEGIN: HTML Table Data */}
-            <div className="p-5 mt-5 intro-y box">
-                {status === Status.LOADING && (
-                    <div className="absolute z-50 bg-slate-50 bg-opacity-70 flex justify-center items-center w-full h-full">
-                        <div className="w-10 h-10">
-                            <LoadingIcon icon="ball-triangle" />
-                        </div>
-                    </div>
-                )}
+            <div className="p-5 mt-5 intro-y box relative">
+                {status === Status.LOADING && <OverlayLoader />}
 
                 <div className="flex flex-col sm:flex-row sm:items-end xl:items-start">
                     <form
