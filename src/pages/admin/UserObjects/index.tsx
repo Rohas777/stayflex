@@ -173,7 +173,7 @@ function Main() {
                     },
                     {
                         title: "Действия",
-                        minWidth: 30,
+                        minWidth: 210,
                         field: "id",
                         responsive: 1,
                         hozAlign: "right",
@@ -649,8 +649,11 @@ function Main() {
                 </h2>
                 <div className="flex items-center w-full mt-4 sm:w-auto sm:mt-0">
                     <Link to={"/objects/" + params.id} target="_blank">
-                        <Button variant="secondary" className="mr-2 shadow-md">
-                            Публичная версия
+                        <Button
+                            variant="secondary"
+                            className="mr-2 shadow-md whitespace-nowrap"
+                        >
+                            Страница объектов
                             <Icon icon="ExternalLink" className="size-5 ml-2" />
                         </Button>
                     </Link>

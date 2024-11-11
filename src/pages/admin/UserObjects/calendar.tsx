@@ -76,7 +76,7 @@ function ReservationsCalendar({
         navLinkDayClick: (date, jsEvent) => {
             return;
         },
-        dayMaxEvents: true,
+
         buttonText: {
             today: "Сегодня",
             month: "Месяц",

@@ -78,7 +78,6 @@ function ReservationsCalendar({
             return;
         },
 
-        dayMaxEvents: true,
         buttonText: {
             today: "Сегодня",
             month: "Месяц",
