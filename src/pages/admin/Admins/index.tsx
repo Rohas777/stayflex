@@ -517,13 +517,9 @@ function Main() {
                 </div>
             </div>
             {/* BEGIN: HTML Table Data */}
-            <div className="p-5 mt-5 intro-y box">
+            <div className="p-5 mt-5 intro-y box relative">
                 {status === Status.LOADING && !isLoaderOpen && (
-                    <div className="absolute z-50 bg-slate-50 bg-opacity-70 flex justify-center items-center w-full h-full">
-                        <div className="w-10 h-10">
-                            <LoadingIcon icon="ball-triangle" />
-                        </div>
-                    </div>
+                    <OverlayLoader />
                 )}
                 <div className="flex flex-col sm:flex-row sm:items-end xl:items-start">
                     <form
@@ -534,7 +530,7 @@ function Main() {
                             onFilter();
                         }}
                     >
-                        <div className="items-center mt-2 sm:flex sm:mr-4 xl:mt-0">
+                        <div className="flex items-center mt-2 sm:flex sm:mr-4 xl:mt-0">
                             <label className="whitespace-nowrap flex-none mr-2 xl:w-auto xl:flex-initial">
                                 <Lucide icon="Search" className="w-4 h-4" />
                             </label>

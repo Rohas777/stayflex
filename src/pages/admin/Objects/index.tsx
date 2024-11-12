@@ -617,7 +617,7 @@ function Main() {
                             onFilter();
                         }}
                     >
-                        <div className="items-center mt-2 sm:flex sm:mr-4 xl:mt-0">
+                        <div className="flex items-center mt-2 sm:flex sm:mr-4 xl:mt-0">
                             <label className="whitespace-nowrap flex-none mr-2 xl:w-auto xl:flex-initial">
                                 <Lucide icon="Search" className="w-4 h-4" />
                             </label>
