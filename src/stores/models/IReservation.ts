@@ -29,6 +29,7 @@ export interface IObjectReservation {
         status: reservationStatus;
         description: string;
         letter: string;
+        order?: number;
         client: {
             id: number;
             fullname: string;

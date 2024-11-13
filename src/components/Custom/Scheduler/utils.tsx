@@ -1,4 +1,6 @@
+import { IClient } from "@/stores/models/IClient";
 import { IObjectReservation, IReservation } from "@/stores/models/IReservation";
+import { reservationStatus } from "@/vars";
 
 export const getObjectReservations = (reservations: IReservation[]) => {
     return reservations.reduce((acc, reservation) => {
@@ -47,6 +49,41 @@ export const getObjectReservations = (reservations: IReservation[]) => {
 
         return acc;
     }, [] as IObjectReservation[]);
+};
+
+export const sortAndSetOrder = (objectReservations: IObjectReservation[]) => {
+    objectReservations.forEach((object) => {
+        // Сортируем бронирования по start_date
+        object.reservations.sort(
+            (a, b) =>
+                new Date(a.start_date).getTime() -
+                new Date(b.start_date).getTime()
+        );
+
+        let lastEndDate: string | null = null; // Отслеживаем end_date последней брони
+        let currentOrder = 0; // Начальный order
+
+        // Перебираем отсортированные бронирования
+        object.reservations.forEach((reservation, index) => {
+            // Если это первое бронирование или текущее бронирование начинается после окончания предыдущего,
+            // то начинаем новую группу и сбрасываем order на 0
+            if (
+                lastEndDate === null ||
+                new Date(reservation.start_date).getTime() >
+                    new Date(lastEndDate).getTime()
+            ) {
+                reservation.order = 0; // Сбрасываем order для новой группы
+                currentOrder = 0; // Сбрасываем currentOrder
+                lastEndDate = reservation.end_date; // Обновляем lastEndDate
+            } else {
+                // Если текущее бронирование перекрывает предыдущее, то продолжаем увеличивать order
+                reservation.order = currentOrder + 1; // Увеличиваем order для перекрывающейся группы
+                currentOrder++; // Инкрементируем для следующей брони в группе
+            }
+        });
+    });
+
+    return objectReservations;
 };
 
 export const getMaxConcurrentReservations = (

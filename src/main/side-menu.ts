@@ -37,8 +37,8 @@ const menu: Array<Menu | "divider"> = [
     },
     {
         icon: "GanttChartSquare",
-        pathname: "/gantt",
-        title: lang.menu.gantt,
+        pathname: "/scheduler",
+        title: lang.menu.scheduler,
         mark: "experimental",
     },
     {

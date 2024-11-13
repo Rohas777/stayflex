@@ -17,6 +17,7 @@ import authReducer from "./reducers/auth/slice";
 import errorToastReducer from "./errorToastSlice";
 import preferencesReducer from "./preferencesSlice";
 import serverReducer from "./reducers/servers/slice";
+import mailReducer from "./reducers/mails/slice";
 import languageReducer from "./languageSlice";
 
 export const store = configureStore({
@@ -38,6 +39,7 @@ export const store = configureStore({
         error: errorToastReducer,
         preferences: preferencesReducer,
         server: serverReducer,
+        mail: mailReducer,
         language: languageReducer,
         logs: logsReducer,
     },

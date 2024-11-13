@@ -16,7 +16,7 @@ import ObjectsClient from "../pages/user/Objects";
 import CreateObject from "../pages/user/CreateObject";
 import Channels from "../pages/user/Channels";
 import Widget from "../pages/user/Widget";
-import Gantt from "../pages/user/Gantt";
+import Scheduler from "../pages/user/Scheduler";
 import TariffsClient from "../pages/user/Tariffs";
 
 import Object from "../pages/public/Object";
@@ -55,8 +55,8 @@ function Router() {
             element: <Layout />,
             children: [
                 {
-                    path: "/gantt",
-                    element: <Gantt />,
+                    path: "/scheduler",
+                    element: <Scheduler />,
                 },
 
                 {

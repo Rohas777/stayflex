@@ -1,4 +1,4 @@
-import Gantt from "@/components/Custom/Gantt";
+import Scheduler from "@/components/Custom/Scheduler";
 import Loader from "@/components/Custom/Loader/Loader";
 import OnDevMark from "@/components/Custom/OnDevMark";
 import { useAppDispatch, useAppSelector } from "@/stores/hooks";
@@ -42,7 +42,7 @@ function Main() {
                 <h2 className="mr-auto text-lg font-medium">Шахматка броней</h2>
             </div>
             <div className="mt-5 intro-y box p-5">
-                <Gantt reservations={reservations} />
+                <Scheduler reservations={reservations} />
             </div>
         </>
     );

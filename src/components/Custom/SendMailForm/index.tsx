@@ -5,29 +5,63 @@ import * as yup from "yup";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FormLabel, FormInput, FormTextarea } from "@/components/Base/Form";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { startLoader, stopLoader } from "@/utils/customUtils";
 import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
 import ValidationErrorNotification from "@/components/Custom/ValidationErrorNotification";
+import TomSelect from "@/components/Base/TomSelect";
+import { useAppDispatch, useAppSelector } from "@/stores/hooks";
+import { fetchUsers } from "@/stores/reducers/users/actions";
+import { Status } from "@/stores/reducers/types";
+import Loader from "@/components/Custom/Loader/Loader";
 
-interface MailFormProps {
-    onUpdate: (mailData: any) => void;
-    // onUpdate: (amenityData: MailCreateType) => void;
+interface SendMailFormProps {
+    onSend: (mailData: any) => void;
+    // onSend: (amenityData: MailCreateType) => void;
     setIsLoaderOpened: React.Dispatch<React.SetStateAction<boolean>>;
     isLoaderOpened: boolean;
 }
+type CustomErrors = {
+    isValid: boolean;
+    user: string | null;
+};
 
-function MailForm({
-    onUpdate,
+function SendMailForm({
+    onSend,
     setIsLoaderOpened,
     isLoaderOpened,
-}: MailFormProps) {
+}: SendMailFormProps) {
+    const dispatch = useAppDispatch();
+    const { users, status } = useAppSelector((state) => state.user);
+
     const [showValidationNotification, setShowValidationNotification] =
         useState(false);
+    const [selectedUser, setSelectedUser] = useState<string>("-1");
+    const [customErrors, setCustomErrors] = useState<CustomErrors>({
+        isValid: true,
+        user: null,
+    });
+    const vaildateWithoutYup = async () => {
+        const errors: CustomErrors = {
+            isValid: true,
+            user: null,
+        };
+        if (selectedUser === "-1") {
+            errors.user = "Обязательно выберите пользователя";
+        }
+
+        Object.keys(errors).forEach((key) => {
+            if (errors[key as keyof CustomErrors] && key != "isValid") {
+                errors.isValid = false;
+                return;
+            }
+        });
+        setCustomErrors(errors);
+        return errors;
+    };
 
     const schema = yup
         .object({
-            name: yup.string().required("Это обязательное поле"),
             subject: yup.string().required("Это обязательное поле"),
             body: yup.string().required("Это обязательное поле"),
         })
@@ -46,7 +80,8 @@ function MailForm({
         startLoader(setIsLoaderOpened);
         const formData = new FormData(event.target);
         const result = await trigger();
-        if (!result) {
+        const customResult = await vaildateWithoutYup();
+        if (!result || !customResult.isValid) {
             setShowValidationNotification(true);
             stopLoader(setIsLoaderOpened);
             return;
@@ -57,41 +92,69 @@ function MailForm({
             body: String(formData.get("body")),
         };
 
-        onUpdate(mailData);
+        onSend(mailData);
     };
+
+    useEffect(() => {
+        dispatch(fetchUsers());
+    }, []);
+
+    if (status === Status.LOADING) return <Loader />;
 
     return (
         <>
             {isLoaderOpened && <OverlayLoader />}
             <div className="p-5">
                 <div className="mt-5 text-lg font-bold text-center">
-                    Редактировать шаблон письма
+                    Отправить письмо
                 </div>
                 <form className="validate-form mt-5" onSubmit={onSubmit}>
                     <div className="input-form mt-3">
                         <FormLabel
-                            htmlFor="validation-form-name"
+                            htmlFor="validation-form-user"
                             className="flex flex-col w-full sm:flex-row"
                         >
-                            Название шаблона
+                            Пользователь
                             <span className="mt-1 text-xs sm:ml-auto sm:mt-0 text-slate-500">
                                 Обязательное
                             </span>
                         </FormLabel>
-                        <FormInput
-                            {...register("name")}
-                            id="validation-form-name"
-                            type="text"
-                            name="name"
-                            className={clsx({
-                                "border-danger": errors.name,
-                            })}
-                            placeholder="Название"
-                        />
-                        {errors.name && (
+                        <div
+                            className={clsx(
+                                "border rounded-md border-transparent",
+                                {
+                                    "border-danger-important":
+                                        customErrors.user,
+                                }
+                            )}
+                        >
+                            <TomSelect
+                                id="validation-form-user"
+                                value={selectedUser}
+                                name="user"
+                                onChange={(e) => {
+                                    setSelectedUser(e.target.value);
+                                    setCustomErrors((prev) => ({
+                                        ...prev,
+                                        user: null,
+                                    }));
+                                }}
+                                options={{
+                                    placeholder: "Выберите пользователя",
+                                }}
+                                className="w-full"
+                            >
+                                {users.map((user) => (
+                                    <option key={user.id} value={user.id}>
+                                        {user.fullname}
+                                    </option>
+                                ))}
+                            </TomSelect>
+                        </div>
+                        {customErrors.user && (
                             <div className="mt-2 text-danger">
-                                {typeof errors.name.message === "string" &&
-                                    errors.name.message}
+                                {typeof customErrors.user === "string" &&
+                                    customErrors.user}
                             </div>
                         )}
                     </div>
@@ -153,7 +216,7 @@ function MailForm({
                         variant="primary"
                         className="w-full mt-5"
                     >
-                        Обновить
+                        Отправить
                     </Button>
                 </form>
             </div>
@@ -167,4 +230,4 @@ function MailForm({
     );
 }
 
-export default MailForm;
+export default SendMailForm;
