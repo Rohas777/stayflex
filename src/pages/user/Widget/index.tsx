@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { useState } from "react";
 import TomSelect from "@/components/Base/CustomTomSelect";
 import { ListPlus } from "lucide-react";
+import OnDevMark from "@/components/Custom/OnDevMark";
 
 function Main() {
     const [select, setSelect] = useState("1");
@@ -29,6 +30,7 @@ function Main() {
 
     return (
         <>
+            <OnDevMark />
             <div className="flex items-center mt-8 intro-y">
                 <h2 className="mr-auto text-lg font-medium">
                     Код виджета для сайта

@@ -23,6 +23,7 @@ const menu: Array<Menu | "divider"> = [
         icon: "Link",
         pathname: "/channels",
         title: lang.menu.channels,
+        mark: "experimental",
     },
     {
         icon: "UserCheck",
@@ -35,9 +36,16 @@ const menu: Array<Menu | "divider"> = [
         title: lang.menu.reservations,
     },
     {
+        icon: "GanttChartSquare",
+        pathname: "/gantt",
+        title: lang.menu.gantt,
+        mark: "experimental",
+    },
+    {
         icon: "Airplay",
         pathname: "/widget",
         title: lang.menu.widget,
+        mark: "experimental",
     },
 ];
 

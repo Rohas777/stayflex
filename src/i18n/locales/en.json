@@ -16,7 +16,8 @@
         "logs": "Logs",
         "channels": "Channels",
         "widget": "Widget",
-        "mails": "Mails"
+        "mails": "Mails",
+        "gantt": "Gantt"
     },
     "theme_switcher": {
         "lang": {

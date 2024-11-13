@@ -103,10 +103,10 @@ function Main() {
                 {mails.map((mail) => (
                     <div
                         key={mail.id}
-                        className="col-span-12 intro-y md:col-span-6 lg:col-span-4 xl:col-span-3"
+                        className="relative col-span-12 intro-y md:col-span-6 lg:col-span-4 xl:col-span-3"
                     >
                         <div className="box flex flex-col h-full">
-                            <div className="p-5 flex-auto">
+                            <div className="p-5 flex-auto z-10">
                                 <h2 className="block text-base font-medium">
                                     {mail.name}
                                 </h2>
@@ -116,7 +116,7 @@ function Main() {
                                     </div>
                                 </div>
                             </div>
-                            <div className="flex items-center justify-center p-5 border-t lg:justify-end border-slate-200/60 dark:border-darkmode-400">
+                            <div className="z-10 flex items-center justify-center p-5 border-t lg:justify-end border-slate-200/60 dark:border-darkmode-400">
                                 <Button
                                     variant="primary"
                                     className="flex items-center mr-auto"
@@ -162,6 +162,12 @@ function Main() {
                                 >
                                     <Lucide icon="Trash2" className="w-4 h-4" />
                                 </Button>
+                            </div>
+                            <div className="absolute top-0 right-0 size-full opacity-5">
+                                <Icon
+                                    icon="Mail"
+                                    className="size-full text-slate-500"
+                                />
                             </div>
                         </div>
                     </div>

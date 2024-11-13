@@ -16,7 +16,8 @@
         "logs": "Логи",
         "channels": "Каналы",
         "widget": "Виджет",
-        "mails": "Письма"
+        "mails": "Письма",
+        "gantt": "Шахматка"
     },
     "theme_switcher": {
         "lang": {

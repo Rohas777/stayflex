@@ -18,3 +18,22 @@ export interface IReservation {
         name: string;
     };
 }
+
+export interface IObjectReservation {
+    id: number;
+    name: string;
+    reservations: {
+        id: number;
+        start_date: string;
+        end_date: string;
+        status: reservationStatus;
+        description: string;
+        letter: string;
+        client: {
+            id: number;
+            fullname: string;
+            phone: string;
+            email: string;
+        };
+    }[];
+}

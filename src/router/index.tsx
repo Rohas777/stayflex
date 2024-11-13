@@ -1,13 +1,29 @@
 import { useRoutes } from "react-router-dom";
+import Layout from "../themes";
+import { useEffect } from "react";
+import { useAppSelector } from "@/stores/hooks";
 
 import ProfileOverview from "../pages/common/ProfileOverview";
 import Login from "../pages/common/Login";
 import Register from "../pages/common/Register";
 import ActivateCode from "../pages/common/ActivateCode";
+import UpdateObject from "../pages/common/UpdateObject";
+import Clients from "../pages/common/Clients";
+import Reservations from "../pages/common/Reservations";
+import ClientReservations from "../pages/common/ClientReservations";
+
+import ObjectsClient from "../pages/user/Objects";
+import CreateObject from "../pages/user/CreateObject";
+import Channels from "../pages/user/Channels";
+import Widget from "../pages/user/Widget";
+import Gantt from "../pages/user/Gantt";
+import TariffsClient from "../pages/user/Tariffs";
+
+import Object from "../pages/public/Object";
+import PrivacyPolicy from "../pages/public/PrivacyPolicy";
+import PublicUserObjects from "../pages/public/UserObjects";
 import ErrorPage from "../pages/public/ErrorPage";
 import SuccessReservation from "../pages/public/SuccessReservation";
-
-import Layout from "../themes";
 
 import Users from "../pages/admin/Users";
 import Admins from "../pages/admin/Admins";
@@ -17,25 +33,11 @@ import Cities from "../pages/admin/Cities";
 import PropertyTypes from "../pages/admin/PropertyTypes";
 import Amenities from "../pages/admin/Amenities";
 import Objects from "../pages/admin/Objects";
-import Object from "../pages/public/Object";
-import PublicUserObjects from "../pages/public/UserObjects";
 import UserObjects from "../pages/admin/UserObjects";
-import ObjectsClient from "../pages/user/Objects";
-import CreateObject from "../pages/user/CreateObject";
-import UpdateObject from "../pages/common/UpdateObject";
-import Clients from "../pages/common/Clients";
-import Reservations from "../pages/common/Reservations";
-import ClientReservations from "../pages/common/ClientReservations";
-import Channels from "../pages/user/Channels";
-import Widget from "../pages/user/Widget";
 import Tariffs from "../pages/admin/Tariffs";
 import Mails from "../pages/admin/Mails";
 import Logs from "../pages/admin/LogsPage";
-import TariffsClient from "../pages/user/Tariffs";
 import Icon from "../pages/admin/Icon";
-import PrivacyPolicy from "../pages/public/PrivacyPolicy";
-import { useEffect } from "react";
-import { useAppSelector } from "@/stores/hooks";
 
 function Router() {
     const { authorizedUser } = useAppSelector((state) => state.user);
@@ -52,6 +54,11 @@ function Router() {
             path: "/",
             element: <Layout />,
             children: [
+                {
+                    path: "/gantt",
+                    element: <Gantt />,
+                },
+
                 {
                     path: "/",
                     element: <ObjectsClient />,

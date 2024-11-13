@@ -1,6 +1,6 @@
 import Icon from "../Icon";
 
-function PageStatusMark({
+function OnDevMark({
     type = "experimental",
 }: {
     type?: "experimental" | "new";
@@ -13,4 +13,4 @@ function PageStatusMark({
     );
 }
 
-export default PageStatusMark;
+export default OnDevMark;
