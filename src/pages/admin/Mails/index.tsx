@@ -7,7 +7,6 @@ import { FormInput, FormSelect } from "@/components/Base/Form";
 import Lucide from "@/components/Base/Lucide";
 import { Dialog, Menu } from "@/components/Base/Headless";
 import Icon from "@/components/Custom/Icon";
-import OnDevMark from "@/components/Custom/OnDevMark";
 import MailForm from "./form";
 import MailPreview from "./preview";
 import clsx from "clsx";
@@ -114,7 +113,6 @@ function Main() {
 
     return (
         <>
-            <OnDevMark />
             <div className="flex flex-col items-center mt-8 intro-y sm:flex-row">
                 <h2 className="mr-auto text-lg font-medium">Шаблоны писем</h2>
                 <div className="flex w-full mt-4 sm:w-auto sm:mt-0">
@@ -128,7 +126,7 @@ function Main() {
                             setIsSendFormOpened(true);
                         }}
                     >
-                        <Icon icon="ListPlus" className="size-5 mr-2" />
+                        <Icon icon="Send" className="size-5 mr-2" />
                         Отправить
                     </Button>
                 </div>

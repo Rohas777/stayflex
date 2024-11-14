@@ -77,7 +77,6 @@ const menu: Array<Menu | "divider"> = [
                 icon: "Mail",
                 pathname: "/admin/mails",
                 title: lang.menu.mails,
-                mark: "experimental",
             },
             {
                 icon: "Activity",
