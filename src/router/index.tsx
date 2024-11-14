@@ -61,7 +61,7 @@ function Router() {
 
                 {
                     path: "/",
-                    element: <ObjectsClient />,
+                    element: <Scheduler />,
                 },
                 {
                     path: "objects",

@@ -40,6 +40,9 @@ import UserUpdateModal from "./updateModal";
 import { fetchTariffs } from "@/stores/reducers/tariffs/actions";
 import { errorToastSlice } from "@/stores/errorToastSlice";
 import { tariffSlice } from "@/stores/reducers/tariffs/slice";
+import SendMailForm from "@/components/Custom/SendMailForm";
+import { IUser } from "@/stores/models/IUser";
+import { mailSlice } from "@/stores/reducers/mails/slice";
 
 window.DateTime = DateTime;
 interface Response {
@@ -51,13 +54,10 @@ interface Response {
 }
 
 function Main() {
-    const [userData, setUserData] = useState<{
-        name: string;
-        id: number;
-    } | null>(null);
     const [isLoaderOpen, setIsLoaderOpen] = useState(false);
     const [createModalPreview, setCreateModalPreview] = useState(false);
     const [updateModalPreview, setUpdateModalPreview] = useState(false);
+    const [sendModalPreview, setSendModalPreview] = useState(false);
 
     const [confirmationModalPreview, setConfirmationModalPreview] =
         useState(false);
@@ -122,7 +122,7 @@ function Main() {
                     // For HTML table
                     {
                         title: "ID",
-                        maxWidth: 100,
+                        maxWidth: 70,
                         responsive: 0,
                         field: "id",
                         vertAlign: "middle",
@@ -138,7 +138,7 @@ function Main() {
                     },
                     {
                         title: "Имя",
-                        minWidth: 200,
+                        minWidth: 160,
                         responsive: 0,
                         field: "name",
                         vertAlign: "middle",
@@ -154,7 +154,7 @@ function Main() {
                     },
                     {
                         title: "Объекты",
-                        minWidth: 200,
+                        minWidth: 140,
                         field: "objects",
                         hozAlign: "center",
                         headerHozAlign: "center",
@@ -191,7 +191,7 @@ function Main() {
                     },
                     {
                         title: "Действия",
-                        minWidth: 200,
+                        minWidth: 240,
                         field: "id",
                         responsive: 1,
                         hozAlign: "right",
@@ -204,6 +204,10 @@ function Main() {
                             const a = stringToHTML(
                                 `<div class="flex lg:justify-center items-center"></div>`
                             );
+                            const sendA =
+                                stringToHTML(`<a class="flex items-center mr-3 w-7 h-7 p-1 border border-black rounded-md hover:opacity-70" href="javascript:;">
+                                <i data-lucide="send"></i>
+                              </a>`);
                             const infoA =
                                 stringToHTML(`<a class="flex items-center mr-3 w-7 h-7 p-1 border border-black rounded-md hover:opacity-70" href="javascript:;">
                                 <i data-lucide="info"></i>
@@ -216,6 +220,11 @@ function Main() {
                                 stringToHTML(`<a class="flex items-center text-danger w-7 h-7 p-1 border border-danger rounded-md hover:opacity-70" href="javascript:;">
                                 <i data-lucide="trash-2"></i>
                               </a>`);
+                            tippy(sendA, {
+                                content: "Написать",
+                                placement: "bottom",
+                                animation: "shift-away",
+                            });
                             tippy(infoA, {
                                 content: "К объектам",
                                 placement: "bottom",
@@ -244,7 +253,7 @@ function Main() {
                                 placement: "bottom",
                                 animation: "shift-away",
                             });
-                            a.append(switcher, infoA, editA, deleteA);
+                            a.append(switcher, sendA, infoA, editA, deleteA);
                             a.addEventListener("hover", function () {});
                             deleteA.addEventListener("click", function () {
                                 setConfirmModalContent({
@@ -263,6 +272,10 @@ function Main() {
                                 dispatch(fetchUserById(response.id!));
                                 dispatch(fetchTariffs());
                                 setUpdateModalPreview(true);
+                            });
+                            sendA.addEventListener("click", function () {
+                                dispatch(fetchUserById(response.id!));
+                                setSendModalPreview(true);
                             });
                             infoA.addEventListener("click", function () {
                                 navigate(`/admin/objects/user/${response.id}`);
@@ -430,8 +443,10 @@ function Main() {
         statusOne,
     } = useAppSelector((state) => state.user);
     const tariffState = useAppSelector((state) => state.tariff);
+    const mailState = useAppSelector((state) => state.mail);
     const userActions = userSlice.actions;
     const tariffActions = tariffSlice.actions;
+    const mailActions = mailSlice.actions;
     const dispatch = useAppDispatch();
 
     const onDelete = async (id: number) => {
@@ -471,7 +486,22 @@ function Main() {
             stopLoader(setIsLoaderOpen);
             dispatch(tariffActions.resetStatus());
         }
-    }, [status, statusOne, error, tariffState.statusAll, tariffState.error]);
+        if (mailState.statusActions === Status.ERROR && mailState.error) {
+            dispatch(
+                setErrorToast({ message: mailState.error, isError: true })
+            );
+            stopLoader(setIsLoaderOpen);
+            dispatch(mailActions.resetStatusActions());
+        }
+    }, [
+        status,
+        statusOne,
+        error,
+        tariffState.statusAll,
+        tariffState.error,
+        mailState.status,
+        mailState.error,
+    ]);
 
     useEffect(() => {
         if (statusOne === Status.ERROR || status === Status.ERROR) {
@@ -481,11 +511,21 @@ function Main() {
         if (isActiveStatusUpdated) {
             switcherIsActive!.checked = !switcherIsActive!.checked;
         }
-        if (isCreated || isUpdated || isActiveStatusUpdated || isDeleted) {
+        if (mailState.isSended) {
+            dispatch(userActions.resetUserOne());
+        }
+        if (
+            isCreated ||
+            isUpdated ||
+            isActiveStatusUpdated ||
+            isDeleted ||
+            mailState.isSended
+        ) {
             dispatch(fetchUsers());
             setCreateModalPreview(false);
             setConfirmationModalPreview(false);
             setUpdateModalPreview(false);
+            setSendModalPreview(false);
             const successEl = document
                 .querySelectorAll("#success-notification-content")[0]
                 .cloneNode(true) as HTMLElement;
@@ -493,6 +533,8 @@ function Main() {
                 ? "Пользователь успешно создан"
                 : isDeleted
                 ? "Пользователь успешно удалён"
+                : mailState.isSended
+                ? "Письмо успешно отправлено"
                 : "Пользователь успешно обновлен";
             successEl.classList.remove("hidden");
             Toastify({
@@ -507,6 +549,7 @@ function Main() {
             dispatch(userActions.resetIsCreated());
             dispatch(userActions.resetIsUpdated());
             dispatch(userActions.resetIsDeleted());
+            dispatch(mailActions.resetIsSended());
             dispatch(userActions.resetIsActiveStatusUpdated());
             stopLoader(setIsLoaderOpen);
         }
@@ -515,6 +558,7 @@ function Main() {
         isUpdated,
         isActiveStatusUpdated,
         isDeleted,
+        mailState.isSended,
         statusOne,
         status,
     ]);
@@ -727,6 +771,34 @@ function Main() {
                         setIsLoaderOpen={setIsLoaderOpen}
                         onUpdateUser={onUpdate}
                         onUpdateUserTariff={onUpdateTariff}
+                    />
+                </Dialog.Panel>
+            </Dialog>
+            {/* END: Modal Content */}
+            {/* BEGIN: Modal Content */}
+            <Dialog
+                open={sendModalPreview}
+                size="xl"
+                onClose={() => {
+                    setSendModalPreview(false);
+                    dispatch(userActions.resetUserOne());
+                }}
+            >
+                <Dialog.Panel>
+                    <a
+                        onClick={(event: React.MouseEvent) => {
+                            event.preventDefault();
+                            setSendModalPreview(false);
+                            dispatch(userActions.resetUserOne());
+                        }}
+                        className="absolute top-0 right-0 mt-3 mr-3"
+                        href="#"
+                    >
+                        <Lucide icon="X" className="w-8 h-8 text-slate-400" />
+                    </a>
+                    <SendMailForm
+                        isLoaderOpened={isLoaderOpen}
+                        setIsLoaderOpened={setIsLoaderOpen}
                     />
                 </Dialog.Panel>
             </Dialog>

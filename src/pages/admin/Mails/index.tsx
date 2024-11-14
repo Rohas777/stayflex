@@ -40,13 +40,11 @@ function Main() {
     const { mails, status, error, statusActions, isSended, isUpdated } =
         useAppSelector((state) => state.mail);
     const { setErrorToast } = errorToastSlice.actions;
-    const { resetStatus, resetIsSended, resetIsUpdated } = mailSlice.actions;
+    const { resetStatusActions, resetIsSended, resetIsUpdated } =
+        mailSlice.actions;
 
     const onUpdate = async (mailData: UpdateMail) => {
         await dispatch(updateMail(mailData));
-    };
-    const onSend = async (mailData: SendMail) => {
-        await dispatch(sendMail(mailData));
     };
 
     useEffect(() => {
@@ -54,7 +52,7 @@ function Main() {
             dispatch(setErrorToast({ message: error, isError: true }));
             stopLoader(setIsLoaderOpened);
 
-            dispatch(resetStatus());
+            dispatch(resetStatusActions());
         }
     }, [statusActions, error]);
 
@@ -102,7 +100,13 @@ function Main() {
                 if (mail.slug !== "authorization") return mail;
                 return {
                     ...mail,
-                    constructions: ["(?code)"],
+                    constructions: [
+                        {
+                            name: "Код",
+                            construction: "(?code)",
+                            description: "Код авторизации",
+                        },
+                    ],
                 };
             })
         );
@@ -176,12 +180,6 @@ function Main() {
                                     <Lucide icon="Pencil" className="w-4 h-4" />
                                 </Button>
                             </div>
-                            <div className="absolute top-0 right-0 size-full opacity-5">
-                                <Icon
-                                    icon="Mail"
-                                    className="size-full text-slate-500"
-                                />
-                            </div>
                         </div>
                     </div>
                 ))}
@@ -236,7 +234,6 @@ function Main() {
                         <Lucide icon="X" className="w-8 h-8 text-slate-400" />
                     </a>
                     <SendMailForm
-                        onSend={onSend}
                         isLoaderOpened={isLoaderOpened}
                         setIsLoaderOpened={setIsLoaderOpened}
                     />

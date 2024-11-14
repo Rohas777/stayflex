@@ -84,7 +84,7 @@ function Scheduler({ reservations }: Props) {
                 <table className="min-w-full table-fixed border-collapse ">
                     <thead>
                         <tr>
-                            <th className="border-b p-2 text-left border-r border-slate-200 bg-slate-100 sticky left-0 z-10">
+                            <th className="border-b p-2 text-left border-r bg-slate-100 dark:bg-darkmode-300 sticky left-0 z-10">
                                 Объект
                             </th>
                             {dates.map((date) => (
@@ -105,7 +105,7 @@ function Scheduler({ reservations }: Props) {
                         {objectReservations.map((object) => {
                             return (
                                 <tr key={object.name}>
-                                    <td className="border-b z-10 p-2 whitespace-nowrap border-r border-slate-200 bg-slate-100 sticky left-0">
+                                    <td className="border-b z-10 p-2 whitespace-nowrap border-r bg-slate-100 dark:bg-darkmode-300 sticky left-0">
                                         {object.name}
                                     </td>
                                     {dates.map((date) => (
@@ -140,7 +140,7 @@ function Scheduler({ reservations }: Props) {
                                                                     data.status ===
                                                                     "new"
                                                                 )
-                                                                    return "bg-pending";
+                                                                    return "bg-warning";
                                                                 if (
                                                                     data.status ===
                                                                     "rejected"

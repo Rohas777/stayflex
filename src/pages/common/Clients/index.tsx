@@ -17,6 +17,7 @@ import { clientSlice } from "@/stores/reducers/clients/slice";
 import {
     createClient,
     deleteClient,
+    fetchClientByID,
     fetchClients,
     saveClient,
 } from "@/stores/reducers/clients/actions";
@@ -32,6 +33,8 @@ import Notification from "@/components/Base/Notification";
 import Icon from "@/components/Custom/Icon";
 import ClientForm from "./form";
 import { ClientCreateType } from "@/stores/reducers/clients/types";
+import SendMailToClientForm from "@/components/Custom/SendMailToClientForm";
+import { mailSlice } from "@/stores/reducers/mails/slice";
 
 window.DateTime = DateTime;
 interface Response {
@@ -46,6 +49,7 @@ interface Response {
 function Main() {
     const [isLoaderOpen, setIsLoaderOpen] = useState(false);
     const [createModal, setCreateModal] = useState(false);
+    const [sendModalPreview, setSendModalPreview] = useState(false);
     const [confirmationModalPreview, setConfirmationModalPreview] =
         useState(false);
     const [confirmModalContent, setConfirmModalContent] = useState<{
@@ -190,48 +194,6 @@ function Main() {
                                     </div>`;
                         },
                     },
-                    // {
-                    //     title: "Оценка",
-                    //     minWidth: 200,
-                    //     field: "grade",
-                    //     responsive: 1,
-                    //     hozAlign: "center",
-                    //     headerHozAlign: "center",
-                    //     vertAlign: "middle",
-                    //     print: false,
-                    //     download: false,
-                    //     formatter(cell) {
-                    //         const response: Response = cell.getData();
-                    //         const a = stringToHTML(
-                    //             `<div class="min-w-32 flex lg:justify-center items-center"></div>`
-                    //         );
-                    //         const grades = [0, 1, 2, 3, 4, 5];
-                    //         const options = grades.map((grade) => {
-                    //             return `<option class="cursor-pointer" ${
-                    //                 grade === response.grade ? "selected" : ""
-                    //             } value="${grade}">${
-                    //                 grade === 0
-                    //                     ? "Без оценки"
-                    //                     : "★".repeat(grade)
-                    //             }</option>`;
-                    //         });
-                    //         const selector =
-                    //             stringToHTML(`<select class="cursor-pointer bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                    //                 ${options.join("")}
-                    //                     </select>`);
-
-                    //         a.append(selector);
-                    //         a.addEventListener("hover", function () {});
-
-                    //         selector.addEventListener(
-                    //             "change",
-                    //             function (this: HTMLInputElement) {
-                    //                 console.log(this.value);
-                    //             }
-                    //         );
-                    //         return a;
-                    //     },
-                    // },
                     {
                         minWidth: 50,
                         maxWidth: 150,
@@ -251,11 +213,21 @@ function Main() {
                                 stringToHTML(`<a class="flex items-center w-7 h-7 p-1 border border-black rounded-md hover:opacity-70" href="javascript:;">
                                 <i data-lucide="info"></i>
                               </a>`);
+                            const sendA =
+                                stringToHTML(`<a class="flex items-center mr-3 w-7 h-7 p-1 border border-black rounded-md hover:opacity-70" href="javascript:;">
+                                <i data-lucide="send"></i>
+                              </a>`);
+                            tippy(sendA, {
+                                content: "Написать",
+                                placement: "bottom",
+                                animation: "shift-away",
+                            });
                             tippy(info, {
                                 content: "Подробнее",
                                 placement: "bottom",
                                 animation: "shift-away",
                             });
+                            // a.append(sendA, info); //FIXME -
                             a.append(info);
                             if (response?.reservation_count! < 1) {
                                 const deleteA =
@@ -282,6 +254,10 @@ function Main() {
                                 });
                                 a.append(deleteA);
                             }
+                            sendA.addEventListener("click", function () {
+                                dispatch(fetchClientByID(response.id!));
+                                setSendModalPreview(true);
+                            });
                             a.addEventListener("hover", function () {});
                             info.addEventListener("click", function () {
                                 if (authorizedUser?.is_admin) {
@@ -442,7 +418,10 @@ function Main() {
     const { clients, status, error, isDeleted, isCreated } = useAppSelector(
         (state) => state.client
     );
+
+    const mailState = useAppSelector((state) => state.mail);
     const clientActions = clientSlice.actions;
+    const mailActions = mailSlice.actions;
     const dispatch = useAppDispatch();
     const { setErrorToast } = errorToastSlice.actions;
 
@@ -452,18 +431,29 @@ function Main() {
             stopLoader(setIsLoaderOpen);
             dispatch(clientActions.resetStatus());
         }
-    }, [status, error]);
+        if (mailState.statusActions === Status.ERROR && mailState.error) {
+            dispatch(
+                setErrorToast({ message: mailState.error, isError: true })
+            );
+            stopLoader(setIsLoaderOpen);
+            dispatch(mailActions.resetStatusActions());
+        }
+    }, [status, error, mailState.statusActions, mailState.error]);
 
     useEffect(() => {
-        if (isDeleted || isCreated) {
+        if (isDeleted || isCreated || mailState.isSended) {
             dispatch(fetchClients());
+            setSendModalPreview(false);
             setConfirmationModalPreview(false);
             setCreateModal(false);
+            dispatch(clientActions.resetClientOne());
             const successEl = document
                 .querySelectorAll("#success-notification-content")[0]
                 .cloneNode(true) as HTMLElement;
             successEl.querySelector(".text-content")!.textContent = isCreated
                 ? "Пользователь успешно создан"
+                : mailState.isSended
+                ? "Письмо успешно отправлено"
                 : "Пользователь успешно удалён";
             successEl.classList.remove("hidden");
             Toastify({
@@ -478,9 +468,10 @@ function Main() {
             dispatch(clientActions.resetIsDeleted());
             dispatch(clientActions.resetIsCreated());
             dispatch(clientActions.resetClientByPhone());
+            dispatch(mailActions.resetIsSended());
             stopLoader(setIsLoaderOpen);
         }
-    }, [isDeleted, isCreated, status]);
+    }, [isDeleted, isCreated, mailState.isSended, status]);
 
     useEffect(() => {
         initTabulator();
@@ -717,6 +708,34 @@ function Main() {
                     />
                 </Dialog.Panel>
             </Dialog>
+            {/* BEGIN: Modal Content */}
+            <Dialog
+                open={sendModalPreview}
+                size="xl"
+                onClose={() => {
+                    setSendModalPreview(false);
+                    dispatch(clientActions.resetClientOne());
+                }}
+            >
+                <Dialog.Panel>
+                    <a
+                        onClick={(event: React.MouseEvent) => {
+                            event.preventDefault();
+                            setSendModalPreview(false);
+                            dispatch(clientActions.resetClientOne());
+                        }}
+                        className="absolute top-0 right-0 mt-3 mr-3"
+                        href="#"
+                    >
+                        <Lucide icon="X" className="w-8 h-8 text-slate-400" />
+                    </a>
+                    <SendMailToClientForm
+                        isLoaderOpened={isLoaderOpen}
+                        setIsLoaderOpened={setIsLoaderOpen}
+                    />
+                </Dialog.Panel>
+            </Dialog>
+            {/* END: Modal Content */}
             {/* BEGIN: Success Notification Content */}
             <Notification
                 id="success-notification-content"

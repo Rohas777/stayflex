@@ -36,6 +36,11 @@ export const clientSlice = createSlice({
             state.errorByPhone = null;
             state.isFound = null;
         },
+        resetClientOne: (state) => {
+            state.clientOne = null;
+            state.statusOne = Status.LOADING;
+            state.error = null;
+        },
         resetIsCreated: (state) => {
             state.isCreated = false;
             state.createdClient = null;

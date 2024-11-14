@@ -11,45 +11,45 @@ import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
 import ValidationErrorNotification from "@/components/Custom/ValidationErrorNotification";
 import TomSelect from "@/components/Base/TomSelect";
 import { useAppDispatch, useAppSelector } from "@/stores/hooks";
-import { fetchUsers } from "@/stores/reducers/users/actions";
+import { fetchClients } from "@/stores/reducers/clients/actions";
 import { Status } from "@/stores/reducers/types";
 import Loader from "@/components/Custom/Loader/Loader";
-import { IUser } from "@/stores/models/IUser";
+import { IClient } from "@/stores/models/IClient";
 import { sendMail } from "@/stores/reducers/mails/actions";
 
-interface SendMailFormProps {
+interface SendMailToClientFormProps {
     setIsLoaderOpened: React.Dispatch<React.SetStateAction<boolean>>;
     isLoaderOpened: boolean;
 }
 type CustomErrors = {
     isValid: boolean;
-    user: string | null;
+    client: string | null;
 };
 
-function SendMailForm({
+function SendMailToClientForm({
     setIsLoaderOpened,
     isLoaderOpened,
-}: SendMailFormProps) {
+}: SendMailToClientFormProps) {
     const dispatch = useAppDispatch();
-    const { users, userOne, statusOne, status } = useAppSelector(
-        (state) => state.user
+    const { clients, clientOne, statusOne, status } = useAppSelector(
+        (state) => state.client
     );
 
     const [showValidationNotification, setShowValidationNotification] =
         useState(false);
-    const [selectedUserID, setSelectedUserID] = useState<string>("-1");
-    const [selectedUser, setSelectedUser] = useState<IUser | null>(null);
+    const [selectedClientID, setSelectedClientID] = useState<string>("-1");
+    const [selectedClient, setSelectedClient] = useState<IClient | null>(null);
     const [customErrors, setCustomErrors] = useState<CustomErrors>({
         isValid: true,
-        user: null,
+        client: null,
     });
     const vaildateWithoutYup = async () => {
         const errors: CustomErrors = {
             isValid: true,
-            user: null,
+            client: null,
         };
-        if (!userOne && (selectedUserID === "-1" || !selectedUser)) {
-            errors.user = "Обязательно выберите пользователя";
+        if (!clientOne && (selectedClientID === "-1" || !selectedClient)) {
+            errors.client = "Обязательно выберите клиента";
         }
 
         Object.keys(errors).forEach((key) => {
@@ -89,7 +89,7 @@ function SendMailForm({
             return;
         }
         const mailData = {
-            user_mail: userOne ? userOne.mail : selectedUser!.mail,
+            user_mail: clientOne ? clientOne.email : selectedClient!.email,
             subject: String(formData.get("subject")),
             description: String(formData.get("description")),
         };
@@ -98,23 +98,23 @@ function SendMailForm({
     };
 
     useEffect(() => {
-        dispatch(fetchUsers());
+        dispatch(fetchClients());
     }, []);
 
     useEffect(() => {
-        if (!userOne) return;
+        if (!clientOne) return;
 
-        setSelectedUserID(String(userOne.id));
-        setSelectedUser(userOne);
-    }, [userOne]);
+        setSelectedClientID(String(clientOne.id));
+        setSelectedClient(clientOne);
+    }, [clientOne]);
 
     useEffect(() => {
-        if (selectedUserID === "-1") return;
+        if (selectedClientID === "-1") return;
 
-        setSelectedUser(
-            users.find((user) => user.id === Number(selectedUserID))!
+        setSelectedClient(
+            clients.find((client) => client.id === Number(selectedClientID))!
         );
-    }, [selectedUserID]);
+    }, [selectedClientID]);
 
     if (status === Status.LOADING || statusOne === Status.LOADING)
         return <Loader />;
@@ -129,10 +129,10 @@ function SendMailForm({
                 <form className="validate-form mt-5" onSubmit={onSubmit}>
                     <div className="input-form mt-3">
                         <FormLabel
-                            htmlFor="validation-form-user"
+                            htmlFor="validation-form-client"
                             className="flex flex-col w-full sm:flex-row"
                         >
-                            Пользователь
+                            Клиент
                             <span className="mt-1 text-xs sm:ml-auto sm:mt-0 text-slate-500">
                                 Обязательное
                             </span>
@@ -142,38 +142,38 @@ function SendMailForm({
                                 "border rounded-md border-transparent",
                                 {
                                     "border-danger-important":
-                                        customErrors.user,
+                                        customErrors.client,
                                 }
                             )}
                         >
                             <TomSelect
-                                id="validation-form-user"
-                                value={selectedUserID}
-                                name="user"
+                                id="validation-form-client"
+                                value={selectedClientID}
+                                name="client"
                                 onChange={(e) => {
-                                    setSelectedUserID(e.target.value);
+                                    setSelectedClientID(e.target.value);
                                     setCustomErrors((prev) => ({
                                         ...prev,
-                                        user: null,
+                                        client: null,
                                     }));
                                 }}
                                 options={{
-                                    placeholder: "Выберите пользователя",
+                                    placeholder: "Выберите клиента",
                                 }}
                                 className="w-full"
-                                disabled={!!userOne}
+                                disabled={!!clientOne}
                             >
-                                {users.map((user) => (
-                                    <option key={user.id} value={user.id}>
-                                        {user.fullname}: {user.mail}
+                                {clients.map((client) => (
+                                    <option key={client.id} value={client.id}>
+                                        {client.fullname}: {client.email}
                                     </option>
                                 ))}
                             </TomSelect>
                         </div>
-                        {customErrors.user && (
+                        {customErrors.client && (
                             <div className="mt-2 text-danger">
-                                {typeof customErrors.user === "string" &&
-                                    customErrors.user}
+                                {typeof customErrors.client === "string" &&
+                                    customErrors.client}
                             </div>
                         )}
                     </div>
@@ -249,4 +249,4 @@ function SendMailForm({
     );
 }
 
-export default SendMailForm;
+export default SendMailToClientForm;

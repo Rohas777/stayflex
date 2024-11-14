@@ -4,14 +4,24 @@ import * as yup from "yup";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FormLabel, FormInput, FormTextarea } from "@/components/Base/Form";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { startLoader, stopLoader } from "@/utils/customUtils";
 import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
 import ValidationErrorNotification from "@/components/Custom/ValidationErrorNotification";
 import { IMail } from "@/stores/models/IMail";
 import Loader from "@/components/Custom/Loader/Loader";
-import { template } from "lodash";
 import { UpdateMail } from "@/stores/reducers/mails/types";
+// import { ClassicEditor } from "@/components/Base/Ckeditor";
+import { CKEditor } from "@ckeditor/ckeditor5-react";
+import {
+    ClassicEditor,
+    Bold,
+    Essentials,
+    Italic,
+    Mention,
+    Paragraph,
+    Undo,
+} from "ckeditor5";
 
 interface MailFormProps {
     onUpdate: (mailData: UpdateMail) => void;
@@ -32,10 +42,13 @@ function MailForm({
 }: MailFormProps) {
     const [showValidationNotification, setShowValidationNotification] =
         useState(false);
+    const [editorData, setEditorData] = useState<string>("");
     const [customErrors, setCustomErrors] = useState<CustomErrors>({
         isValid: true,
         description: null,
     });
+    const editorValidationRef = useRef<HTMLDivElement>(null);
+
     const vaildateWithoutYup = async (formData: FormData) => {
         const errors: CustomErrors = {
             isValid: true,
@@ -51,12 +64,15 @@ function MailForm({
             for (const construction of currentMail.constructions) {
                 if (
                     String(formData.get("description")).indexOf(
-                        construction
+                        construction.construction
                     ) === -1
                 ) {
                     errors.description = "Укажите обязательные конструкции";
                 }
             }
+        }
+        if (!editorData) {
+            errors.description = "Это обязательное поле";
         }
 
         Object.keys(errors).forEach((key) => {
@@ -188,8 +204,8 @@ function MailForm({
                                     Вам обязательно необходимо указать следующие
                                     конструкции:{" "}
                                     {currentMail.constructions.map(
-                                        (c, index) =>
-                                            c +
+                                        (construction, index) =>
+                                            construction.construction +
                                             (index <
                                             currentMail.constructions.length - 1
                                                 ? ", "
@@ -197,6 +213,66 @@ function MailForm({
                                     )}
                                 </p>
                             )}
+                        <div
+                            ref={editorValidationRef}
+                            className={clsx(
+                                "border rounded-sm border-transparent",
+                                {
+                                    "border-danger-important":
+                                        customErrors.description,
+                                }
+                            )}
+                        >
+                            {/* <ClassicEditor
+                                id="validation-form-description"
+                                value={editorData}
+                                onChange={setEditorData}
+                                config={{
+                                    toolbar: [
+                                        "heading",
+                                        "|",
+                                        "bold",
+                                        "italic",
+                                        "link",
+                                        "bulletedList",
+                                        "numberedList",
+                                        "|",
+                                        "undo",
+                                        "redo",
+                                    ],
+                                }}
+                            /> */}
+                            {/* <CKEditor
+                                editor={ClassicEditor}
+                                config={{
+                                    toolbar: {
+                                        items: [
+                                            "undo",
+                                            "redo",
+                                            "|",
+                                            "bold",
+                                            "italic",
+                                        ],
+                                    },
+                                    plugins: [
+                                        Bold,
+                                        Essentials,
+                                        Italic,
+                                        Mention,
+                                        Paragraph,
+                                        Undo,
+                                    ],
+                                    initialData:
+                                        "<p>Hello from CKEditor 5 in React!</p>",
+                                }}
+                            /> */}
+                        </div>
+                        {customErrors.description && (
+                            <div className="mt-2 text-danger">
+                                {typeof customErrors.description === "string" &&
+                                    customErrors.description}
+                            </div>
+                        )}
                         <FormTextarea
                             {...register("description")}
                             id="validation-form-description"

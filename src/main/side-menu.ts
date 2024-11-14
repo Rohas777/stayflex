@@ -10,6 +10,12 @@ const lang = localStorage.getItem("language") == "en" ? en : ru;
 
 const menu: Array<Menu | "divider"> = [
     {
+        icon: "GanttChartSquare",
+        pathname: "/scheduler",
+        title: lang.menu.scheduler,
+        mark: "experimental",
+    },
+    {
         icon: "Home",
         pathname: "/objects",
         title: lang.menu.objects,
@@ -34,12 +40,6 @@ const menu: Array<Menu | "divider"> = [
         icon: "Calendar",
         pathname: "/reservations",
         title: lang.menu.reservations,
-    },
-    {
-        icon: "GanttChartSquare",
-        pathname: "/scheduler",
-        title: lang.menu.scheduler,
-        mark: "experimental",
     },
     {
         icon: "Airplay",

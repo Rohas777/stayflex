@@ -20,6 +20,10 @@ export const mailSlice = createSlice({
             state.status = Status.IDLE;
             state.error = null;
         },
+        resetStatusActions: (state) => {
+            state.statusActions = Status.IDLE;
+            state.error = null;
+        },
         resetIsUpdated: (state) => {
             state.isUpdated = false;
         },

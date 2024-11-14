@@ -3,5 +3,9 @@ export interface IMail {
     name: string;
     subject: string;
     description: string;
-    constructions: string[];
+    constructions: {
+        name: string;
+        construction: string;
+        description: string;
+    }[];
 }

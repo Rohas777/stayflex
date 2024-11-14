@@ -5,9 +5,9 @@ import ClassicEditor from "./ClassicEditor";
 // import InlineEditor from "./InlineEditor";
 
 export {
-  // BalloonBlockEditor,
-  // BalloonEditor,
-  ClassicEditor,
-  // DocumentEditor,
-  // InlineEditor,
+    // BalloonBlockEditor,
+    // BalloonEditor,
+    ClassicEditor,
+    // DocumentEditor,
+    // InlineEditor,
 };
