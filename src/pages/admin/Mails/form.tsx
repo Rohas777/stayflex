@@ -1,4 +1,3 @@
-import "@/assets/css/vendors/tabulator.css";
 import clsx from "clsx";
 import Button from "@/components/Base/Button";
 import * as yup from "yup";
@@ -9,27 +8,72 @@ import { useState } from "react";
 import { startLoader, stopLoader } from "@/utils/customUtils";
 import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
 import ValidationErrorNotification from "@/components/Custom/ValidationErrorNotification";
+import { IMail } from "@/stores/models/IMail";
+import Loader from "@/components/Custom/Loader/Loader";
+import { template } from "lodash";
+import { UpdateMail } from "@/stores/reducers/mails/types";
 
 interface MailFormProps {
-    onUpdate: (mailData: any) => void;
-    // onUpdate: (amenityData: MailCreateType) => void;
+    onUpdate: (mailData: UpdateMail) => void;
+    currentMail: IMail | null;
     setIsLoaderOpened: React.Dispatch<React.SetStateAction<boolean>>;
     isLoaderOpened: boolean;
 }
+type CustomErrors = {
+    isValid: boolean;
+    description: string | null;
+};
 
 function MailForm({
     onUpdate,
+    currentMail,
     setIsLoaderOpened,
     isLoaderOpened,
 }: MailFormProps) {
     const [showValidationNotification, setShowValidationNotification] =
         useState(false);
+    const [customErrors, setCustomErrors] = useState<CustomErrors>({
+        isValid: true,
+        description: null,
+    });
+    const vaildateWithoutYup = async (formData: FormData) => {
+        const errors: CustomErrors = {
+            isValid: true,
+            description: null,
+        };
+
+        if (
+            !!formData.get("description") &&
+            !!currentMail &&
+            !!currentMail?.constructions &&
+            !!currentMail.constructions.length
+        ) {
+            for (const construction of currentMail.constructions) {
+                if (
+                    String(formData.get("description")).indexOf(
+                        construction
+                    ) === -1
+                ) {
+                    errors.description = "Укажите обязательные конструкции";
+                }
+            }
+        }
+
+        Object.keys(errors).forEach((key) => {
+            if (errors[key as keyof CustomErrors] && key != "isValid") {
+                errors.isValid = false;
+                return;
+            }
+        });
+        setCustomErrors(errors);
+        return errors;
+    };
 
     const schema = yup
         .object({
             name: yup.string().required("Это обязательное поле"),
             subject: yup.string().required("Это обязательное поле"),
-            body: yup.string().required("Это обязательное поле"),
+            description: yup.string().required("Это обязательное поле"),
         })
         .required();
 
@@ -46,19 +90,23 @@ function MailForm({
         startLoader(setIsLoaderOpened);
         const formData = new FormData(event.target);
         const result = await trigger();
-        if (!result) {
+        const customResult = await vaildateWithoutYup(formData);
+        if (!result || !customResult.isValid) {
             setShowValidationNotification(true);
             stopLoader(setIsLoaderOpened);
             return;
         }
         const mailData = {
+            slug: currentMail!.slug,
             name: String(formData.get("name")),
             subject: String(formData.get("subject")),
-            body: String(formData.get("body")),
+            description: String(formData.get("description")),
         };
 
         onUpdate(mailData);
     };
+
+    if (!currentMail) return <Loader />;
 
     return (
         <>
@@ -87,6 +135,7 @@ function MailForm({
                                 "border-danger": errors.name,
                             })}
                             placeholder="Название"
+                            defaultValue={currentMail.name}
                         />
                         {errors.name && (
                             <div className="mt-2 text-danger">
@@ -114,6 +163,7 @@ function MailForm({
                                 "border-danger": errors.subject,
                             })}
                             placeholder="Тема"
+                            defaultValue={currentMail.subject}
                         />
                         {errors.subject && (
                             <div className="mt-2 text-danger">
@@ -124,7 +174,7 @@ function MailForm({
                     </div>
                     <div className="input-form mt-3">
                         <FormLabel
-                            htmlFor="validation-form-body"
+                            htmlFor="validation-form-description"
                             className="flex flex-col w-full sm:flex-row"
                         >
                             Содержимое письма
@@ -132,20 +182,51 @@ function MailForm({
                                 Обязательное
                             </span>
                         </FormLabel>
+                        {!!currentMail.constructions &&
+                            currentMail.constructions.length > 0 && (
+                                <p className="mb-1 text-xs text-slate-500">
+                                    Вам обязательно необходимо указать следующие
+                                    конструкции:{" "}
+                                    {currentMail.constructions.map(
+                                        (c, index) =>
+                                            c +
+                                            (index <
+                                            currentMail.constructions.length - 1
+                                                ? ", "
+                                                : "")
+                                    )}
+                                </p>
+                            )}
                         <FormTextarea
-                            {...register("body")}
-                            id="validation-form-body"
-                            name="body"
+                            {...register("description")}
+                            id="validation-form-description"
+                            name="description"
                             className={clsx("min-h-40", {
-                                "border-danger": errors.body,
+                                "border-danger":
+                                    errors.description ||
+                                    customErrors.description,
                             })}
+                            onChange={(e) => {
+                                trigger("description");
+                                setCustomErrors({
+                                    ...customErrors,
+                                    description: null,
+                                });
+                            }}
                             placeholder="Содержимое"
+                            defaultValue={currentMail.description}
                         />
-                        {errors.body && (
+                        {errors.description ? (
                             <div className="mt-2 text-danger">
-                                {typeof errors.body.message === "string" &&
-                                    errors.body.message}
+                                {typeof errors.description.message ===
+                                    "string" && errors.description.message}
                             </div>
+                        ) : (
+                            customErrors.description && (
+                                <div className="mt-2 text-danger">
+                                    {customErrors.description}
+                                </div>
+                            )
                         )}
                     </div>
                     <Button

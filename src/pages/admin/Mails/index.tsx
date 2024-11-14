@@ -13,10 +13,20 @@ import MailPreview from "./preview";
 import clsx from "clsx";
 import SendMailForm from "../../../components/Custom/SendMailForm";
 import { useAppDispatch, useAppSelector } from "@/stores/hooks";
-import { fetchMails } from "@/stores/reducers/mails/actions";
+import {
+    fetchMails,
+    sendMail,
+    updateMail,
+} from "@/stores/reducers/mails/actions";
 import { Status } from "@/stores/reducers/types";
 import Loader from "@/components/Custom/Loader/Loader";
 import { IMail } from "@/stores/models/IMail";
+import { SendMail, UpdateMail } from "@/stores/reducers/mails/types";
+import { errorToastSlice } from "@/stores/errorToastSlice";
+import { stopLoader } from "@/utils/customUtils";
+import { mailSlice } from "@/stores/reducers/mails/slice";
+import Toastify from "toastify-js";
+import Notification from "@/components/Base/Notification";
 
 function Main() {
     const dispatch = useAppDispatch();
@@ -25,56 +35,80 @@ function Main() {
     const [isFormOpened, setIsFormOpened] = useState(false);
     const [isSendFormOpened, setIsSendFormOpened] = useState(false);
     const [isPreviewOpened, setIsPreviewOpened] = useState(false);
-    const [formattedMails, setFormattedMails] = useState<IMail[]>([]);
+    const [formattedMails, setFormattedMails] = useState<IMail[]>([]); //FIXME -
+    const [currentMail, setCurrentMail] = useState<IMail | null>(null);
 
-    const { mails, status, error } = useAppSelector((state) => state.mail);
+    const { mails, status, error, statusActions, isSended, isUpdated } =
+        useAppSelector((state) => state.mail);
+    const { setErrorToast } = errorToastSlice.actions;
+    const { resetStatus, resetIsSended, resetIsUpdated } = mailSlice.actions;
 
-    const tempMails = [
-        {
-            id: 1,
-            name: "Приветственное письмо",
-            subject: "Добро пожаловать в Stayflex",
-            body: "",
-        },
-        {
-            id: 2,
-            name: "Аккаунт активирован",
-            subject: "Ваш аккаунт был активирован",
-            body: "",
-        },
-        {
-            id: 3,
-            name: "Двухфакторная аутентификация",
-            subject: "Двухфакторная аутентификация",
-            body: "",
-        },
-        {
-            id: 4,
-            name: "Объект забронирован",
-            subject: `Объект "У моря" забронирован`,
-            body: "",
-        },
-    ];
-
-    const onUpdate = (mailData: any) => {
-        console.log("Update data: ", mailData);
+    const onUpdate = async (mailData: UpdateMail) => {
+        await dispatch(updateMail(mailData));
     };
-    const onSend = (mailData: any) => {
-        console.log("Send data: ", mailData);
+    const onSend = async (mailData: SendMail) => {
+        await dispatch(sendMail(mailData));
     };
+
+    useEffect(() => {
+        if (statusActions === Status.ERROR && error) {
+            dispatch(setErrorToast({ message: error, isError: true }));
+            stopLoader(setIsLoaderOpened);
+
+            dispatch(resetStatus());
+        }
+    }, [statusActions, error]);
+
+    useEffect(() => {
+        if (isUpdated || isSended) {
+            dispatch(fetchMails());
+            setIsFormOpened(false);
+            setIsSendFormOpened(false);
+            setCurrentMail(null);
+
+            const successEl = document
+                .querySelectorAll("#success-notification-content")[0]
+                .cloneNode(true) as HTMLElement;
+            successEl.classList.remove("hidden");
+
+            successEl.querySelector(".text-content")!.textContent = isUpdated
+                ? "Шаблон обновлен"
+                : "Письмо отправлено";
+            Toastify({
+                node: successEl,
+                duration: 3000,
+                newWindow: true,
+                close: true,
+                gravity: "top",
+                position: "right",
+                stopOnFocus: true,
+            }).showToast();
+
+            dispatch(resetIsUpdated());
+            dispatch(resetIsSended());
+            stopLoader(setIsLoaderOpened);
+        }
+    }, [isSended, isUpdated]);
 
     useEffect(() => {
         dispatch(fetchMails());
     }, []);
 
+    //FIXME ------------------------------------
     useEffect(() => {
-        const dataArray = Object.entries(mails).map(([key, value]) => ({
-            name: key,
-            subject: value.subject,
-            body: value.body,
-        }));
-        setFormattedMails(dataArray);
-    }, [mails]);
+        if (!mails || !mails.length || status !== Status.SUCCESS) return;
+
+        setFormattedMails(
+            mails.map((mail) => {
+                if (mail.slug !== "authorization") return mail;
+                return {
+                    ...mail,
+                    constructions: ["(?code)"],
+                };
+            })
+        );
+    }, [mails, status]);
+    //FIXME ------------------------------------
 
     if (status === Status.LOADING) return <Loader />;
 
@@ -100,9 +134,9 @@ function Main() {
                 </div>
             </div>
             <div className="grid grid-cols-12 gap-6 mt-5">
-                {tempMails.map((template) => (
+                {formattedMails.map((template) => (
                     <div
-                        key={template.name}
+                        key={template.slug}
                         className="relative col-span-12 intro-y md:col-span-6 lg:col-span-4 xl:col-span-3"
                     >
                         <div className="box flex flex-col h-full">
@@ -123,6 +157,7 @@ function Main() {
                                     onClick={(event) => {
                                         event.preventDefault();
                                         setIsPreviewOpened(true);
+                                        setCurrentMail(template);
                                     }}
                                 >
                                     <Lucide
@@ -137,6 +172,7 @@ function Main() {
                                     onClick={(event) => {
                                         event.preventDefault();
                                         setIsFormOpened(true);
+                                        setCurrentMail(template);
                                     }}
                                 >
                                     <Lucide icon="Pencil" className="w-4 h-4" />
@@ -158,6 +194,7 @@ function Main() {
                 size="xl"
                 onClose={() => {
                     setIsFormOpened(false);
+                    setCurrentMail(null);
                 }}
             >
                 <Dialog.Panel>
@@ -165,6 +202,7 @@ function Main() {
                         onClick={(event: React.MouseEvent) => {
                             event.preventDefault();
                             setIsFormOpened(false);
+                            setCurrentMail(null);
                         }}
                         className="absolute top-0 right-0 mt-3 mr-3"
                         href="#"
@@ -173,6 +211,7 @@ function Main() {
                     </a>
                     <MailForm
                         onUpdate={onUpdate}
+                        currentMail={currentMail}
                         isLoaderOpened={isLoaderOpened}
                         setIsLoaderOpened={setIsLoaderOpened}
                     />
@@ -225,10 +264,21 @@ function Main() {
                     >
                         <Lucide icon="X" className="w-8 h-8 text-slate-400" />
                     </a>
-                    <MailPreview />
+                    <MailPreview currentMail={currentMail} />
                 </Dialog.Panel>
             </Dialog>
             {/* END: Preview Content */}
+            {/* BEGIN: Success Notification Content */}
+            <Notification
+                id="success-notification-content"
+                className="flex hidden"
+            >
+                <Lucide icon="CheckCircle" className="text-success" />
+                <div className="ml-4 mr-4">
+                    <div className="font-medium text-content"></div>
+                </div>
+            </Notification>
+            {/* END: Success Notification Content */}
         </>
     );
 }

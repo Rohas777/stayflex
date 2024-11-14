@@ -140,10 +140,7 @@ function Main() {
                                                 response.role === "A"
                                                     ? "bg-danger/40"
                                                     : "bg-primary/10"
-                                            }">${response.role}</span>
-                                            <span class="rounded-md px-2 py-1 text-xs bg-primary/10">ID: ${
-                                                response.user_id
-                                            }</span>
+                                            }">ID: ${response.user_id}</span>
                                         </div>
                                     </div>`;
                         },
@@ -472,6 +469,14 @@ function Main() {
                             </Menu.Items>
                         </Menu>
                     </div>
+                </div>
+                <div className="flex gap-1 mt-2">
+                    <span className="block size-5 bg-danger/40 rounded-md"></span>{" "}
+                    - Администратор
+                </div>
+                <div className="flex gap-1 mt-1">
+                    <span className="block size-5 bg-primary/10 rounded-md"></span>{" "}
+                    - Пользователь
                 </div>
                 <div className="overflow-x-auto scrollbar-hidden">
                     <div id="tabulator" ref={tableRef} className="mt-5"></div>

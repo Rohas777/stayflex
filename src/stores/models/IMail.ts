@@ -1,5 +1,7 @@
 export interface IMail {
+    slug: string;
     name: string;
     subject: string;
-    body: string;
+    description: string;
+    constructions: string[];
 }

@@ -14,10 +14,11 @@ import { useAppDispatch, useAppSelector } from "@/stores/hooks";
 import { fetchUsers } from "@/stores/reducers/users/actions";
 import { Status } from "@/stores/reducers/types";
 import Loader from "@/components/Custom/Loader/Loader";
+import { SendMail } from "@/stores/reducers/mails/types";
+import { IUser } from "@/stores/models/IUser";
 
 interface SendMailFormProps {
-    onSend: (mailData: any) => void;
-    // onSend: (amenityData: MailCreateType) => void;
+    onSend: (mailData: SendMail) => void;
     setIsLoaderOpened: React.Dispatch<React.SetStateAction<boolean>>;
     isLoaderOpened: boolean;
 }
@@ -36,7 +37,8 @@ function SendMailForm({
 
     const [showValidationNotification, setShowValidationNotification] =
         useState(false);
-    const [selectedUser, setSelectedUser] = useState<string>("-1");
+    const [selectedUserID, setSelectedUserID] = useState<string>("-1");
+    const [selectedUser, setSelectedUser] = useState<IUser | null>(null);
     const [customErrors, setCustomErrors] = useState<CustomErrors>({
         isValid: true,
         user: null,
@@ -46,7 +48,7 @@ function SendMailForm({
             isValid: true,
             user: null,
         };
-        if (selectedUser === "-1") {
+        if (selectedUserID === "-1" || !selectedUser) {
             errors.user = "Обязательно выберите пользователя";
         }
 
@@ -63,7 +65,7 @@ function SendMailForm({
     const schema = yup
         .object({
             subject: yup.string().required("Это обязательное поле"),
-            body: yup.string().required("Это обязательное поле"),
+            description: yup.string().required("Это обязательное поле"),
         })
         .required();
 
@@ -87,9 +89,9 @@ function SendMailForm({
             return;
         }
         const mailData = {
-            name: String(formData.get("name")),
+            user_mail: selectedUser!.mail,
             subject: String(formData.get("subject")),
-            body: String(formData.get("body")),
+            description: String(formData.get("description")),
         };
 
         onSend(mailData);
@@ -98,6 +100,14 @@ function SendMailForm({
     useEffect(() => {
         dispatch(fetchUsers());
     }, []);
+
+    useEffect(() => {
+        if (selectedUserID === "-1") return;
+
+        setSelectedUser(
+            users.find((user) => user.id === Number(selectedUserID))!
+        );
+    }, [selectedUserID]);
 
     if (status === Status.LOADING) return <Loader />;
 
@@ -130,10 +140,10 @@ function SendMailForm({
                         >
                             <TomSelect
                                 id="validation-form-user"
-                                value={selectedUser}
+                                value={selectedUserID}
                                 name="user"
                                 onChange={(e) => {
-                                    setSelectedUser(e.target.value);
+                                    setSelectedUserID(e.target.value);
                                     setCustomErrors((prev) => ({
                                         ...prev,
                                         user: null,
@@ -146,7 +156,7 @@ function SendMailForm({
                             >
                                 {users.map((user) => (
                                     <option key={user.id} value={user.id}>
-                                        {user.fullname}
+                                        {user.fullname}: {user.mail}
                                     </option>
                                 ))}
                             </TomSelect>
@@ -187,7 +197,7 @@ function SendMailForm({
                     </div>
                     <div className="input-form mt-3">
                         <FormLabel
-                            htmlFor="validation-form-body"
+                            htmlFor="validation-form-description"
                             className="flex flex-col w-full sm:flex-row"
                         >
                             Содержимое письма
@@ -196,18 +206,18 @@ function SendMailForm({
                             </span>
                         </FormLabel>
                         <FormTextarea
-                            {...register("body")}
-                            id="validation-form-body"
-                            name="body"
+                            {...register("description")}
+                            id="validation-form-description"
+                            name="description"
                             className={clsx("min-h-40", {
-                                "border-danger": errors.body,
+                                "border-danger": errors.description,
                             })}
                             placeholder="Содержимое"
                         />
-                        {errors.body && (
+                        {errors.description && (
                             <div className="mt-2 text-danger">
-                                {typeof errors.body.message === "string" &&
-                                    errors.body.message}
+                                {typeof errors.description.message ===
+                                    "string" && errors.description.message}
                             </div>
                         )}
                     </div>
