@@ -1,0 +1,18 @@
+/* placeholder/theme/placeholder.css */
+
+.placeholder {
+    @apply rounded-md bg-success/30 p-1;
+    outline-offset: -2px;
+    margin: 0 1px;
+}
+
+.placeholder::selection {
+    display: none;
+}
+
+.ck-button.placeholder {
+    @apply relative;
+}
+.ck-button.placeholder .ck-button__label {
+    @apply absolute -top-1 left-6 !w-auto !text-danger !font-bold !text-xl;
+}

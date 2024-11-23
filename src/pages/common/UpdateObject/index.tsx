@@ -19,7 +19,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import TomSelect from "@/components/Base/TomSelect";
 import { fetchRegions } from "@/stores/reducers/regions/actions";
 import { schema } from "./schema";
-import { ClassicEditor } from "@/components/Base/Ckeditor";
+// import { ClassicEditor } from "@/components/Base/Ckeditor";
 import { fetchAmenities } from "@/stores/reducers/amenities/actions";
 import { fetchPropertyTypes } from "@/stores/reducers/property-types/actions";
 import Notification from "@/components/Base/Notification";
@@ -55,6 +55,7 @@ import { propertyTypeSlice } from "@/stores/reducers/property-types/slice";
 import Loader from "@/components/Custom/Loader/Loader";
 import { IObject } from "@/stores/models/IObject";
 import ValidationErrorNotification from "@/components/Custom/ValidationErrorNotification";
+import { CKEditorClassic } from "@/components/Custom/CKEditor";
 
 window.DateTime = DateTime;
 
@@ -1075,23 +1076,11 @@ function Main() {
                                     }
                                 )}
                             >
-                                <ClassicEditor
+                                <CKEditorClassic
                                     id="validation-form-description"
-                                    value={editorData}
-                                    onChange={setEditorData}
-                                    config={{
-                                        toolbar: [
-                                            "heading",
-                                            "|",
-                                            "bold",
-                                            "italic",
-                                            "link",
-                                            "bulletedList",
-                                            "numberedList",
-                                            "|",
-                                            "undo",
-                                            "redo",
-                                        ],
+                                    editorData={editorData}
+                                    onChange={(event, editor) => {
+                                        setEditorData(editor.getData());
                                     }}
                                 />
                             </div>
@@ -1141,6 +1130,7 @@ function Main() {
                                 <FormCheck.Input
                                     id="checkbox-switch-1"
                                     type="checkbox"
+                                    checked
                                     value=""
                                     className="size-6 mr-2"
                                 />
@@ -1152,6 +1142,7 @@ function Main() {
                                 <FormCheck.Input
                                     id="checkbox-switch-3"
                                     type="checkbox"
+                                    checked
                                     value=""
                                     className="size-6 mr-2"
                                 />
@@ -1165,6 +1156,7 @@ function Main() {
                                 <FormCheck.Input
                                     id="checkbox-switch-2"
                                     type="checkbox"
+                                    checked
                                     value=""
                                     className="size-6 mr-2"
                                 />
@@ -1176,6 +1168,7 @@ function Main() {
                                 <FormCheck.Input
                                     id="checkbox-switch-4"
                                     type="checkbox"
+                                    checked
                                     value=""
                                     className="size-6 mr-2"
                                 />

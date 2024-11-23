@@ -112,7 +112,7 @@ function Main() {
                         }}
                     >
                         {objectOne?.photos.map((image) => (
-                            <div key={image} className="h-80 xl:h-64 px-2">
+                            <div key={image} className="aspect-video h-96 px-2">
                                 <div className="h-full overflow-hidden rounded-md image-fit">
                                     <img src={image} />
                                 </div>

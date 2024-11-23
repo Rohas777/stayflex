@@ -95,19 +95,33 @@ function Main() {
     useEffect(() => {
         if (!mails || !mails.length || status !== Status.SUCCESS) return;
 
+        const tempMails = mails.map((mail) => {
+            if (mail.slug !== "authorization") return mail;
+            return {
+                ...mail,
+                constructions: [
+                    {
+                        name: "Код авторизации",
+                        construction: "(?code)",
+                    },
+                ],
+            };
+        });
+
         setFormattedMails(
-            mails.map((mail) => {
-                if (mail.slug !== "authorization") return mail;
-                return {
-                    ...mail,
-                    constructions: [
-                        {
-                            name: "Код",
-                            construction: "(?code)",
-                            description: "Код авторизации",
-                        },
-                    ],
-                };
+            tempMails.map((mail) => {
+                const constructions = mail.constructions
+                    ? mail.constructions.map((construction) => {
+                          return {
+                              name: construction.name,
+                              construction: construction.construction,
+                              class: construction.construction.slice(2, -1),
+                          };
+                      })
+                    : undefined;
+                return constructions
+                    ? { ...mail, constructions: [...constructions] }
+                    : mail;
             })
         );
     }, [mails, status]);

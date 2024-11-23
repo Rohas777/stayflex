@@ -1,0 +1,37 @@
+// placeholder/placeholdercommand.js
+
+import { Command } from "ckeditor5";
+
+export default class PlaceholderCommand extends Command {
+    execute({ value, title }: { value: string; title: string }) {
+        const editor = this.editor;
+        const selection = editor.model.document.selection;
+
+        editor.model.change((writer) => {
+            // Create a <placeholder> element with the "name" attribute (and all the selection attributes)...
+            const placeholder = writer.createElement("placeholder", {
+                ...Object.fromEntries(selection.getAttributes()),
+                name: value,
+                title: title,
+            });
+
+            // ... and insert it into the document. Put the selection on the inserted element.
+            editor.model.insertObject(placeholder, null, null, {
+                setSelection: "on",
+            });
+        });
+    }
+
+    refresh() {
+        const model = this.editor.model;
+        const selection = model.document.selection;
+
+        const isAllowed = model.schema.checkChild(
+            //@ts-ignore
+            selection.focus.parent,
+            "placeholder"
+        );
+
+        this.isEnabled = isAllowed;
+    }
+}

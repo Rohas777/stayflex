@@ -3,25 +3,27 @@ import Button from "@/components/Base/Button";
 import * as yup from "yup";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { FormLabel, FormInput, FormTextarea } from "@/components/Base/Form";
-import { useRef, useState } from "react";
+import { FormLabel, FormInput } from "@/components/Base/Form";
+import { useEffect, useRef, useState } from "react";
 import { startLoader, stopLoader } from "@/utils/customUtils";
 import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
 import ValidationErrorNotification from "@/components/Custom/ValidationErrorNotification";
 import { IMail } from "@/stores/models/IMail";
 import Loader from "@/components/Custom/Loader/Loader";
 import { UpdateMail } from "@/stores/reducers/mails/types";
-// import { ClassicEditor } from "@/components/Base/Ckeditor";
-import { CKEditor } from "@ckeditor/ckeditor5-react";
 import {
-    ClassicEditor,
     Bold,
     Essentials,
     Italic,
+    List,
     Mention,
     Paragraph,
     Undo,
+    Heading,
+    Link,
+    FontSize,
 } from "ckeditor5";
+import { CKEditorWithConstructions } from "@/components/Custom/CKEditor";
 
 interface MailFormProps {
     onUpdate: (mailData: UpdateMail) => void;
@@ -49,6 +51,42 @@ function MailForm({
     });
     const editorValidationRef = useRef<HTMLDivElement>(null);
 
+    const checkUsedConstructions = (data: string, validate = false) => {
+        if (
+            !data ||
+            !currentMail ||
+            !currentMail.constructions ||
+            !currentMail.constructions.length
+        )
+            return false;
+        for (const construction of currentMail.constructions) {
+            const constructionSelectorBtn = document.querySelector(
+                ".ck-button.placeholder"
+            );
+            const constructionSelect = document.querySelector(
+                `.ck-list .construction.${construction.class}`
+            );
+            if (String(data).indexOf(construction.construction) !== -1) {
+                constructionSelectorBtn?.classList.remove("!bg-danger/30");
+                constructionSelectorBtn?.classList.add("bg-success/30");
+                constructionSelect?.classList.add("!bg-success/30");
+                constructionSelect?.classList.remove("!bg-danger/30");
+                return true;
+            }
+            if (String(data).indexOf(construction.construction) === -1) {
+                constructionSelectorBtn?.classList.remove("bg-success/30");
+                constructionSelect?.classList.remove("!bg-success/30");
+                if (validate) {
+                    constructionSelectorBtn?.classList.add("!bg-danger/30");
+                    constructionSelect?.classList.add("!bg-danger/30");
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    };
+
     const vaildateWithoutYup = async (formData: FormData) => {
         const errors: CustomErrors = {
             isValid: true,
@@ -56,19 +94,14 @@ function MailForm({
         };
 
         if (
-            !!formData.get("description") &&
+            editorData &&
             !!currentMail &&
-            !!currentMail?.constructions &&
+            !!currentMail.constructions &&
             !!currentMail.constructions.length
         ) {
-            for (const construction of currentMail.constructions) {
-                if (
-                    String(formData.get("description")).indexOf(
-                        construction.construction
-                    ) === -1
-                ) {
-                    errors.description = "Укажите обязательные конструкции";
-                }
+            if (!checkUsedConstructions(editorData, true)) {
+                checkUsedConstructions(editorData, true);
+                errors.description = "Укажите обязательные конструкции";
             }
         }
         if (!editorData) {
@@ -89,7 +122,6 @@ function MailForm({
         .object({
             name: yup.string().required("Это обязательное поле"),
             subject: yup.string().required("Это обязательное поле"),
-            description: yup.string().required("Это обязательное поле"),
         })
         .required();
 
@@ -116,11 +148,16 @@ function MailForm({
             slug: currentMail!.slug,
             name: String(formData.get("name")),
             subject: String(formData.get("subject")),
-            description: String(formData.get("description")),
+            description: editorData,
         };
 
         onUpdate(mailData);
     };
+
+    useEffect(() => {
+        checkUsedConstructions(editorData);
+        setCustomErrors({ ...customErrors, description: null });
+    }, [editorData, currentMail]);
 
     if (!currentMail) return <Loader />;
 
@@ -198,21 +235,6 @@ function MailForm({
                                 Обязательное
                             </span>
                         </FormLabel>
-                        {!!currentMail.constructions &&
-                            currentMail.constructions.length > 0 && (
-                                <p className="mb-1 text-xs text-slate-500">
-                                    Вам обязательно необходимо указать следующие
-                                    конструкции:{" "}
-                                    {currentMail.constructions.map(
-                                        (construction, index) =>
-                                            construction.construction +
-                                            (index <
-                                            currentMail.constructions.length - 1
-                                                ? ", "
-                                                : "")
-                                    )}
-                                </p>
-                            )}
                         <div
                             ref={editorValidationRef}
                             className={clsx(
@@ -222,36 +244,40 @@ function MailForm({
                                         customErrors.description,
                                 }
                             )}
+                            onChange={(e) => {
+                                setCustomErrors({
+                                    ...customErrors,
+                                    description: null,
+                                });
+                            }}
                         >
-                            {/* <ClassicEditor
-                                id="validation-form-description"
-                                value={editorData}
-                                onChange={setEditorData}
-                                config={{
-                                    toolbar: [
-                                        "heading",
-                                        "|",
-                                        "bold",
-                                        "italic",
-                                        "link",
-                                        "bulletedList",
-                                        "numberedList",
-                                        "|",
-                                        "undo",
-                                        "redo",
-                                    ],
+                            <CKEditorWithConstructions
+                                editorData={editorData}
+                                onChange={(event, editor) => {
+                                    const data = editor.getData();
+                                    setEditorData(data);
                                 }}
-                            /> */}
-                            {/* <CKEditor
-                                editor={ClassicEditor}
+                                onReady={() => {
+                                    setEditorData(currentMail.description);
+                                    checkUsedConstructions(
+                                        currentMail.description
+                                    );
+                                }}
+                                constructions={currentMail.constructions}
                                 config={{
                                     toolbar: {
                                         items: [
-                                            "undo",
-                                            "redo",
+                                            "heading",
+                                            "fontSize",
                                             "|",
                                             "bold",
                                             "italic",
+                                            "link",
+                                            "numberedList",
+                                            "bulletedList",
+                                            "|",
+                                            "undo",
+                                            "redo",
                                         ],
                                     },
                                     plugins: [
@@ -261,48 +287,20 @@ function MailForm({
                                         Mention,
                                         Paragraph,
                                         Undo,
+                                        List,
+                                        Link,
+                                        Heading,
+                                        FontSize,
                                     ],
-                                    initialData:
-                                        "<p>Hello from CKEditor 5 in React!</p>",
+                                    initialData: currentMail.description,
                                 }}
-                            /> */}
+                            />
                         </div>
                         {customErrors.description && (
                             <div className="mt-2 text-danger">
                                 {typeof customErrors.description === "string" &&
                                     customErrors.description}
                             </div>
-                        )}
-                        <FormTextarea
-                            {...register("description")}
-                            id="validation-form-description"
-                            name="description"
-                            className={clsx("min-h-40", {
-                                "border-danger":
-                                    errors.description ||
-                                    customErrors.description,
-                            })}
-                            onChange={(e) => {
-                                trigger("description");
-                                setCustomErrors({
-                                    ...customErrors,
-                                    description: null,
-                                });
-                            }}
-                            placeholder="Содержимое"
-                            defaultValue={currentMail.description}
-                        />
-                        {errors.description ? (
-                            <div className="mt-2 text-danger">
-                                {typeof errors.description.message ===
-                                    "string" && errors.description.message}
-                            </div>
-                        ) : (
-                            customErrors.description && (
-                                <div className="mt-2 text-danger">
-                                    {customErrors.description}
-                                </div>
-                            )
                         )}
                     </div>
                     <Button

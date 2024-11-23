@@ -6,6 +6,6 @@ export interface IMail {
     constructions: {
         name: string;
         construction: string;
-        description: string;
+        class?: string;
     }[];
 }
