@@ -1,5 +1,5 @@
 import { CKEditor } from "@ckeditor/ckeditor5-react";
-import { ClassicEditor, Clipboard, EventInfo } from "ckeditor5";
+import { ClassicEditor, Clipboard, EditorConfig, EventInfo } from "ckeditor5";
 import Placeholder from "@/components/Custom/CKEditorPlugins/ConstructionList/placeholder";
 import "ckeditor5/ckeditor5.css";
 import "@/assets/css/vendors/ckeditor.css";
@@ -22,11 +22,18 @@ interface CKEditorClassicProps {
     onChange: (event: EventInfo, editor: ClassicEditor) => void;
     onReady?: () => void;
     initialData?: string;
+    config?: EditorConfig;
     id?: string;
 }
 function CKEditorClassic(props: CKEditorClassicProps) {
-    const { editorData, onChange, onReady, initialData, ...computedProps } =
-        props;
+    const {
+        editorData,
+        onChange,
+        onReady,
+        initialData,
+        config,
+        ...computedProps
+    } = props;
 
     return (
         <CKEditor
@@ -38,19 +45,24 @@ function CKEditorClassic(props: CKEditorClassicProps) {
             }}
             onChange={onChange}
             config={{
-                toolbar: [
-                    "heading",
-                    "fontSize",
-                    "|",
-                    "bold",
-                    "italic",
-                    "link",
-                    "numberedList",
-                    "bulletedList",
-                    "|",
-                    "undo",
-                    "redo",
-                ],
+                ...config,
+                toolbar: {
+                    items: [
+                        "heading",
+                        "fontSize",
+                        "|",
+                        "bold",
+                        "italic",
+                        "link",
+                        "numberedList",
+                        "bulletedList",
+                        "|",
+                        "undo",
+                        "redo",
+                        //@ts-ignore
+                        ...config?.toolbar.items,
+                    ],
+                },
                 plugins: [
                     Bold,
                     Essentials,
@@ -62,6 +74,8 @@ function CKEditorClassic(props: CKEditorClassicProps) {
                     Link,
                     Heading,
                     FontSize,
+                    //@ts-ignore
+                    ...config?.plugins,
                 ],
                 initialData: initialData,
             }}

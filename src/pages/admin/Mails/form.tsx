@@ -22,8 +22,11 @@ import {
     Heading,
     Link,
     FontSize,
+    Clipboard,
 } from "ckeditor5";
-import CKEditorWithConstructions from "@/components/Custom/CKEditor/CKEditorWithConstructions";
+import Placeholder from "@/components/Custom/CKEditorPlugins/ConstructionList/placeholder";
+import CKEditorClassic from "@/components/Custom/CKEditor/CKEditorClassic";
+import tippy from "tippy.js";
 
 interface MailFormProps {
     onUpdate: (mailData: UpdateMail) => void;
@@ -154,7 +157,22 @@ function MailForm({
         onUpdate(mailData);
     };
 
+    const addConstructionTooltips = () => {
+        const constructionViews = document.querySelectorAll(
+            ".placeholder.ck-widget"
+        );
+        constructionViews.forEach((constructionView) => {
+            const elem = constructionView as HTMLElement;
+            tippy(elem, {
+                content: String(elem.getAttribute("data-title")),
+                placement: "bottom",
+                animation: "shift-away",
+            });
+        });
+    };
+
     useEffect(() => {
+        addConstructionTooltips();
         checkUsedConstructions(editorData);
         setCustomErrors({ ...customErrors, description: null });
     }, [editorData, currentMail]);
@@ -251,7 +269,7 @@ function MailForm({
                                 });
                             }}
                         >
-                            <CKEditorWithConstructions
+                            <CKEditorClassic
                                 editorData={editorData}
                                 onChange={(event, editor) => {
                                     const data = editor.getData();
@@ -262,36 +280,26 @@ function MailForm({
                                     checkUsedConstructions(
                                         currentMail.description
                                     );
+                                    addConstructionTooltips();
                                 }}
-                                constructions={currentMail.constructions}
                                 config={{
                                     toolbar: {
-                                        items: [
-                                            "heading",
-                                            "fontSize",
-                                            "|",
-                                            "bold",
-                                            "italic",
-                                            "link",
-                                            "numberedList",
-                                            "bulletedList",
-                                            "|",
-                                            "undo",
-                                            "redo",
-                                        ],
+                                        items: ["|", "placeholder"],
                                     },
-                                    plugins: [
-                                        Bold,
-                                        Essentials,
-                                        Italic,
-                                        Mention,
-                                        Paragraph,
-                                        Undo,
-                                        List,
-                                        Link,
-                                        Heading,
-                                        FontSize,
-                                    ],
+                                    plugins: [Clipboard, Placeholder],
+                                    //@ts-ignore
+                                    placeholderConfig: currentMail.constructions
+                                        ? {
+                                              types: currentMail.constructions.map(
+                                                  (construction) => ({
+                                                      title: construction.name,
+                                                      construction:
+                                                          construction.construction,
+                                                      class: construction.class,
+                                                  })
+                                              ),
+                                          }
+                                        : undefined,
                                     initialData: currentMail.description,
                                 }}
                             />
