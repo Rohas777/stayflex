@@ -1,7 +1,7 @@
 import { useAppDispatch, useAppSelector } from "@/stores/hooks";
 import React, { useEffect, useState } from "react";
 import { fetchObjectById } from "@/stores/reducers/objects/actions";
-import { Navigate, useLocation, useNavigate } from "react-router-dom";
+import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { Status } from "@/stores/reducers/types";
 import Loader from "@/components/Custom/Loader/Loader";
 import TinySlider from "@/components/Base/TinySlider";
@@ -17,6 +17,7 @@ import Notification from "@/components/Base/Notification";
 import Icon from "@/components/Custom/Icon";
 import { ReservationClientCreateType } from "@/stores/reducers/reservations/types";
 import { createClientReservation } from "@/stores/reducers/reservations/actions";
+import ImageZoom from "@/components/Base/ImageZoom";
 
 function Main() {
     const [reservationModal, setReservationModal] = useState(false);
@@ -95,10 +96,22 @@ function Main() {
 
     return (
         <>
-            <div className="flex items-center mt-8 intro-y">
+            <div className="flex flex-col items-center mt-8 intro-y sm:flex-row">
                 <h2 className="mr-auto text-lg font-medium">
                     Объект - {objectOne?.name}
                 </h2>
+                <Link
+                    to={`/objects/${objectOne?.author.id}`}
+                    className="flex items-center mt-3 sm:mt-0"
+                >
+                    <Button
+                        variant="secondary"
+                        className="mr-2 shadow-md whitespace-nowrap"
+                    >
+                        Все объекты
+                        <Icon icon="ExternalLink" className="size-5 ml-2" />
+                    </Button>
+                </Link>
             </div>
             {/* BEGIN: Profile Info */}
             <div className="grid lg:grid-cols-3 xl:grid-cols-2 px-5 pt-5 mt-5 intro-y box">
@@ -112,9 +125,12 @@ function Main() {
                         }}
                     >
                         {objectOne?.photos.map((image) => (
-                            <div key={image} className="aspect-video h-96 px-2">
+                            <div key={image} className="h-72 sm:h-96 px-2">
                                 <div className="h-full overflow-hidden rounded-md image-fit">
-                                    <img src={image} />
+                                    <ImageZoom
+                                        src={image}
+                                        className="size-full hover:scale-120"
+                                    />
                                 </div>
                             </div>
                         ))}

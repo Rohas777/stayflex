@@ -25,6 +25,7 @@ import Loader from "@/components/Custom/Loader/Loader";
 import { Tab } from "@/components/Base/Headless";
 import UserUpdateForm from "./updateUserForm";
 import UserTariffUpdateForm from "./updateTariffForm";
+import UserBalanceUpdateForm from "./updateBalanceForm";
 
 interface UserUpdateModalProps {
     onUpdateUser: (userData: UserUpdateType) => void;
@@ -68,6 +69,11 @@ function UserUpdateModal({
                                 Тариф
                             </Tab.Button>
                         </Tab>
+                        <Tab>
+                            <Tab.Button className="w-full py-2" as="button">
+                                Баланс
+                            </Tab.Button>
+                        </Tab>
                     </Tab.List>
                     <Tab.Panels className="mt-5">
                         <Tab.Panel className="leading-relaxed">
@@ -79,6 +85,13 @@ function UserUpdateModal({
                         </Tab.Panel>
                         <Tab.Panel className="leading-relaxed">
                             <UserTariffUpdateForm
+                                onUpdate={onUpdateUserTariff}
+                                setIsLoaderOpen={setIsLoaderOpen}
+                                isLoaderOpen={isLoaderOpen}
+                            />
+                        </Tab.Panel>
+                        <Tab.Panel className="leading-relaxed">
+                            <UserBalanceUpdateForm
                                 onUpdate={onUpdateUserTariff}
                                 setIsLoaderOpen={setIsLoaderOpen}
                                 isLoaderOpen={isLoaderOpen}

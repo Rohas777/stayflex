@@ -78,11 +78,17 @@ function ReservationsCalendar({
         });
 
     const options: CalendarOptions = {
-        plugins: [interactionPlugin, dayGridPlugin, timeGridPlugin, listPlugin],
+        // plugins: [interactionPlugin, dayGridPlugin, timeGridPlugin, listPlugin],
+        // headerToolbar: {
+        //     left: "prev,next today",
+        //     center: "title",
+        //     right: "dayGridMonth,timeGridWeek,timeGridDay,listYear",
+        // },
+        plugins: [interactionPlugin, dayGridPlugin],
         headerToolbar: {
             left: "prev,next today",
             center: "title",
-            right: "dayGridMonth,timeGridWeek,timeGridDay,listYear",
+            right: "",
         },
         locale: ruLocale,
         weekNumberCalculation: "ISO",

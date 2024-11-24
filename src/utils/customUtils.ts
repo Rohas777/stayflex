@@ -34,6 +34,16 @@ export const convertDateString = (str: string) => {
 };
 
 /**
+ * Конвертирует строку в формате '01.01.2022' в строку в формате '2022-01-01'
+ * @param {string} str - строка в формате '01.01.2022'
+ * @returns {string} - строка в формате '2022-01-01'
+ */
+export const convertStringDate = (str: string) => {
+    const [day, month, year] = str.split(".");
+    return `${year}-${month}-${day}`;
+};
+
+/**
  * Форматирует дату в формат "Д ммм., ГГГГ", где
  * ммм. - месяц в виде тр - х букв
  * @param {Date} date - дата

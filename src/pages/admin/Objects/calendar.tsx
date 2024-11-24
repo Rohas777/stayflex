@@ -64,11 +64,17 @@ function ReservationsCalendar({
     const dispatch = useAppDispatch();
 
     const options: CalendarOptions = {
-        plugins: [interactionPlugin, dayGridPlugin, timeGridPlugin, listPlugin],
+        // plugins: [interactionPlugin, dayGridPlugin, timeGridPlugin, listPlugin],
+        // headerToolbar: {
+        //     left: "prev,next today",
+        //     center: "title",
+        //     right: "dayGridMonth,timeGridWeek,timeGridDay,listYear",
+        // },
+        plugins: [interactionPlugin, dayGridPlugin],
         headerToolbar: {
             left: "prev,next today",
             center: "title",
-            right: "dayGridMonth,timeGridWeek,timeGridDay,listYear",
+            right: "",
         },
         locale: ruLocale,
         weekNumberCalculation: "ISO",
@@ -78,13 +84,9 @@ function ReservationsCalendar({
             return;
         },
 
-        buttonText: {
-            today: "Сегодня",
-            month: "Месяц",
-            week: "Неделя",
-            day: "День",
-            list: "Список",
-        },
+        // buttonText: {
+        //     today: "Сегодня",
+        // },
         displayEventTime: false,
         events: events,
         eventClassNames: (info) => {

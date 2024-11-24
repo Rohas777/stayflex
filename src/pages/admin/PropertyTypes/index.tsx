@@ -77,7 +77,7 @@ function Main() {
                 columns: [
                     {
                         title: "",
-                        field: "id",
+                        field: "",
                         formatter: "responsiveCollapse",
                         width: 40,
                         minWidth: 30,
@@ -123,7 +123,7 @@ function Main() {
                     {
                         title: "Действия",
                         minWidth: 200,
-                        field: "id",
+                        field: "",
                         responsive: 1,
                         hozAlign: "right",
                         headerHozAlign: "right",

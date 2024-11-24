@@ -92,7 +92,7 @@ function Main() {
                 columns: [
                     {
                         title: "",
-                        field: "id",
+                        field: "",
                         formatter: "responsiveCollapse",
                         width: 40,
                         minWidth: 30,
@@ -110,7 +110,7 @@ function Main() {
                         vertAlign: "middle",
                         print: false,
                         download: false,
-                        sorter: "string",
+                        sorter: "number",
                         formatter(cell) {
                             const response: Response = cell.getData();
                             return `<div>
@@ -155,7 +155,7 @@ function Main() {
                         vertAlign: "middle",
                         print: false,
                         download: false,
-                        sorter: "number",
+                        sorter: "string",
                         formatter(cell) {
                             const response: Response = cell.getData();
                             const output =
@@ -182,7 +182,10 @@ function Main() {
                         vertAlign: "middle",
                         print: false,
                         download: false,
-                        sorter: "number",
+                        sorter: "datetime",
+                        sorterParams: {
+                            format: "dd.mm.yyyy HH:mm:ss",
+                        },
                         formatter(cell) {
                             const response: Response = cell.getData();
                             return `<div class="flex lg:justify-center">

@@ -26,6 +26,7 @@ import LoadingIcon from "@/components/Base/LoadingIcon";
 import { ListPlus } from "lucide-react";
 import {
     convertDateString,
+    convertStringDate,
     startLoader,
     stopLoader,
 } from "@/utils/customUtils";
@@ -110,7 +111,7 @@ function Main() {
                 columns: [
                     {
                         title: "",
-                        field: "id",
+                        field: "",
                         formatter: "responsiveCollapse",
                         width: 40,
                         minWidth: 30,
@@ -128,7 +129,7 @@ function Main() {
                         vertAlign: "middle",
                         print: false,
                         download: false,
-                        sorter: "string",
+                        sorter: "number",
                         formatter(cell) {
                             const response: Response = cell.getData();
                             return `<div>
@@ -162,7 +163,17 @@ function Main() {
                         vertAlign: "middle",
                         print: false,
                         download: false,
-                        sorter: "string",
+                        sorter: function (a, b) {
+                            const startA = convertStringDate(a.split(" - ")[0]);
+                            const startB = convertStringDate(b.split(" - ")[0]);
+
+                            a = new Date(startA).getTime();
+                            b = new Date(startB).getTime();
+
+                            if (a < b) return -1;
+                            if (a > b) return 1;
+                            return 0;
+                        },
                         formatter(cell) {
                             const response: Response = cell.getData();
                             return `<div>

@@ -110,7 +110,7 @@ function Main() {
                 columns: [
                     {
                         title: "",
-                        field: "id",
+                        field: "",
                         formatter: "responsiveCollapse",
                         width: 40,
                         minWidth: 30,
@@ -128,7 +128,7 @@ function Main() {
                         vertAlign: "middle",
                         print: false,
                         download: false,
-                        sorter: "string",
+                        sorter: "number",
                         formatter(cell) {
                             const response: Response = cell.getData();
                             return `<div>
@@ -179,7 +179,7 @@ function Main() {
                         print: false,
                         download: false,
                         sorter: "date",
-                        sorterParams: { format: "DD/MM/YY" },
+                        sorterParams: { format: "dd-mm-yyyy" },
                         formatter(cell) {
                             const response: Response = cell.getData();
                             const formattedDate =

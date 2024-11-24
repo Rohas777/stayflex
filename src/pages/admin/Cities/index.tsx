@@ -37,10 +37,8 @@ window.DateTime = DateTime;
 interface Response {
     id?: number;
     name?: string;
-    region?: {
-        name: string;
-        id: number;
-    };
+    region_name?: string;
+    region_id?: number;
     objects?: number;
     server?: string;
 }
@@ -89,7 +87,7 @@ function Main() {
                 columns: [
                     {
                         title: "",
-                        field: "id",
+                        field: "",
                         formatter: "responsiveCollapse",
                         width: 40,
                         minWidth: 30,
@@ -118,7 +116,7 @@ function Main() {
                     {
                         title: "Регион",
                         minWidth: 200,
-                        field: "region",
+                        field: "region_name",
                         vertAlign: "middle",
                         headerHozAlign: "center",
                         print: false,
@@ -127,9 +125,7 @@ function Main() {
                         formatter(cell) {
                             const response: Response = cell.getData();
                             return `<div>
-                                        <div class="font-medium whitespace-nowrap">${
-                                            response.region!.name
-                                        }</div>
+                                        <div class="font-medium whitespace-nowrap">${response.region_name}</div>
                                     </div>`;
                         },
                     },
@@ -159,7 +155,7 @@ function Main() {
                         vertAlign: "middle",
                         print: false,
                         download: false,
-                        sorter: "number",
+                        sorter: "string",
                         formatter(cell) {
                             const response: Response = cell.getData();
                             return `<div class="flex lg:justify-center">
@@ -198,8 +194,8 @@ function Main() {
                                     name: response.name!,
                                     id: response.id!,
                                     region: {
-                                        name: response.region!.name,
-                                        id: response.region!.id,
+                                        name: response.region_name!,
+                                        id: response.region_id!,
                                     },
                                     server: 3,
                                 });
@@ -399,10 +395,8 @@ function Main() {
             const formattedData = cities.map((city) => ({
                 id: city.id,
                 name: city.name,
-                region: {
-                    name: city.region.name,
-                    id: city.region.id,
-                },
+                region_name: city.region.name,
+                region_id: city.region.id,
                 objects: city.object_count,
                 server: "Stayflex",
             }));

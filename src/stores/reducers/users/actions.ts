@@ -182,7 +182,6 @@ export const updateUserTariff = createAsyncThunk(
         }
     }
 );
-
 export const fetchAuthorizedUser = createAsyncThunk(
     "user/profile",
     async (_, thunkAPI) => {

@@ -126,7 +126,7 @@ function Main() {
                         vertAlign: "middle",
                         print: false,
                         download: false,
-                        sorter: "string",
+                        sorter: "number",
                         formatter(cell) {
                             const response: Response = cell.getData();
                             return `<div>
@@ -153,7 +153,7 @@ function Main() {
                     {
                         title: t("table.actions"),
                         minWidth: 200,
-                        field: "id",
+                        field: "",
                         responsive: 1,
                         hozAlign: "right",
                         headerHozAlign: "center",

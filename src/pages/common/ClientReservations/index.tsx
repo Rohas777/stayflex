@@ -17,7 +17,6 @@ import {
     createReservation,
     deleteReservation,
     fetchReservationById,
-    fetchReservations,
     fetchReservationsByClient,
     updateReservation,
     updateReservationStatus,
@@ -27,6 +26,7 @@ import LoadingIcon from "@/components/Base/LoadingIcon";
 import { ListPlus } from "lucide-react";
 import {
     convertDateString,
+    convertStringDate,
     startLoader,
     stopLoader,
 } from "@/utils/customUtils";
@@ -42,7 +42,6 @@ import {
     fetchObjects,
 } from "@/stores/reducers/objects/actions";
 import { clientSlice } from "@/stores/reducers/clients/slice";
-import { di } from "@fullcalendar/core/internal-common";
 import OverlayLoader from "@/components/Custom/OverlayLoader/Loader";
 import clsx from "clsx";
 import { errorToastSlice } from "@/stores/errorToastSlice";
@@ -53,7 +52,8 @@ import { reservationStatus } from "@/vars";
 window.DateTime = DateTime;
 interface Response {
     id?: number;
-    object?: { name: string; id: number };
+    object_id?: number;
+    object_name?: string;
     date?: string;
     name?: string;
     status?: string;
@@ -112,7 +112,7 @@ function Main() {
                 columns: [
                     {
                         title: "",
-                        field: "id",
+                        field: "",
                         formatter: "responsiveCollapse",
                         width: 40,
                         minWidth: 30,
@@ -130,7 +130,7 @@ function Main() {
                         vertAlign: "middle",
                         print: false,
                         download: false,
-                        sorter: "string",
+                        sorter: "number",
                         formatter(cell) {
                             const response: Response = cell.getData();
                             return `<div>
@@ -142,7 +142,7 @@ function Main() {
                         title: "Объект",
                         minWidth: 200,
                         responsive: 0,
-                        field: "object",
+                        field: "object_name",
                         headerHozAlign: "center",
                         vertAlign: "middle",
                         print: false,
@@ -151,9 +151,7 @@ function Main() {
                         formatter(cell) {
                             const response: Response = cell.getData();
                             return `<div>
-                                        <div class="font-medium whitespace-nowrap">${
-                                            response.object!.name
-                                        }</div>
+                                        <div class="font-medium whitespace-nowrap">${response.object_name}</div>
                                     </div>`;
                         },
                     },
@@ -166,7 +164,17 @@ function Main() {
                         vertAlign: "middle",
                         print: false,
                         download: false,
-                        sorter: "string",
+                        sorter: function (a, b) {
+                            const startA = convertStringDate(a.split(" - ")[0]);
+                            const startB = convertStringDate(b.split(" - ")[0]);
+
+                            a = new Date(startA).getTime();
+                            b = new Date(startB).getTime();
+
+                            if (a < b) return -1;
+                            if (a > b) return 1;
+                            return 0;
+                        },
                         formatter(cell) {
                             const response: Response = cell.getData();
                             return `<div>
@@ -245,7 +253,7 @@ function Main() {
                         minWidth: 50,
                         maxWidth: 150,
                         title: "Действия",
-                        field: "id",
+                        field: "",
                         responsive: 1,
                         hozAlign: "right",
                         headerHozAlign: "right",
@@ -276,14 +284,14 @@ function Main() {
                             });
                             editA.addEventListener("click", function () {
                                 dispatch(fetchReservationById(response.id!));
-                                dispatch(fetchObjectById(response.object!.id));
+                                dispatch(fetchObjectById(response.object_id!));
                                 dispatch(fetchObjects());
                                 setButtonModalCreate(true);
                             });
                             deleteA.addEventListener("click", function () {
                                 setConfirmModalContent({
                                     title: "Удалить бронь?",
-                                    description: `Вы уверены, что хотите удалить бронь "${response.object!.name.trim()} - ${response.date?.trim()}"?<br/>Это действие нельзя будет отменить.`,
+                                    description: `Вы уверены, что хотите удалить бронь "${response.object_name?.trim()} - ${response.date?.trim()}"?<br/>Это действие нельзя будет отменить.`,
                                     onConfirm: () => {
                                         console.log("first");
                                         onDelete(response.id!);
@@ -466,7 +474,8 @@ function Main() {
         if (reservations.length) {
             const formattedData = reservations.map((reservation) => ({
                 id: reservation.id,
-                object: reservation.object,
+                object_name: reservation.object.name,
+                object_id: reservation.object.id,
                 date:
                     convertDateString(reservation.start_date) +
                     " - " +

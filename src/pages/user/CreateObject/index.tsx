@@ -1038,6 +1038,7 @@ function Main() {
                                 <FormCheck.Input
                                     id="checkbox-switch-1"
                                     type="checkbox"
+                                    checked
                                     value=""
                                     className="size-6 mr-2"
                                 />
@@ -1049,6 +1050,7 @@ function Main() {
                                 <FormCheck.Input
                                     id="checkbox-switch-3"
                                     type="checkbox"
+                                    checked
                                     value=""
                                     className="size-6 mr-2"
                                 />
@@ -1062,6 +1064,7 @@ function Main() {
                                 <FormCheck.Input
                                     id="checkbox-switch-2"
                                     type="checkbox"
+                                    checked
                                     value=""
                                     className="size-6 mr-2"
                                 />
@@ -1073,6 +1076,7 @@ function Main() {
                                 <FormCheck.Input
                                     id="checkbox-switch-4"
                                     type="checkbox"
+                                    checked
                                     value=""
                                     className="size-6 mr-2"
                                 />
