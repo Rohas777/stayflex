@@ -2,7 +2,7 @@ import { IClient } from "@/stores/models/IClient";
 import { IObjectReservation, IReservation } from "@/stores/models/IReservation";
 import { reservationStatus } from "@/vars";
 
-export const getObjectReservations = (reservations: IReservation[]) => {
+export function getObjectReservations(reservations: IReservation[]) {
     return reservations.reduce((acc, reservation) => {
         // Ищем объект по его id в аккумуляторе
         const existingObject = acc.find(
@@ -49,7 +49,7 @@ export const getObjectReservations = (reservations: IReservation[]) => {
 
         return acc;
     }, [] as IObjectReservation[]);
-};
+}
 
 export const sortAndSetOrder = (objectReservations: IObjectReservation[]) => {
     objectReservations.forEach((object) => {
