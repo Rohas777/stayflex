@@ -37,12 +37,19 @@ function Scheduler({ reservations }: Props) {
             .querySelectorAll("[data-max-concurrent-reservations]")
             .forEach((el) => {
                 const cell = el as HTMLTableElement;
+
                 cell.style.height = `${
                     Number(
                         cell.getAttribute("data-max-concurrent-reservations")
                     ) * 30
                 }px`;
             });
+
+        document.querySelectorAll(".side-heading").forEach((el) => {
+            const cell = el as HTMLTableElement;
+            const tr = cell.parentElement as HTMLTableRowElement;
+            cell.style.height = `${tr.offsetHeight}px`;
+        });
 
         document.querySelectorAll("[data-days]").forEach((el) => {
             const cell = el as HTMLTableElement;
@@ -80,17 +87,17 @@ function Scheduler({ reservations }: Props) {
 
     return (
         <>
-            <div className="overflow-x-auto custom-hoz-scrollbar">
-                <table className="min-w-full table-fixed border-collapse ">
+            <div className="overflow-x-auto custom-hoz-scrollbar ml-48">
+                <table className="border-collapse">
                     <thead>
-                        <tr>
-                            <th className="border-b p-2 text-left border-r bg-slate-100 dark:bg-darkmode-300 sticky left-0 z-10">
+                        <tr className="relative">
+                            <th className="border-b p-2 text-left border-r bg-slate-100 dark:bg-darkmode-300 fixed w-48 h-14 z-10 flex items-center -translate-x-full">
                                 Объект
                             </th>
                             {dates.map((date) => (
                                 <th
                                     key={date}
-                                    className="border-r border-slate-200 border-b p-2 text-center w-[40px] min-w-[40px] max-w-[40px]"
+                                    className="border-r border-slate-200 border-b p-2 text-center w-full min-w-[40px] max-w-[40px] h-full max-h-14"
                                 >
                                     <span className="font-normal">
                                         {dayNames[new Date(date).getDay()]}
@@ -101,11 +108,11 @@ function Scheduler({ reservations }: Props) {
                             ))}
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody className="relative">
                         {objectReservations.map((object) => {
                             return (
                                 <tr key={object.name}>
-                                    <td className="border-b z-10 p-2 whitespace-nowrap border-r bg-slate-100 dark:bg-darkmode-300 sticky left-0">
+                                    <td className="border-b z-10 p-2 whitespace-nowrap border-r bg-slate-100 dark:bg-darkmode-300 fixed w-48 flex items-center -translate-x-full side-heading">
                                         {object.name}
                                     </td>
                                     {dates.map((date) => (

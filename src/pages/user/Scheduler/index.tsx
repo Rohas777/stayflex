@@ -41,6 +41,24 @@ function Main() {
             <div className="flex flex-wrap items-center mt-8 intro-y">
                 <h2 className="mr-auto text-lg font-medium">Шахматка броней</h2>
             </div>
+            <div className="flex flex-wrap gap-2 items-center mt-3">
+                <div className="flex gap-1">
+                    <span className="block size-5 bg-danger rounded-md"></span>{" "}
+                    - Отклонена
+                </div>
+                <div className="flex gap-1">
+                    <span className="block size-5 bg-success rounded-md"></span>{" "}
+                    - Одобрена
+                </div>
+                <div className="flex gap-1">
+                    <span className="block size-5 bg-warning rounded-md"></span>{" "}
+                    - Новая
+                </div>
+                <div className="flex gap-1">
+                    <span className="block size-5 bg-slate-200 rounded-md"></span>{" "}
+                    - Завершена
+                </div>
+            </div>
             <div className="mt-5 intro-y box p-5">
                 <Scheduler reservations={reservations} />
             </div>
