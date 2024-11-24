@@ -45,7 +45,7 @@ import { amenitySlice } from "@/stores/reducers/amenities/slice";
 import { propertyTypeSlice } from "@/stores/reducers/property-types/slice";
 import { errorToastSlice } from "@/stores/errorToastSlice";
 import ValidationErrorNotification from "@/components/Custom/ValidationErrorNotification";
-import { CKEditorClassic } from "@/components/Custom/CKEditor";
+import CKEditorClassic from "@/components/Custom/CKEditor/CKEditorClassic";
 
 window.DateTime = DateTime;
 

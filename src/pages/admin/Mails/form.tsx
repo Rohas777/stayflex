@@ -23,7 +23,7 @@ import {
     Link,
     FontSize,
 } from "ckeditor5";
-import { CKEditorWithConstructions } from "@/components/Custom/CKEditor";
+import CKEditorWithConstructions from "@/components/Custom/CKEditor/CKEditorWithConstructions";
 
 interface MailFormProps {
     onUpdate: (mailData: UpdateMail) => void;

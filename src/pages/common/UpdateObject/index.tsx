@@ -55,7 +55,7 @@ import { propertyTypeSlice } from "@/stores/reducers/property-types/slice";
 import Loader from "@/components/Custom/Loader/Loader";
 import { IObject } from "@/stores/models/IObject";
 import ValidationErrorNotification from "@/components/Custom/ValidationErrorNotification";
-import { CKEditorClassic } from "@/components/Custom/CKEditor";
+import CKEditorClassic from "@/components/Custom/CKEditor/CKEditorClassic";
 
 window.DateTime = DateTime;
 
