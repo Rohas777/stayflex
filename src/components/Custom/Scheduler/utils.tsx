@@ -3,13 +3,14 @@ import { IObjectReservation, IReservation } from "@/stores/models/IReservation";
 import { reservationStatus } from "@/vars";
 
 export function getObjectReservations(reservations: IReservation[]) {
+    if (!Array.isArray(reservations)) return [] as IObjectReservation[];
     return reservations.reduce((acc, reservation) => {
         // Ищем объект по его id в аккумуляторе
         const existingObject = acc.find(
             (item) => item.id === reservation.object.id
         );
 
-        if (existingObject && Array.isArray(existingObject.reservations)) {
+        if (existingObject) {
             // Если объект найден, добавляем новую резервацию
             existingObject.reservations.push({
                 id: reservation.id,
@@ -120,11 +121,10 @@ export const getMaxConcurrentReservations = (
 };
 
 export function getEarliestDate(reservations: IReservation[]) {
-    if (Array.isArray(reservations)) {
-        return reservations.reduce((earliest, current) => {
-            return new Date(current.start_date) < new Date(earliest.start_date)
-                ? current
-                : earliest;
-        }).start_date;
-    }
+    if (!Array.isArray(reservations)) return [];
+    return reservations.reduce((earliest, current) => {
+        return new Date(current.start_date) < new Date(earliest.start_date)
+            ? current
+            : earliest;
+    }).start_date;
 }
