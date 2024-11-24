@@ -121,7 +121,7 @@ export const getMaxConcurrentReservations = (
 };
 
 export function getEarliestDate(reservations: IReservation[]) {
-    if (!Array.isArray(reservations)) return [];
+    if (!Array.isArray(reservations)) return new Date().toISOString();
     return reservations.reduce((earliest, current) => {
         return new Date(current.start_date) < new Date(earliest.start_date)
             ? current
