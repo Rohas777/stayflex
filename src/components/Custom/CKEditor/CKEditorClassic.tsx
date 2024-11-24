@@ -1,6 +1,5 @@
 import { CKEditor } from "@ckeditor/ckeditor5-react";
-import { ClassicEditor, Clipboard, EditorConfig, EventInfo } from "ckeditor5";
-import Placeholder from "@/components/Custom/CKEditorPlugins/ConstructionList/placeholder";
+import { ClassicEditor, EditorConfig, EventInfo } from "ckeditor5";
 import "ckeditor5/ckeditor5.css";
 import "@/assets/css/vendors/ckeditor.css";
 import {
@@ -15,7 +14,6 @@ import {
     Link,
     FontSize,
 } from "ckeditor5";
-import React from "react";
 
 interface CKEditorClassicProps {
     editorData: string;

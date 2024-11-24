@@ -9,7 +9,7 @@ export function getObjectReservations(reservations: IReservation[]) {
             (item) => item.id === reservation.object.id
         );
 
-        if (existingObject) {
+        if (existingObject && !!existingObject.reservations.length) {
             // Если объект найден, добавляем новую резервацию
             existingObject.reservations.push({
                 id: reservation.id,
@@ -120,9 +120,11 @@ export const getMaxConcurrentReservations = (
 };
 
 export function getEarliestDate(reservations: IReservation[]) {
-    return reservations.reduce((earliest, current) => {
-        return new Date(current.start_date) < new Date(earliest.start_date)
-            ? current
-            : earliest;
-    }).start_date;
+    if (!!reservations.length) {
+        return reservations.reduce((earliest, current) => {
+            return new Date(current.start_date) < new Date(earliest.start_date)
+                ? current
+                : earliest;
+        }).start_date;
+    }
 }

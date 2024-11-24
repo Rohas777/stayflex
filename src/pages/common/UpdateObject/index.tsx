@@ -1,7 +1,7 @@
 import "@/assets/css/vendors/tabulator.css";
 import "@/assets/css/vendors/dropzone.css";
 import Button from "@/components/Base/Button";
-import { useEffect, useRef, createRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { DateTime } from "luxon";
 import { useAppDispatch, useAppSelector } from "@/stores/hooks";
 import { Status } from "@/stores/reducers/types";
@@ -19,25 +19,17 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import TomSelect from "@/components/Base/TomSelect";
 import { fetchRegions } from "@/stores/reducers/regions/actions";
 import { schema } from "./schema";
-// import { ClassicEditor } from "@/components/Base/Ckeditor";
 import { fetchAmenities } from "@/stores/reducers/amenities/actions";
 import { fetchPropertyTypes } from "@/stores/reducers/property-types/actions";
 import Notification from "@/components/Base/Notification";
 import Lucide from "@/components/Base/Lucide";
 import Toastify from "toastify-js";
+import { ObjectUpdateType } from "@/stores/reducers/objects/types";
 import {
-    ObjectCreateType,
-    ObjectUpdateType,
-} from "@/stores/reducers/objects/types";
-import {
-    createObject,
     fetchObjectById,
     updateObject,
 } from "@/stores/reducers/objects/actions";
-import CustomTomSelect, {
-    TomSelectElement,
-} from "@/components/Base/CustomTomSelect";
-import LoadingIcon from "@/components/Base/LoadingIcon";
+import CustomTomSelect from "@/components/Base/CustomTomSelect";
 import {
     ImageDropzoneFile,
     resizeDropzoneFiles,
