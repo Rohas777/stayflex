@@ -160,8 +160,8 @@ function Main() {
                         formatter(cell) {
                             const response: Response = cell.getData();
                             const output =
-                                stringToHTML(`<div class="flex lg:justify-start truncate w-full">
-                                        <div class="font-medium truncate">${response.action}</div>
+                                stringToHTML(`<div class="flex lg:justify-start">
+                                        <div class="font-medium whitespace-normal">${response.action}</div>
                                     </div>`);
 
                             tippy(output, {
@@ -174,7 +174,7 @@ function Main() {
                         },
                     },
                     {
-                        title: "Дата",
+                        title: "Дата/время GMT+3",
                         minWidth: 200,
                         maxWidth: 200,
                         field: "created_at",
