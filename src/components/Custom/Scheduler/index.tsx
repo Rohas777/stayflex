@@ -94,7 +94,9 @@ function Scheduler({ reservations, onClickEvent, daysRange }: Props) {
                 Number(cell.getAttribute("data-index")) * 30
             }px`;
         });
+    }, [objectReservations, daysRange]);
 
+    useEffect(() => {
         if (tableRef.current) {
             const tableContainer = tableRef.current
                 .parentElement as HTMLElement;
@@ -103,7 +105,7 @@ function Scheduler({ reservations, onClickEvent, daysRange }: Props) {
             ) as HTMLTableElement;
             tableContainer.scrollLeft = todayCell?.offsetLeft - 40;
         }
-    }, [objectReservations, daysRange]);
+    }, [tableRef.current]);
 
     // Функция для генерации массива дат
     const generateDates = (start: string, days: number): string[] => {
