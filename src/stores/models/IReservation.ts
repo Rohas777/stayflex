@@ -7,6 +7,8 @@ export interface IReservation {
     status: reservationStatus;
     description: string;
     letter: string;
+    adult_places: number;
+    child_places: number;
     client: {
         id: number;
         fullname: string;
@@ -29,6 +31,8 @@ export interface IObjectReservation {
         status: reservationStatus;
         description: string;
         letter: string;
+        adult_places: number;
+        child_places: number;
         order?: number;
         client: {
             id: number;

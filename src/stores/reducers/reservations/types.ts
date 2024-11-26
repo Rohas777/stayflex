@@ -21,7 +21,8 @@ export interface ReservationCreateType {
     description: string;
     letter: string;
     status: reservationStatus;
-    guest_count: number; //FIXME -
+    adult_places: number;
+    child_places: number;
 }
 export interface ReservationClientCreateType {
     client_data: {
@@ -30,7 +31,8 @@ export interface ReservationClientCreateType {
         email: string;
     };
     reservation_data: {
-        guest_count: number; //FIXME -
+        adult_places: number;
+        child_places: number;
         start_date: string;
         end_date: string;
         object_id: number;

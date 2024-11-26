@@ -308,9 +308,8 @@ function ReservationForm({
                 description: String(formData?.get("description")),
                 letter: String(formData?.get("letter")),
                 status: selectedStatus,
-                guest_count:
-                    Number(formData?.get("adult_count")) +
-                    Number(formData?.get("child_count")), //FIXME -
+                adult_places: Number(formData?.get("adult_count")),
+                child_places: Number(formData?.get("child_count")),
             };
             if (isCreate) {
                 onCreate(reservationData);
@@ -332,9 +331,8 @@ function ReservationForm({
                 description: String(formData?.get("description")),
                 letter: String(formData?.get("letter")),
                 status: selectedStatus,
-                guest_count:
-                    Number(formData?.get("adult_count")) +
-                    Number(formData?.get("child_count")), //FIXME -
+                adult_places: Number(formData?.get("adult_count")),
+                child_places: Number(formData?.get("child_count")),
             };
             if (isCreate) {
                 onCreate(reservationData);
@@ -408,6 +406,19 @@ function ReservationForm({
                             <TomSelect
                                 id="validation-form-object"
                                 value={selectedObjectID}
+                                onLoad={(e) => {
+                                    setSelectedObjectID(
+                                        currentReservation
+                                            ? String(
+                                                  currentReservation.object.id
+                                              )
+                                            : currentUnreservedData
+                                            ? String(
+                                                  currentUnreservedData.objectID
+                                              )
+                                            : "-1"
+                                    );
+                                }}
                                 onChange={(e) => {
                                     setSelectedObjectID(e.target.value);
                                     setCustomErrors((prev) => ({
@@ -827,6 +838,11 @@ function ReservationForm({
                                     "border-danger": errors.adult_count,
                                 })}
                                 placeholder="2"
+                                defaultValue={
+                                    currentReservation
+                                        ? currentReservation.adult_places
+                                        : undefined
+                                }
                             />
                             {errors.adult_count && (
                                 <div className="mt-2 text-danger">
@@ -852,6 +868,11 @@ function ReservationForm({
                                 className={clsx({
                                     "border-danger": customErrors.child_count,
                                 })}
+                                defaultValue={
+                                    currentReservation
+                                        ? currentReservation.child_places
+                                        : 0
+                                }
                                 disabled={
                                     selectedObject
                                         ? selectedObject.child_places <= 0

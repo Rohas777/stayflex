@@ -25,25 +25,33 @@ function Main() {
             {/* BEGIN: Profile Info */}
             <div className="px-5 pt-5 mt-5 intro-y box">
                 <div className="flex justify-center pb-5 -mx-5 border-b lg:flex-row border-slate-200/60 dark:border-darkmode-400">
-                    <div className="flex flex-col items-center mt-4">
-                        <div className="flex items-center justify-center sm:whitespace-normal font-medium">
-                            {objects[0]?.author?.fullname}
+                    {!!objects.length ? (
+                        <div className="flex flex-col items-center mt-4">
+                            <div className="flex items-center justify-center sm:whitespace-normal font-medium">
+                                {objects[0]?.author?.fullname}
+                            </div>
+                            <Link
+                                to={`mailto:${objects[0]?.author?.mail}`}
+                                className="flex items-center justify-center mt-3 truncate sm:whitespace-normal"
+                            >
+                                <Icon icon="Mail" className="w-4 h-4 mr-2" />
+                                {objects[0]?.author?.mail}
+                            </Link>
+                            <Link
+                                to={`tel:${objects[0]?.author?.phone}`}
+                                className="flex items-center justify-center mt-3 truncate sm:whitespace-normal"
+                            >
+                                <Icon icon="Phone" className="w-4 h-4 mr-2" />{" "}
+                                {objects[0]?.author?.phone}
+                            </Link>
                         </div>
-                        <Link
-                            to={`mailto:${objects[0]?.author?.mail}`}
-                            className="flex items-center justify-center mt-3 truncate sm:whitespace-normal"
-                        >
-                            <Icon icon="Mail" className="w-4 h-4 mr-2" />
-                            {objects[0]?.author?.mail}
-                        </Link>
-                        <Link
-                            to={`tel:${objects[0]?.author?.phone}`}
-                            className="flex items-center justify-center mt-3 truncate sm:whitespace-normal"
-                        >
-                            <Icon icon="Phone" className="w-4 h-4 mr-2" />{" "}
-                            {objects[0]?.author?.phone}
-                        </Link>
-                    </div>
+                    ) : (
+                        <div className="flex flex-col items-center my-4">
+                            <div className="flex items-center justify-center sm:whitespace-normal font-medium text-xl">
+                                У этого пользователя нет объектов
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
             {/* END: Profile Info */}

@@ -70,9 +70,6 @@ function ReservationForm({
     const [isTermsChecked, setIsTermsChecked] = useState<boolean>(false);
 
     const objectsState = useAppSelector((state) => state.object);
-    const clientActions = clientSlice.actions;
-
-    const dispatch = useAppDispatch();
 
     const [showValidationNotification, setShowValidationNotification] =
         useState(false);
@@ -228,11 +225,8 @@ function ReservationForm({
                 email: String(formData.get("email")),
             },
             reservation_data: {
-                guest_count:
-                    Number(formData.get("adult_count")) +
-                    Number(formData.get("child_count")),
-                // adult_count: Number(formData.get("adult_count")), //FIXME -
-                // child_count: Number(formData.get("child_count")), //FIXME -
+                adult_places: Number(formData.get("adult_count")),
+                child_places: Number(formData.get("child_count")),
                 start_date: formatDate(new Date(startDate)),
                 end_date: formatDate(new Date(endDate)),
                 object_id: object.id,
@@ -575,6 +569,7 @@ function ReservationForm({
                                 className={clsx({
                                     "border-danger": customErrors.child_count,
                                 })}
+                                defaultValue={0}
                                 disabled={object.child_places <= 0}
                                 value={object.child_places <= 0 ? 0 : undefined}
                                 onChange={(e) => {

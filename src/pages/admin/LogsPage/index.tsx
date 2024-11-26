@@ -360,9 +360,11 @@ function Main() {
                 action: log.description,
                 role: log.user?.is_admin ? "A" : "U",
             }));
-            tabulator.current?.setData(formattedData).then(function () {
-                reInitTabulator();
-            });
+            tabulator.current
+                ?.setData(formattedData.reverse())
+                .then(function () {
+                    reInitTabulator();
+                });
         }
     }, [logs]);
 

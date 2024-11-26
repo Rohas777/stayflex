@@ -7,6 +7,7 @@ import {
     getObjectReservations,
     sortAndSetOrder,
 } from "./utils";
+import Tippy from "@/components/Base/Tippy";
 
 interface Props {
     reservations: IReservation[];
@@ -113,7 +114,16 @@ function Scheduler({ reservations }: Props) {
                             return (
                                 <tr key={object.name}>
                                     <td className="border-b z-10 p-2 whitespace-nowrap border-r bg-slate-100 dark:bg-darkmode-300 fixed w-48 flex items-center -translate-x-full side-heading">
-                                        {object.name}
+                                        <span className="truncate">
+                                            <Tippy
+                                                content={object.name}
+                                                options={{
+                                                    placement: "bottom-start",
+                                                }}
+                                            >
+                                                {object.name}
+                                            </Tippy>
+                                        </span>
                                     </td>
                                     {dates.map((date) => (
                                         <td

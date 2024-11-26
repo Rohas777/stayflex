@@ -238,9 +238,8 @@ function ReservationForm({
             description: String(formData?.get("description")),
             letter: String(formData?.get("letter")),
             status: selectedStatus,
-            guest_count:
-                Number(formData?.get("adult_count")) +
-                Number(formData?.get("child_count")), //FIXME -
+            adult_places: Number(formData?.get("adult_count")),
+            child_places: Number(formData?.get("child_count")),
         };
         if (isCreate) {
             onCreate(reservationData);
@@ -314,6 +313,16 @@ function ReservationForm({
                             <TomSelect
                                 id="validation-form-object"
                                 value={selectedObjectID}
+                                onLoad={(e) => {
+                                    setSelectedObjectID(
+                                        reservationState.reservationOne
+                                            ? String(
+                                                  reservationState
+                                                      .reservationOne.object.id
+                                              )
+                                            : "-1"
+                                    );
+                                }}
                                 onChange={(e) => {
                                     setSelectedObjectID(e.target.value);
                                     setCustomErrors((prev) => ({
@@ -604,6 +613,12 @@ function ReservationForm({
                                     "border-danger": errors.adult_count,
                                 })}
                                 placeholder="2"
+                                defaultValue={
+                                    reservationState.reservationOne
+                                        ? reservationState.reservationOne
+                                              .adult_places
+                                        : undefined
+                                }
                             />
                             {errors.adult_count && (
                                 <div className="mt-2 text-danger">
@@ -629,6 +644,12 @@ function ReservationForm({
                                 className={clsx({
                                     "border-danger": customErrors.child_count,
                                 })}
+                                defaultValue={
+                                    reservationState.reservationOne
+                                        ? reservationState.reservationOne
+                                              .child_places
+                                        : 0
+                                }
                                 disabled={
                                     selectedObject
                                         ? selectedObject.child_places <= 0
