@@ -19,31 +19,31 @@ function Main() {
         },
         {
             id: 2,
-            title: "СуточноРу",
+            title: "The Locals",
             data: {
                 login: "login",
                 password: "111222",
                 APIkey: "jhe23234jksdkjands",
             },
         },
-        {
-            id: 3,
-            title: "Airbnb",
-            data: {
-                login: "login",
-                password: "111222",
-                APIkey: "jhe23234jksdkjands",
-            },
-        },
-        {
-            id: 4,
-            title: "Яндекс.Квартира",
-            data: {
-                login: "login",
-                password: "111222",
-                APIkey: "jhe23234jksdkjands",
-            },
-        },
+        // {
+        //     id: 3,
+        //     title: "Airbnb",
+        //     data: {
+        //         login: "login",
+        //         password: "111222",
+        //         APIkey: "jhe23234jksdkjands",
+        //     },
+        // },
+        // {
+        //     id: 4,
+        //     title: "Яндекс.Квартира",
+        //     data: {
+        //         login: "login",
+        //         password: "111222",
+        //         APIkey: "jhe23234jksdkjands",
+        //     },
+        // },
     ]);
 
     return (

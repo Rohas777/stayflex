@@ -367,10 +367,12 @@ function ReservationForm({
         );
     }, [selectedObjectID]);
 
+    if (!isCreate && !currentReservation) {
+        return <Loader />;
+    }
     if (
         objectsState.status === Status.LOADING &&
-        clientsState.statusByPhone !== Status.LOADING &&
-        reservationsState.statusOne !== Status.LOADING
+        clientsState.statusByPhone !== Status.LOADING
     ) {
         return <Loader />;
     }

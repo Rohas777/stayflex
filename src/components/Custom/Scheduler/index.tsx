@@ -1,6 +1,6 @@
 import { IObjectReservation, IReservation } from "@/stores/models/IReservation";
 import { formatDate, getDaysBetweenDates } from "@/utils/customUtils";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
     getEarliestDate,
     getMaxConcurrentReservations,
@@ -8,6 +8,7 @@ import {
     sortAndSetOrder,
 } from "./utils";
 import Tippy from "@/components/Base/Tippy";
+import clsx from "clsx";
 
 interface Props {
     reservations: IReservation[];
@@ -22,6 +23,7 @@ function Scheduler({ reservations, onClickEvent, daysRange }: Props) {
     const [dates, setDates] = useState<string[]>([]);
 
     const dayNames = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
+    const tableRef = useRef<HTMLTableElement>(null);
 
     useEffect(() => {
         if (!reservations.length) return;
@@ -32,7 +34,16 @@ function Scheduler({ reservations, onClickEvent, daysRange }: Props) {
         const startDate = new Date(getEarliestDate(reservations));
         startDate.setDate(startDate.getDate() - 2);
 
-        setDates(generateDates(formatDate(startDate), daysRange));
+        setDates(
+            generateDates(
+                formatDate(startDate),
+                daysRange +
+                    getDaysBetweenDates(
+                        formatDate(startDate),
+                        new Date().toISOString()
+                    )
+            )
+        );
     }, [reservations, daysRange]);
 
     useEffect(() => {
@@ -83,6 +94,15 @@ function Scheduler({ reservations, onClickEvent, daysRange }: Props) {
                 Number(cell.getAttribute("data-index")) * 30
             }px`;
         });
+
+        if (tableRef.current) {
+            const tableContainer = tableRef.current
+                .parentElement as HTMLElement;
+            const todayCell = document.querySelector(
+                "[data-is-today='true']"
+            ) as HTMLTableElement;
+            tableContainer.scrollLeft = todayCell?.offsetLeft - 40;
+        }
     }, [objectReservations, daysRange]);
 
     // Функция для генерации массива дат
@@ -99,6 +119,34 @@ function Scheduler({ reservations, onClickEvent, daysRange }: Props) {
 
         return dates;
     };
+    const groupDatesByMonth = (dates: string[]): string[][] => {
+        const grouped: string[][] = [];
+        let currentMonthGroup: string[] = [];
+
+        // Получаем первый месяц из первой даты
+        let currentMonth = new Date(dates[0]).getMonth();
+
+        dates.forEach((date) => {
+            const dateObj = new Date(date);
+            const month = dateObj.getMonth();
+
+            // Если месяц изменился, начинаем новый подмассив
+            if (month !== currentMonth) {
+                grouped.push(currentMonthGroup);
+                currentMonthGroup = [];
+                currentMonth = month;
+            }
+
+            currentMonthGroup.push(date);
+        });
+
+        // Не забываем добавить последнюю группу в конец
+        if (currentMonthGroup.length > 0) {
+            grouped.push(currentMonthGroup);
+        }
+
+        return grouped;
+    };
 
     if (reservations.length < 1) {
         return <div>Нет броней</div>;
@@ -107,24 +155,59 @@ function Scheduler({ reservations, onClickEvent, daysRange }: Props) {
     return (
         <>
             <div className="overflow-x-auto custom-hoz-scrollbar ml-48">
-                <table className="border-collapse">
+                <table ref={tableRef} className="border-collapse">
                     <thead>
-                        <tr className="relative">
-                            <th className="border-b p-2 text-left border-r bg-slate-100 dark:bg-darkmode-300 fixed w-48 h-14 z-10 flex items-center -translate-x-full">
+                        <tr>
+                            <th className="border-b p-2 text-left border-r bg-slate-100 dark:bg-darkmode-300 fixed w-48 h-28 z-10 flex items-center -translate-x-full">
                                 Объект
                             </th>
-                            {dates.map((date) => (
-                                <th
-                                    key={date}
-                                    className="border-r border-slate-200 border-b p-2 text-center w-full min-w-[40px] max-w-[40px] h-full max-h-14"
-                                >
-                                    <span className="font-normal">
-                                        {dayNames[new Date(date).getDay()]}
-                                    </span>
-                                    <br />
-                                    <span>{new Date(date).getDate()}</span>
-                                </th>
-                            ))}
+                            {groupDatesByMonth(dates).map(
+                                (monthGroup, index) => {
+                                    const firstDate = new Date(monthGroup[0]);
+                                    const monthName = firstDate.toLocaleString(
+                                        "ru-RU",
+                                        { month: "long" }
+                                    ); // Название месяца
+                                    const colSpan = monthGroup.length; // Количество дней в этом месяце
+
+                                    return (
+                                        <th
+                                            key={index}
+                                            colSpan={colSpan}
+                                            className="border-r border-slate-200 border-b p-2 text-left w-full min-w-[40px] max-w-[40px] h-full max-h-14"
+                                        >
+                                            <span className="sticky left-2 capitalize">
+                                                {monthName}
+                                            </span>
+                                        </th>
+                                    );
+                                }
+                            )}
+                        </tr>
+                        <tr className="relative">
+                            <th></th>
+                            {dates.map((date) => {
+                                const isToday =
+                                    new Date(date).toDateString() ===
+                                    new Date().toDateString();
+
+                                return (
+                                    <th
+                                        data-is-today={isToday}
+                                        key={date}
+                                        className={clsx(
+                                            "border-r border-t border-slate-200 border-b p-2 text-center w-full min-w-[40px] max-w-[40px] h-full max-h-14",
+                                            isToday && "bg-danger/20"
+                                        )}
+                                    >
+                                        <span className="font-normal">
+                                            {dayNames[new Date(date).getDay()]}
+                                        </span>
+                                        <br />
+                                        <span>{new Date(date).getDate()}</span>
+                                    </th>
+                                );
+                            })}
                         </tr>
                     </thead>
                     <tbody className="relative">
@@ -143,97 +226,110 @@ function Scheduler({ reservations, onClickEvent, daysRange }: Props) {
                                             </Tippy>
                                         </span>
                                     </td>
-                                    {dates.map((date) => (
-                                        <td
-                                            key={date}
-                                            className="border-r border-slate-200 border-b w-[40px] min-w-[40px] max-w-[40px] p-0"
-                                        >
-                                            <div
-                                                data-max-concurrent-reservations={getMaxConcurrentReservations(
-                                                    object.reservations as IReservation[]
+                                    {dates.map((date) => {
+                                        const isToday =
+                                            new Date(date).toDateString() ===
+                                            new Date().toDateString();
+                                        return (
+                                            <td
+                                                key={date}
+                                                className={clsx(
+                                                    "border-r border-slate-200 border-b w-[40px] min-w-[40px] max-w-[40px] p-0",
+                                                    isToday && "bg-danger/20"
                                                 )}
-                                                className="relative w-full"
                                             >
-                                                {object.reservations.map(
-                                                    (reservation, index) => {
-                                                        if (
-                                                            date !==
-                                                            reservation.start_date
-                                                        )
-                                                            return;
+                                                <div
+                                                    data-max-concurrent-reservations={getMaxConcurrentReservations(
+                                                        object.reservations as IReservation[]
+                                                    )}
+                                                    className="relative w-full"
+                                                >
+                                                    {object.reservations.map(
+                                                        (
+                                                            reservation,
+                                                            index
+                                                        ) => {
+                                                            if (
+                                                                date !==
+                                                                reservation.start_date
+                                                            )
+                                                                return;
 
-                                                        const reservationClasses =
-                                                            (
-                                                                data: typeof reservation
-                                                            ) => {
-                                                                if (
-                                                                    data.status ===
-                                                                    "approved"
-                                                                )
-                                                                    return "bg-success";
-                                                                if (
-                                                                    data.status ===
-                                                                    "new"
-                                                                )
-                                                                    return "bg-warning";
-                                                                if (
-                                                                    data.status ===
-                                                                    "rejected"
-                                                                )
-                                                                    return "bg-danger";
-                                                                if (
-                                                                    data.status ===
-                                                                    "completed"
-                                                                )
-                                                                    return "bg-slate-200 text-black";
-                                                            };
-
-                                                        return (
-                                                            <div
-                                                                key={
-                                                                    reservation.id
-                                                                }
-                                                                data-index={
-                                                                    reservation.order
-                                                                }
-                                                                data-end={
-                                                                    reservation.end_date
-                                                                }
-                                                                data-start={
-                                                                    reservation.start_date
-                                                                }
-                                                                data-days={getDaysBetweenDates(
-                                                                    reservation.start_date,
-                                                                    reservation.end_date
-                                                                )}
-                                                                className={`flex justify-between items-center cursor-pointer z-[100] absolute h-[28px] whitespace-nowrap p-1 rounded-md left-[10px] text-white ${reservationClasses(
-                                                                    reservation
-                                                                )}`}
-                                                                onClick={(
-                                                                    e
+                                                            const reservationClasses =
+                                                                (
+                                                                    data: typeof reservation
                                                                 ) => {
-                                                                    onClickEvent(
+                                                                    if (
+                                                                        data.status ===
+                                                                        "approved"
+                                                                    )
+                                                                        return "bg-success";
+                                                                    if (
+                                                                        data.status ===
+                                                                        "new"
+                                                                    )
+                                                                        return "bg-warning";
+                                                                    if (
+                                                                        data.status ===
+                                                                        "rejected"
+                                                                    )
+                                                                        return "bg-danger";
+                                                                    if (
+                                                                        data.status ===
+                                                                        "completed"
+                                                                    )
+                                                                        return "bg-slate-200 text-black";
+                                                                };
+
+                                                            return (
+                                                                <div
+                                                                    key={
                                                                         reservation.id
-                                                                    );
-                                                                }}
-                                                            >
-                                                                <div className="truncate">
-                                                                    {
-                                                                        reservation
-                                                                            .client
-                                                                            .fullname
                                                                     }
+                                                                    data-index={
+                                                                        reservation.order
+                                                                    }
+                                                                    data-end={
+                                                                        reservation.end_date
+                                                                    }
+                                                                    data-start={
+                                                                        reservation.start_date
+                                                                    }
+                                                                    data-days={
+                                                                        getDaysBetweenDates(
+                                                                            reservation.start_date,
+                                                                            reservation.end_date
+                                                                        ) + 1
+                                                                    }
+                                                                    className={`flex justify-between items-center cursor-pointer z-[100] absolute h-[28px] whitespace-nowrap p-1 rounded-md left-[10px] text-white ${reservationClasses(
+                                                                        reservation
+                                                                    )}`}
+                                                                    onClick={(
+                                                                        e
+                                                                    ) => {
+                                                                        onClickEvent(
+                                                                            reservation.id
+                                                                        );
+                                                                    }}
+                                                                >
+                                                                    <div className="truncate">
+                                                                        {
+                                                                            reservation
+                                                                                .client
+                                                                                .fullname
+                                                                        }
+                                                                    </div>
+                                                                    <span className="hidden">
+                                                                        &#8594;
+                                                                    </span>
                                                                 </div>
-                                                                <span className="hidden">
-                                                                    &#8594;
-                                                                </span>
-                                                            </div>
-                                                        );
-                                                    }
-                                                )}
-                                            </div>
-                                        </td>
-                                    ))}
+                                                            );
+                                                        }
+                                                    )}
+                                                </div>
+                                            </td>
+                                        );
+                                    })}
                                 </tr>
                             );
                         })}

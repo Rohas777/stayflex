@@ -1053,11 +1053,11 @@ function Main() {
                                     className="size-6 mr-2"
                                 />
                                 <FormCheck.Label htmlFor="checkbox-switch-3">
-                                    СуточноРу
+                                    The Locals
                                 </FormCheck.Label>
                             </FormCheck>
                         </div>
-                        <div className="grid grid-cols-12 gap-3 mt-3">
+                        {/* <div className="grid grid-cols-12 gap-3 mt-3">
                             <FormCheck className="col-span-12 sm:col-span-3">
                                 <FormCheck.Input
                                     id="checkbox-switch-2"
@@ -1082,7 +1082,7 @@ function Main() {
                                     Яндекс.Квартира
                                 </FormCheck.Label>
                             </FormCheck>
-                        </div>
+                        </div> */}
                     </div>
                     <div className="p-5 mt-5 intro-y box flex flex-wrap gap-3">
                         <div className="flex items-center gap-3">

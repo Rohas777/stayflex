@@ -14,7 +14,10 @@ import { Status } from "@/stores/reducers/types";
 import { useEffect, useState } from "react";
 import { Dialog, Menu } from "@/components/Base/Headless";
 import { clientSlice } from "@/stores/reducers/clients/slice";
-import { fetchObjectById } from "@/stores/reducers/objects/actions";
+import {
+    fetchObjectById,
+    fetchObjects,
+} from "@/stores/reducers/objects/actions";
 import Icon from "@/components/Custom/Icon";
 import ReservationForm from "./form";
 import { stopLoader } from "@/utils/customUtils";
@@ -29,6 +32,7 @@ import {
 import { IReservation } from "@/stores/models/IReservation";
 import Button from "@/components/Base/Button";
 import TomSelect from "@/components/Base/CustomTomSelect";
+import Notification from "@/components/Base/Notification";
 
 function Main() {
     const [daysRange, setDaysRange] = useState("30");
@@ -154,6 +158,7 @@ function Main() {
     ]);
 
     useEffect(() => {
+        dispatch(fetchObjects());
         dispatch(fetchReservations());
     }, []);
 
@@ -206,7 +211,9 @@ function Main() {
                 <Scheduler
                     reservations={reservations}
                     onClickEvent={(reservation_id) => {
-                        dispatch(fetchReservationById(reservation_id));
+                        setCurrentReservation(
+                            reservations.find((el) => el.id === reservation_id)!
+                        );
                         setReservationModal(true);
                     }}
                     daysRange={Number(daysRange)}
@@ -248,6 +255,17 @@ function Main() {
                 </Dialog.Panel>
             </Dialog>
             {/* END: Form Modal */}
+            {/* BEGIN: Success Notification Content */}
+            <Notification
+                id="success-notification-content"
+                className="flex hidden"
+            >
+                <Icon icon="CheckCircle" className="text-success" />
+                <div className="ml-4 mr-4">
+                    <div className="font-medium text-content"></div>
+                </div>
+            </Notification>
+            {/* END: Success Notification Content */}
         </>
     );
 }
