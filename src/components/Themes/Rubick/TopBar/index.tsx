@@ -78,7 +78,7 @@ function Main() {
         <>
             {isLoaderOpen && <OverlayLoader />}
             {/* BEGIN: Top Bar */}
-            <div className="h-[67px] z-[51] flex items-center relative border-b border-slate-200">
+            <div className="hidden md:flex h-[67px] z-[51] items-center relative border-b border-slate-200">
                 {/* BEGIN: Notifications */}
                 <Popover className="mr-auto intro-x sm:mr-6 ml-auto">
                     {/* <Popover.Button

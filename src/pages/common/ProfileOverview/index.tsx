@@ -1,15 +1,5 @@
 import _ from "lodash";
-import fakerData from "@/utils/faker";
-import Button from "@/components/Base/Button";
-import { FormSwitch } from "@/components/Base/Form";
-import Progress from "@/components/Base/Progress";
 import Lucide from "@/components/Base/Lucide";
-import StackedBarChart1 from "@/components/StackedBarChart1";
-import SimpleLineChart from "@/components/SimpleLineChart";
-import SimpleLineChart1 from "@/components/SimpleLineChart1";
-import SimpleLineChart2 from "@/components/SimpleLineChart2";
-import { Menu, Tab } from "@/components/Base/Headless";
-import { Tab as HeadlessTab } from "@headlessui/react";
 import { useAppSelector } from "@/stores/hooks";
 
 function Main() {
@@ -23,15 +13,12 @@ function Main() {
             {/* BEGIN: Profile Info */}
             <div className="px-5 pt-5 mt-5 intro-y box">
                 <div className="flex flex-col pb-5 -mx-5 border-b lg:flex-row border-slate-200/60 dark:border-darkmode-400">
-                    <div className="flex items-center justify-center flex-1 px-5 lg:justify-start">
-                        <div className="relative flex items-center justify-center bg-slate-200 rounded-full overflow-hidden flex-none w-20 h-20 sm:w-24 sm:h-24 lg:w-32 lg:h-32 image-fit">
-                            <Lucide icon="User" className="size-3/4" />
-                        </div>
-                        <div className="ml-5">
-                            <div className="w-24 text-lg font-medium truncate sm:w-40 sm:whitespace-normal">
+                    <div className="flex justify-center flex-1 px-5 lg:mt-3 lg:justify-start">
+                        <div className="lg:ml-5">
+                            <div className="text-lg font-medium sm:whitespace-normal">
                                 {authorizedUser?.fullname}
                             </div>
-                            <div className="text-slate-500">
+                            <div className="text-slate-500 text-center lg:text-left">
                                 Баланс: {authorizedUser?.balance}
                             </div>
                         </div>

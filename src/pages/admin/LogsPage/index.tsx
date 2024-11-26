@@ -28,6 +28,7 @@ import Icon from "@/components/Custom/Icon";
 import PageStatusMark from "@/components/Custom/OnDevMark";
 import { fetchLogs } from "@/stores/reducers/logsReducer/actions";
 import { logSlice } from "@/stores/reducers/logsReducer/slice";
+import ExportMenu from "@/components/Custom/ExportMenu";
 
 window.DateTime = DateTime;
 interface Response {
@@ -104,7 +105,7 @@ function Main() {
                     // For HTML table
                     {
                         title: "ID",
-                        maxWidth: 100,
+                        maxWidth: 50,
                         responsive: 0,
                         field: "id",
                         vertAlign: "middle",
@@ -297,32 +298,6 @@ function Main() {
         }
     };
 
-    const onExportCsv = () => {
-        if (tabulator.current) {
-            tabulator.current.download("csv", "data.csv");
-        }
-    };
-    const onExportJson = () => {
-        if (tabulator.current) {
-            tabulator.current.download("json", "data.json");
-        }
-    };
-    const onExportXlsx = () => {
-        if (tabulator.current) {
-            (window as any).XLSX = xlsx;
-            tabulator.current.download("xlsx", "data.xlsx", {
-                sheetName: "Users",
-            });
-        }
-    };
-    const onExportHtml = () => {
-        if (tabulator.current) {
-            tabulator.current.download("html", "data.html", {
-                style: true,
-            });
-        }
-    };
-
     const onDelete = async (id: number) => {
         startLoader(setIsLoaderOpen);
         await dispatch(deleteClient(String(id)));
@@ -370,14 +345,15 @@ function Main() {
 
     return (
         <>
-            <div className="flex flex-col items-center mt-8 intro-y sm:flex-row">
+            <div className="flex items-center mt-8 intro-y">
                 <h2 className="mr-auto text-lg font-medium">Логи</h2>
+                <ExportMenu tabulator={tabulator} />
             </div>
             {/* BEGIN: HTML Table Data */}
             <div className="p-5 mt-5 intro-y box relative">
                 {status === Status.LOADING && <OverlayLoader />}
 
-                <div className="flex flex-col sm:flex-row sm:items-end xl:items-start">
+                <div className="flex flex-col-reverse sm:flex-row sm:items-end xl:items-start">
                     <form
                         id="tabulator-html-filter-form"
                         className="xl:flex sm:mr-auto"
@@ -425,64 +401,18 @@ function Main() {
                             </Button>
                         </div>
                     </form>
-                    <div className="flex mt-5 sm:mt-0">
-                        <Menu className="w-1/2 sm:w-auto">
-                            <Menu.Button
-                                as={Button}
-                                variant="outline-secondary"
-                                className="w-full sm:w-auto"
-                            >
-                                <Lucide
-                                    icon="FileText"
-                                    className="w-4 h-4 mr-2"
-                                />{" "}
-                                Экспорт
-                                <Lucide
-                                    icon="ChevronDown"
-                                    className="w-4 h-4 ml-auto sm:ml-2"
-                                />
-                            </Menu.Button>
-                            <Menu.Items className="w-40">
-                                <Menu.Item onClick={onExportCsv}>
-                                    <Lucide
-                                        icon="FileText"
-                                        className="w-4 h-4 mr-2"
-                                    />{" "}
-                                    Экспорт CSV
-                                </Menu.Item>
-                                <Menu.Item onClick={onExportJson}>
-                                    <Lucide
-                                        icon="FileText"
-                                        className="w-4 h-4 mr-2"
-                                    />{" "}
-                                    Экспорт JSON
-                                </Menu.Item>
-                                <Menu.Item onClick={onExportXlsx}>
-                                    <Lucide
-                                        icon="FileText"
-                                        className="w-4 h-4 mr-2"
-                                    />{" "}
-                                    Экспорт XLSX
-                                </Menu.Item>
-                                <Menu.Item onClick={onExportHtml}>
-                                    <Lucide
-                                        icon="FileText"
-                                        className="w-4 h-4 mr-2"
-                                    />{" "}
-                                    Экспорт HTML
-                                </Menu.Item>
-                            </Menu.Items>
-                        </Menu>
+                    <div className="flex items-center mt-5 sm:mt-0">
+                        <div className="flex items-center whitespace-nowrap gap-1 mr-1 text-xs">
+                            <span className="block size-3 bg-danger/40 rounded-sm"></span>{" "}
+                            - Администратор
+                        </div>
+                        <div className="flex items-center whitespace-nowrap gap-1 mr-1 text-xs">
+                            <span className="block size-3 bg-primary/10 rounded-sm"></span>{" "}
+                            - Пользователь
+                        </div>
                     </div>
                 </div>
-                <div className="flex gap-1 mt-2">
-                    <span className="block size-5 bg-danger/40 rounded-md"></span>{" "}
-                    - Администратор
-                </div>
-                <div className="flex gap-1 mt-1">
-                    <span className="block size-5 bg-primary/10 rounded-md"></span>{" "}
-                    - Пользователь
-                </div>
+
                 <div className="overflow-x-auto scrollbar-hidden">
                     <div id="tabulator" ref={tableRef} className="mt-5"></div>
                 </div>

@@ -133,21 +133,6 @@ function Main() {
         <>
             <div className="flex flex-col items-center mt-8 intro-y sm:flex-row">
                 <h2 className="mr-auto text-lg font-medium">Шаблоны писем</h2>
-                <div className="flex w-full mt-4 sm:w-auto sm:mt-0">
-                    <Button
-                        as="a"
-                        href="#"
-                        variant="primary"
-                        className="mr-2 shadow-md"
-                        onClick={(event) => {
-                            event.preventDefault();
-                            setIsSendFormOpened(true);
-                        }}
-                    >
-                        <Icon icon="Send" className="size-5 mr-2" />
-                        Отправить
-                    </Button>
-                </div>
             </div>
             <div className="grid grid-cols-12 gap-6 mt-5">
                 {formattedMails.map((template) => (

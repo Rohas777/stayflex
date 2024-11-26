@@ -11,9 +11,11 @@ import Tippy from "@/components/Base/Tippy";
 
 interface Props {
     reservations: IReservation[];
+    onClickEvent: (reservation_id: number) => void;
+    daysRange: number;
 }
 
-function Scheduler({ reservations }: Props) {
+function Scheduler({ reservations, onClickEvent, daysRange }: Props) {
     const [objectReservations, setObjectReservations] = useState<
         IObjectReservation[]
     >([]);
@@ -30,8 +32,8 @@ function Scheduler({ reservations }: Props) {
         const startDate = new Date(getEarliestDate(reservations));
         startDate.setDate(startDate.getDate() - 2);
 
-        setDates(generateDates(formatDate(startDate), 365));
-    }, [reservations]);
+        setDates(generateDates(formatDate(startDate), daysRange));
+    }, [reservations, daysRange]);
 
     useEffect(() => {
         document
@@ -54,9 +56,25 @@ function Scheduler({ reservations }: Props) {
 
         document.querySelectorAll("[data-days]").forEach((el) => {
             const cell = el as HTMLTableElement;
-            cell.style.width = `${
-                Number(cell.getAttribute("data-days")) * 40 - 20
-            }px`;
+            const endDate = cell.getAttribute("data-end");
+            const startDate = cell.getAttribute("data-start");
+            const lastDate = dates.at(-1);
+
+            if (
+                endDate &&
+                startDate &&
+                lastDate &&
+                new Date(lastDate).getTime() < new Date(endDate).getTime()
+            ) {
+                const days = getDaysBetweenDates(startDate, lastDate);
+                cell.style.width = `${days * 40 + 20}px`;
+                cell.querySelector("span")?.classList.remove("hidden");
+            } else {
+                cell.style.width = `${
+                    Number(cell.getAttribute("data-days")) * 40 - 20
+                }px`;
+                cell.querySelector("span")?.classList.add("hidden");
+            }
         });
 
         document.querySelectorAll("[data-index]").forEach((el) => {
@@ -65,7 +83,7 @@ function Scheduler({ reservations }: Props) {
                 Number(cell.getAttribute("data-index")) * 30
             }px`;
         });
-    }, [objectReservations]);
+    }, [objectReservations, daysRange]);
 
     // Функция для генерации массива дат
     const generateDates = (start: string, days: number): string[] => {
@@ -178,19 +196,37 @@ function Scheduler({ reservations }: Props) {
                                                                 data-index={
                                                                     reservation.order
                                                                 }
+                                                                data-end={
+                                                                    reservation.end_date
+                                                                }
+                                                                data-start={
+                                                                    reservation.start_date
+                                                                }
                                                                 data-days={getDaysBetweenDates(
                                                                     reservation.start_date,
                                                                     reservation.end_date
                                                                 )}
-                                                                className={`absolute h-[28px] whitespace-nowrap p-1 rounded-md left-[10px] truncate text-white ${reservationClasses(
+                                                                className={`flex justify-between items-center cursor-pointer z-[100] absolute h-[28px] whitespace-nowrap p-1 rounded-md left-[10px] text-white ${reservationClasses(
                                                                     reservation
                                                                 )}`}
+                                                                onClick={(
+                                                                    e
+                                                                ) => {
+                                                                    onClickEvent(
+                                                                        reservation.id
+                                                                    );
+                                                                }}
                                                             >
-                                                                {
-                                                                    reservation
-                                                                        .client
-                                                                        .fullname
-                                                                }
+                                                                <div className="truncate">
+                                                                    {
+                                                                        reservation
+                                                                            .client
+                                                                            .fullname
+                                                                    }
+                                                                </div>
+                                                                <span className="hidden">
+                                                                    &#8594;
+                                                                </span>
                                                             </div>
                                                         );
                                                     }

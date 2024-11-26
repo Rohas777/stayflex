@@ -43,6 +43,7 @@ import { propertyTypeSlice } from "@/stores/reducers/property-types/slice";
 import { errorToastSlice } from "@/stores/errorToastSlice";
 import ValidationErrorNotification from "@/components/Custom/ValidationErrorNotification";
 import CKEditorClassic from "@/components/Custom/CKEditor/CKEditorClassic";
+import Placeholder from "@/components/Custom/CKEditorPlugins/ConstructionList/placeholder";
 
 window.DateTime = DateTime;
 

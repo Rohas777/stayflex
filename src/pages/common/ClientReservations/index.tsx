@@ -48,6 +48,7 @@ import { errorToastSlice } from "@/stores/errorToastSlice";
 import { fetchClientByID } from "@/stores/reducers/clients/actions";
 import { objectSlice } from "@/stores/reducers/objects/slice";
 import { reservationStatus } from "@/vars";
+import ExportMenu from "@/components/Custom/ExportMenu";
 
 window.DateTime = DateTime;
 interface Response {
@@ -124,7 +125,7 @@ function Main() {
                     // For HTML table
                     {
                         title: "ID",
-                        maxWidth: 100,
+                        maxWidth: 50,
                         responsive: 0,
                         field: "id",
                         vertAlign: "middle",
@@ -410,32 +411,6 @@ function Main() {
         }
     };
 
-    const onExportCsv = () => {
-        if (tabulator.current) {
-            tabulator.current.download("csv", "data.csv");
-        }
-    };
-    const onExportJson = () => {
-        if (tabulator.current) {
-            tabulator.current.download("json", "data.json");
-        }
-    };
-    const onExportXlsx = () => {
-        if (tabulator.current) {
-            (window as any).XLSX = xlsx;
-            tabulator.current.download("xlsx", "data.xlsx", {
-                sheetName: "Users",
-            });
-        }
-    };
-    const onExportHtml = () => {
-        if (tabulator.current) {
-            tabulator.current.download("html", "data.html", {
-                style: true,
-            });
-        }
-    };
-
     const {
         reservations,
         reservationOne,
@@ -564,28 +539,15 @@ function Main() {
 
     return (
         <>
-            <div className="flex flex-col items-center mt-8 intro-y sm:flex-row">
+            <div className="flex mt-8 intro-y sm:flex-row">
                 <h2 className="mr-auto text-lg font-medium">
-                    Список броней клиента - {clientState.clientOne?.fullname}
+                    Список броней клиента
+                    <br />
+                    <span className="text-slate-500 text-sm">
+                        {clientState.clientOne?.fullname}
+                    </span>
                 </h2>
-                {!authorizedUser?.is_admin && (
-                    <div className="flex w-full mt-4 sm:w-auto sm:mt-0">
-                        <Button
-                            as="a"
-                            href="#"
-                            variant="primary"
-                            className="mr-2 shadow-md"
-                            onClick={(event: React.MouseEvent) => {
-                                event.preventDefault();
-                                setButtonModalCreate(true);
-                                dispatch(fetchObjects());
-                            }}
-                        >
-                            <ListPlus className="size-5 mr-2" />
-                            Добавить
-                        </Button>
-                    </div>
-                )}
+                <ExportMenu tabulator={tabulator} />
             </div>
             {/* BEGIN: HTML Table Data */}
             <div className="p-5 mt-5 intro-y box">
@@ -596,7 +558,7 @@ function Main() {
                         </div>
                     </div>
                 )}
-                <div className="flex flex-col sm:flex-row sm:items-end xl:items-start">
+                <div className="flex flex-col-reverse sm:flex-row sm:items-end xl:items-start">
                     <form
                         id="tabulator-html-filter-form"
                         className="xl:flex sm:mr-auto"
@@ -644,55 +606,24 @@ function Main() {
                             </Button>
                         </div>
                     </form>
-                    <div className="flex mt-5 sm:mt-0">
-                        <Menu className="w-1/2 sm:w-auto">
-                            <Menu.Button
-                                as={Button}
-                                variant="outline-secondary"
-                                className="w-full sm:w-auto"
+                    {!authorizedUser?.is_admin && (
+                        <div className="flex w-full mt-4 sm:w-auto sm:mt-0">
+                            <Button
+                                as="a"
+                                href="#"
+                                variant="primary"
+                                className="w-full shadow-md"
+                                onClick={(event: React.MouseEvent) => {
+                                    event.preventDefault();
+                                    setButtonModalCreate(true);
+                                    dispatch(fetchObjects());
+                                }}
                             >
-                                <Lucide
-                                    icon="FileText"
-                                    className="w-4 h-4 mr-2"
-                                />{" "}
-                                Экспорт
-                                <Lucide
-                                    icon="ChevronDown"
-                                    className="w-4 h-4 ml-auto sm:ml-2"
-                                />
-                            </Menu.Button>
-                            <Menu.Items className="w-40">
-                                <Menu.Item onClick={onExportCsv}>
-                                    <Lucide
-                                        icon="FileText"
-                                        className="w-4 h-4 mr-2"
-                                    />{" "}
-                                    Экспорт CSV
-                                </Menu.Item>
-                                <Menu.Item onClick={onExportJson}>
-                                    <Lucide
-                                        icon="FileText"
-                                        className="w-4 h-4 mr-2"
-                                    />{" "}
-                                    Экспорт JSON
-                                </Menu.Item>
-                                <Menu.Item onClick={onExportXlsx}>
-                                    <Lucide
-                                        icon="FileText"
-                                        className="w-4 h-4 mr-2"
-                                    />{" "}
-                                    Экспорт XLSX
-                                </Menu.Item>
-                                <Menu.Item onClick={onExportHtml}>
-                                    <Lucide
-                                        icon="FileText"
-                                        className="w-4 h-4 mr-2"
-                                    />{" "}
-                                    Экспорт HTML
-                                </Menu.Item>
-                            </Menu.Items>
-                        </Menu>
-                    </div>
+                                <ListPlus className="size-5 mr-2" />
+                                Добавить
+                            </Button>
+                        </div>
+                    )}
                 </div>
                 <div className="overflow-x-auto scrollbar-hidden">
                     <div id="tabulator" ref={tableRef} className="mt-5"></div>

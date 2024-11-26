@@ -2,11 +2,11 @@ import "@/assets/css/vendors/simplebar.css";
 import "@/assets/css/components/mobile-menu.css";
 import { Transition } from "react-transition-group";
 import { useState, useEffect, createRef } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toRaw } from "@/utils/helper";
 import { selectMenu } from "@/stores/menuSlice";
 import { selectTheme } from "@/stores/themeSlice";
-import { useAppSelector } from "@/stores/hooks";
+import { useAppDispatch, useAppSelector } from "@/stores/hooks";
 import { FormattedMenu, linkTo, nestedMenu, enter, leave } from "./mobile-menu";
 import Lucide from "@/components/Base/Lucide";
 import logoUrl from "@/assets/images/logo.svg";
@@ -14,8 +14,14 @@ import clsx from "clsx";
 import SimpleBar from "simplebar";
 import { useClickAway } from "ahooks";
 import Icon from "../Custom/Icon";
+import { Menu } from "../Base/Headless";
+import { startLoader } from "@/utils/customUtils";
+import { preferencesSlice } from "@/stores/preferencesSlice";
+import { logout } from "@/stores/reducers/auth/actions";
 
 function Main() {
+    const { authorizedUser } = useAppSelector((state) => state.user);
+    const dispatch = useAppDispatch();
     const navigate = useNavigate();
     const location = useLocation();
     const [formattedMenu, setFormattedMenu] = useState<
@@ -28,6 +34,10 @@ function Main() {
     const scrollableRef = createRef<HTMLDivElement>();
     const mobileMenuOpenRef = createRef<HTMLAnchorElement>();
 
+    const [isLoaderOpen, setIsLoaderOpen] = useState(false);
+
+    const { setPreferencesSlideover } = preferencesSlice.actions;
+
     useClickAway(
         (e) => {
             if (
@@ -39,6 +49,14 @@ function Main() {
         },
         () => document.getElementsByClassName("simplebar-wrapper")[0]
     );
+    const onLogout = () => {
+        startLoader(setIsLoaderOpen);
+        dispatch(logout());
+    };
+
+    const openPreferencesSlideover = () => {
+        dispatch(setPreferencesSlideover(true));
+    };
 
     useEffect(() => {
         if (scrollableRef.current) {
@@ -63,6 +81,62 @@ function Main() {
                     <a href="" className="flex mr-auto">
                         <img className="w-20" src={logoUrl} />
                     </a>
+
+                    <Menu className="block md:hidden mr-2">
+                        <Menu.Button className="flex items-center justify-center transition bg-slate-300 w-8 h-8 overflow-hidden rounded-full shadow-lg image-fit zoom-in intro-x">
+                            <Lucide icon="User" />
+                        </Menu.Button>
+                        <Menu.Items className="w-56 mt-px text-white bg-primary">
+                            <Menu.Header className="font-normal">
+                                <div className="font-medium">
+                                    {authorizedUser?.fullname}
+                                </div>
+                                <div className="text-xs text-white/70 mt-0.5 dark:text-slate-500">
+                                    Баланс: {authorizedUser?.balance}
+                                </div>
+                            </Menu.Header>
+                            <Menu.Divider className="bg-white/[0.08]" />
+                            <Menu.Item className="hover:bg-white/5">
+                                <Link
+                                    to={
+                                        (authorizedUser?.is_admin
+                                            ? "/admin"
+                                            : "") + `/profile`
+                                    }
+                                    className="flex items-center w-full"
+                                >
+                                    <Lucide
+                                        icon="User"
+                                        className="w-4 h-4 mr-2"
+                                    />{" "}
+                                    Профиль
+                                </Link>
+                            </Menu.Item>
+                            <Menu.Divider className="bg-white/[0.08]" />
+                            <Menu.Item
+                                onClick={openPreferencesSlideover}
+                                className="hover:bg-white/5"
+                            >
+                                <Lucide icon="Cog" className="w-4 h-4 mr-2" />{" "}
+                                Настройки
+                            </Menu.Item>
+                            {/* <Menu.Item className="hover:bg-white/5">
+                            <Lucide icon="Lock" className="w-4 h-4 mr-2" />{" "}
+                            Reset Password
+                        </Menu.Item> */}
+                            <Menu.Divider className="bg-white/[0.08]" />
+                            <Menu.Item
+                                onClick={onLogout}
+                                className="hover:bg-white/5"
+                            >
+                                <Lucide
+                                    icon="LogOut"
+                                    className="w-4 h-4 mr-2"
+                                />{" "}
+                                Выйти
+                            </Menu.Item>
+                        </Menu.Items>
+                    </Menu>
                     <a
                         id="mobile-menu-open"
                         ref={mobileMenuOpenRef}

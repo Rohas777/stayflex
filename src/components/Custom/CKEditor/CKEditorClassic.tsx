@@ -1,5 +1,12 @@
 import { CKEditor } from "@ckeditor/ckeditor5-react";
-import { ClassicEditor, EditorConfig, EventInfo } from "ckeditor5";
+import {
+    ClassicEditor,
+    Clipboard,
+    Editor,
+    EditorConfig,
+    EventInfo,
+    PluginConstructor,
+} from "ckeditor5";
 import "ckeditor5/ckeditor5.css";
 import "@/assets/css/vendors/ckeditor.css";
 import {
@@ -14,6 +21,8 @@ import {
     Link,
     FontSize,
 } from "ckeditor5";
+import Placeholder from "../CKEditorPlugins/ConstructionList/placeholder";
+import { useEffect, useState } from "react";
 
 interface CKEditorClassicProps {
     editorData: string;
@@ -24,6 +33,11 @@ interface CKEditorClassicProps {
     id?: string;
 }
 function CKEditorClassic(props: CKEditorClassicProps) {
+    const [plugins, setPlugins] = useState<
+        (string | PluginConstructor<Editor>)[]
+    >([]);
+    const [items, setItems] = useState<string[]>([]);
+
     const {
         editorData,
         onChange,
@@ -32,6 +46,21 @@ function CKEditorClassic(props: CKEditorClassicProps) {
         config,
         ...computedProps
     } = props;
+
+    useEffect(() => {
+        if (config && config.plugins) {
+            setPlugins(config.plugins);
+        } else {
+            setPlugins([]);
+        }
+        //@ts-ignore
+        if (config && config.toolbar && config.toolbar.items) {
+            //@ts-ignore
+            setItems(config.toolbar.items);
+        } else {
+            setItems([]);
+        }
+    }, [config]);
 
     return (
         <CKEditor
@@ -57,8 +86,7 @@ function CKEditorClassic(props: CKEditorClassicProps) {
                         "|",
                         "undo",
                         "redo",
-                        //@ts-ignore
-                        ...config?.toolbar.items,
+                        ...items,
                     ],
                 },
                 plugins: [
@@ -72,8 +100,9 @@ function CKEditorClassic(props: CKEditorClassicProps) {
                     Link,
                     Heading,
                     FontSize,
-                    //@ts-ignore
-                    ...config?.plugins,
+                    Clipboard,
+                    Placeholder,
+                    ...plugins,
                 ],
                 initialData: initialData,
             }}

@@ -45,6 +45,7 @@ import { clientSlice } from "@/stores/reducers/clients/slice";
 import { errorToastSlice } from "@/stores/errorToastSlice";
 import useCopyToClipboard from "@/utils/useCopy";
 import Icon from "@/components/Custom/Icon";
+import ExportMenu from "@/components/Custom/ExportMenu";
 
 window.DateTime = DateTime;
 interface Response {
@@ -124,7 +125,7 @@ function Main() {
                     // For HTML table
                     {
                         title: "ID",
-                        maxWidth: 100,
+                        maxWidth: 50,
                         responsive: 0,
                         field: "id",
                         vertAlign: "middle",
@@ -361,32 +362,6 @@ function Main() {
         }
     };
 
-    const onExportCsv = () => {
-        if (tabulator.current) {
-            tabulator.current.download("csv", "data.csv");
-        }
-    };
-    const onExportJson = () => {
-        if (tabulator.current) {
-            tabulator.current.download("json", "data.json");
-        }
-    };
-    const onExportXlsx = () => {
-        if (tabulator.current) {
-            (window as any).XLSX = xlsx;
-            tabulator.current.download("xlsx", "data.xlsx", {
-                sheetName: "Users",
-            });
-        }
-    };
-    const onExportHtml = () => {
-        if (tabulator.current) {
-            tabulator.current.download("html", "data.html", {
-                style: true,
-            });
-        }
-    };
-
     const onCreateReservation = async (
         reservationData: ReservationCreateType
     ) => {
@@ -607,31 +582,9 @@ function Main() {
     return (
         <>
             {isLoaderOpen && <OverlayLoader />}
-            <div className="flex flex-col items-center mt-8 intro-y sm:flex-row">
+            <div className="flex items-center mt-8 intro-y sm:flex-row">
                 <h2 className="mr-auto text-lg font-medium">Объекты</h2>
-                <div className="flex w-full mt-4 sm:w-auto sm:mt-0">
-                    <Link to="/objects/create">
-                        <Button variant="primary" className="mr-2 shadow-md">
-                            <ListPlus className="size-5 mr-2" />
-                            Добавить
-                        </Button>
-                    </Link>
-                </div>
-                <div className="flex items-center w-full mt-4 sm:w-auto sm:mt-0">
-                    <Link to={"/objects/" + authorizedUser?.id} target="_blank">
-                        <Button variant="secondary" className="mr-2 shadow-md">
-                            Страница объектов
-                            <Icon icon="ExternalLink" className="size-5 ml-2" />
-                        </Button>
-                    </Link>
-                    <Button
-                        variant="secondary"
-                        className="shadow-md"
-                        onClick={onCopy}
-                    >
-                        <Icon icon="Copy" className="size-5" />
-                    </Button>
-                </div>
+                <ExportMenu tabulator={tabulator} />
             </div>
             {/* BEGIN: HTML Table Data */}
             <div className="p-5 mt-5 intro-y box">
@@ -642,7 +595,7 @@ function Main() {
                         </div>
                     </div>
                 )}
-                <div className="flex flex-col sm:flex-row sm:items-end xl:items-start">
+                <div className="flex flex-col-reverse sm:flex-row sm:items-end xl:items-start">
                     <form
                         id="tabulator-html-filter-form"
                         className="xl:flex sm:mr-auto"
@@ -651,7 +604,7 @@ function Main() {
                             onFilter();
                         }}
                     >
-                        <div className="items-center mt-2 sm:flex sm:mr-4 xl:mt-0">
+                        <div className="items-center mt-2 flex sm:mr-4 xl:mt-0">
                             <label className="flex whitespace-nowrap flex-none mr-2 xl:w-auto xl:flex-initial">
                                 <Lucide icon="Search" className="w-4 h-4" />
                             </label>
@@ -690,54 +643,43 @@ function Main() {
                             </Button>
                         </div>
                     </form>
-                    <div className="flex mt-5 sm:mt-0">
-                        <Menu className="w-1/2 sm:w-auto">
-                            <Menu.Button
-                                as={Button}
-                                variant="outline-secondary"
-                                className="w-full sm:w-auto"
+                    <div className="flex gap-2 flex-col xl:flex-row">
+                        <div className="flex w-full mt-4 sm:w-auto sm:mt-0">
+                            <Link to="/objects/create" className="w-full">
+                                <Button
+                                    variant="primary"
+                                    className="w-full shadow-md"
+                                >
+                                    <ListPlus className="size-5 mr-2" />
+                                    Добавить
+                                </Button>
+                            </Link>
+                        </div>
+                        <div className="flex items-center w-full sm:w-auto sm:mt-0">
+                            <Link
+                                to={"/objects/" + authorizedUser?.id}
+                                target="_blank"
+                                className="w-full mr-2"
                             >
-                                <Lucide
-                                    icon="FileText"
-                                    className="w-4 h-4 mr-2"
-                                />{" "}
-                                Экспорт
-                                <Lucide
-                                    icon="ChevronDown"
-                                    className="w-4 h-4 ml-auto sm:ml-2"
-                                />
-                            </Menu.Button>
-                            <Menu.Items className="w-40">
-                                <Menu.Item onClick={onExportCsv}>
-                                    <Lucide
-                                        icon="FileText"
-                                        className="w-4 h-4 mr-2"
-                                    />{" "}
-                                    Экспорт CSV
-                                </Menu.Item>
-                                <Menu.Item onClick={onExportJson}>
-                                    <Lucide
-                                        icon="FileText"
-                                        className="w-4 h-4 mr-2"
-                                    />{" "}
-                                    Экспорт JSON
-                                </Menu.Item>
-                                <Menu.Item onClick={onExportXlsx}>
-                                    <Lucide
-                                        icon="FileText"
-                                        className="w-4 h-4 mr-2"
-                                    />{" "}
-                                    Экспорт XLSX
-                                </Menu.Item>
-                                <Menu.Item onClick={onExportHtml}>
-                                    <Lucide
-                                        icon="FileText"
-                                        className="w-4 h-4 mr-2"
-                                    />{" "}
-                                    Экспорт HTML
-                                </Menu.Item>
-                            </Menu.Items>
-                        </Menu>
+                                <Button
+                                    variant="secondary"
+                                    className="w-full shadow-md whitespace-nowrap"
+                                >
+                                    Страница объектов
+                                    <Icon
+                                        icon="ExternalLink"
+                                        className="size-5 ml-2"
+                                    />
+                                </Button>
+                            </Link>
+                            <Button
+                                variant="secondary"
+                                className="shadow-md"
+                                onClick={onCopy}
+                            >
+                                <Icon icon="Copy" className="size-5" />
+                            </Button>
+                        </div>
                     </div>
                 </div>
                 <div className="overflow-x-auto scrollbar-hidden">
