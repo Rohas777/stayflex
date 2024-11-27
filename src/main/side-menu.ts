@@ -13,7 +13,6 @@ const menu: Array<Menu | "divider"> = [
         icon: "GanttChartSquare",
         pathname: "/scheduler",
         title: lang.menu.scheduler,
-        mark: "experimental",
     },
     {
         icon: "Home",
