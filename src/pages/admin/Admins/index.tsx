@@ -154,7 +154,7 @@ function Main() {
                     {
                         title: t("table.actions"),
                         minWidth: 200,
-                        field: "",
+                        field: "actions",
                         responsive: 1,
                         hozAlign: "right",
                         headerHozAlign: "center",
@@ -470,7 +470,7 @@ function Main() {
 
     return (
         <>
-            <div className="flex flex-col items-center mt-8 intro-y sm:flex-row">
+            <div className="flex items-center mt-8 intro-y sm:flex-row">
                 <h2 className="mr-auto text-lg font-medium">
                     {t("pages.users.admins.title")}
                 </h2>

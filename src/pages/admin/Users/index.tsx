@@ -191,7 +191,7 @@ function Main() {
                     {
                         title: "Действия",
                         minWidth: 240,
-                        field: "id",
+                        field: "actions",
                         responsive: 1,
                         hozAlign: "right",
                         headerHozAlign: "center",

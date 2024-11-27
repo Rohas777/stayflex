@@ -270,7 +270,7 @@ function Main() {
                         minWidth: 50,
                         maxWidth: 150,
                         title: "Действия",
-                        field: "id",
+                        field: "actions",
                         responsive: 1,
                         hozAlign: "right",
                         headerHozAlign: "right",
