@@ -214,6 +214,15 @@ function Main() {
                         setCurrentReservation(
                             reservations.find((el) => el.id === reservation_id)!
                         );
+                        setCurrentUnreservedData(null);
+                        setReservationModal(true);
+                    }}
+                    onClickDate={(date: string, object_id: number) => {
+                        setCurrentUnreservedData({
+                            start_date: date,
+                            objectID: object_id,
+                        });
+                        setCurrentReservation(null);
                         setReservationModal(true);
                     }}
                     daysRange={Number(daysRange)}
@@ -226,6 +235,8 @@ function Main() {
                 open={reservationModal}
                 onClose={(e) => {
                     setReservationModal(false);
+                    setCurrentUnreservedData(null);
+                    setCurrentReservation(null);
                     dispatch(clientActions.resetClientByPhone());
                 }}
             >
@@ -234,6 +245,8 @@ function Main() {
                         onClick={(event: React.MouseEvent) => {
                             event.preventDefault();
                             setReservationModal(false);
+                            setCurrentUnreservedData(null);
+                            setCurrentReservation(null);
                             dispatch(clientActions.resetClientByPhone());
                         }}
                         className="absolute top-0 right-0 mt-3 mr-3"

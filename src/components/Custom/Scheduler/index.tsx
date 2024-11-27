@@ -13,10 +13,16 @@ import clsx from "clsx";
 interface Props {
     reservations: IReservation[];
     onClickEvent: (reservation_id: number) => void;
+    onClickDate: (date: string, object_id: number) => void;
     daysRange: number;
 }
 
-function Scheduler({ reservations, onClickEvent, daysRange }: Props) {
+function Scheduler({
+    reservations,
+    onClickEvent,
+    daysRange,
+    onClickDate,
+}: Props) {
     const [objectReservations, setObjectReservations] = useState<
         IObjectReservation[]
     >([]);
@@ -150,6 +156,23 @@ function Scheduler({ reservations, onClickEvent, daysRange }: Props) {
         return grouped;
     };
 
+    const findApprovedReservation = (date: string, objectID: number) => {
+        const founded = reservations.filter((reservation) => {
+            return (
+                date >= reservation.start_date && date < reservation.end_date
+            );
+        });
+        let filtered: IReservation | undefined;
+        founded.forEach((reservation) => {
+            if (reservation.object.id === objectID) {
+                filtered = reservation;
+                return;
+            }
+        });
+
+        return filtered;
+    };
+
     if (reservations.length < 1) {
         return <div>Нет броней</div>;
     }
@@ -244,7 +267,33 @@ function Scheduler({ reservations, onClickEvent, daysRange }: Props) {
                                                     data-max-concurrent-reservations={getMaxConcurrentReservations(
                                                         object.reservations as IReservation[]
                                                     )}
-                                                    className="relative w-full"
+                                                    className="relative w-full plus-day after:size-5"
+                                                    onClick={(e) => {
+                                                        if (
+                                                            e.target !==
+                                                            e.currentTarget
+                                                        )
+                                                            return;
+                                                        const foundedReservation =
+                                                            findApprovedReservation(
+                                                                date,
+                                                                object.id
+                                                            );
+                                                        console.log(
+                                                            foundedReservation,
+                                                            date
+                                                        );
+                                                        if (
+                                                            foundedReservation &&
+                                                            foundedReservation.status ===
+                                                                "approved"
+                                                        )
+                                                            return;
+                                                        onClickDate(
+                                                            date,
+                                                            object.id
+                                                        );
+                                                    }}
                                                 >
                                                     {object.reservations.map(
                                                         (
@@ -303,7 +352,7 @@ function Scheduler({ reservations, onClickEvent, daysRange }: Props) {
                                                                             reservation.end_date
                                                                         ) + 1
                                                                     }
-                                                                    className={`flex justify-between items-center cursor-pointer z-[100] absolute h-[28px] whitespace-nowrap p-1 rounded-md left-[10px] text-white ${reservationClasses(
+                                                                    className={`fc-event flex justify-between items-center cursor-pointer z-[100] absolute h-[28px] whitespace-nowrap p-1 rounded-md left-[10px] text-white ${reservationClasses(
                                                                         reservation
                                                                     )}`}
                                                                     onClick={(

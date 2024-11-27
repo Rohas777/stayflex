@@ -142,7 +142,7 @@ function ReservationForm({
             ` ${
                 selectedObject
                     ? "Максимальное количество детских спальных мест:" +
-                      selectedObject.adult_places
+                      selectedObject.child_places
                     : "Сначала выберите объект"
             }`
         )
