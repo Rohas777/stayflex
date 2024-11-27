@@ -23,6 +23,7 @@ import {
 } from "ckeditor5";
 import Placeholder from "../CKEditorPlugins/ConstructionList/placeholder";
 import { useEffect, useState } from "react";
+import Loader from "../Loader/Loader";
 
 interface CKEditorClassicProps {
     editorData: string;
@@ -37,6 +38,13 @@ function CKEditorClassic(props: CKEditorClassicProps) {
         (string | PluginConstructor<Editor>)[]
     >([]);
     const [items, setItems] = useState<string[]>([]);
+    const [placeholderTypes, setPlaceholderTypes] = useState<
+        {
+            title: string;
+            construction: string;
+            class: string | undefined;
+        }[]
+    >([]);
 
     const {
         editorData,
@@ -48,6 +56,18 @@ function CKEditorClassic(props: CKEditorClassicProps) {
     } = props;
 
     useEffect(() => {
+        if (
+            config &&
+            //@ts-ignore
+            config.placeholderConfig &&
+            //@ts-ignore
+            config.placeholderConfig.types
+        ) {
+            //@ts-ignore
+            setPlaceholderTypes(config.placeholderConfig.types);
+        } else {
+            setPlaceholderTypes([]);
+        }
         if (config && config.plugins) {
             setPlugins(config.plugins);
         } else {
@@ -61,6 +81,17 @@ function CKEditorClassic(props: CKEditorClassicProps) {
             setItems([]);
         }
     }, [config]);
+
+    if (
+        config &&
+        //@ts-ignore
+        config.placeholderConfig &&
+        //@ts-ignore
+        config.placeholderConfig.types &&
+        !placeholderTypes.length
+    ) {
+        return <Loader />;
+    }
 
     return (
         <CKEditor
@@ -104,6 +135,11 @@ function CKEditorClassic(props: CKEditorClassicProps) {
                     Placeholder,
                     ...plugins,
                 ],
+                //@ts-ignore
+                placeholderConfig: {
+                    //@ts-ignore
+                    types: [...placeholderTypes],
+                },
                 initialData: initialData,
             }}
         />

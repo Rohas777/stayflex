@@ -20,9 +20,12 @@ function MailPreview({ currentMail }: MailPreviewProps) {
                             {currentMail.subject}
                         </h3>
                     </div>
-                    <div className="mt-3 text-box">
-                        {currentMail.description}
-                    </div>
+                    <div
+                        className="mt-3 text-box"
+                        dangerouslySetInnerHTML={{
+                            __html: currentMail.description,
+                        }}
+                    ></div>
                 </div>
             </div>
         </>
