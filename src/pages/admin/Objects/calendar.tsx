@@ -24,6 +24,7 @@ import Lucide from "@/components/Base/Lucide";
 import { IReservation } from "@/stores/models/IReservation";
 import Notification from "@/components/Base/Notification";
 import { fetchObjectById } from "@/stores/reducers/objects/actions";
+import { fetchReservationById } from "@/stores/reducers/reservations/actions";
 
 interface ReservationsCalendarProps {
     isLoaderOpen: boolean;

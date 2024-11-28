@@ -32,6 +32,7 @@ import Regions from "../pages/admin/Regions";
 import Cities from "../pages/admin/Cities";
 import PropertyTypes from "../pages/admin/PropertyTypes";
 import Amenities from "../pages/admin/Amenities";
+import Hashtags from "../pages/admin/Hashtags";
 import Objects from "../pages/admin/Objects";
 import UserObjects from "../pages/admin/UserObjects";
 import Tariffs from "../pages/admin/Tariffs";
@@ -144,6 +145,10 @@ function Router() {
                 {
                     path: "/admin/amenities",
                     element: <Amenities />,
+                },
+                {
+                    path: "/admin/hashtags",
+                    element: <Hashtags />,
                 },
                 {
                     path: "/admin/objects",

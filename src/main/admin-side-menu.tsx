@@ -64,6 +64,11 @@ const menu: Array<Menu | "divider"> = [
                 title: lang.menu.amenities,
             },
             {
+                icon: "Tags",
+                pathname: "/admin/hashtags",
+                title: lang.menu.hashtags,
+            },
+            {
                 icon: "Server",
                 pathname: "/admin/servers",
                 title: lang.menu.servers,

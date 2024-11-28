@@ -235,7 +235,21 @@ function Main() {
             </div>
             <div className="flex flex-col-reverse xl:flex-row px-5 pt-10 mt-5 intro-y box">
                 <div className="flex-1">
-                    <div className="mx-6">
+                    {!!objectOne?.hashtags.length && (
+                        <div className="mx-6">
+                            <div className="flex items-center mb-4 text-lg font-medium text-slate-600 dark:text-slate-300">
+                                Хэштеги:
+                            </div>
+                            <div className="flex flex-wrap gap-5 gap-y-2">
+                                {objectOne?.hashtags.map((hashtag) => (
+                                    <p className="flex items-center text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-darkmode-400 px-2 rounded">
+                                        {hashtag.name}
+                                    </p>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                    <div className="mx-6 mt-4">
                         <div className="flex items-center mb-4 text-lg font-medium text-slate-600 dark:text-slate-300">
                             Удобства:
                         </div>

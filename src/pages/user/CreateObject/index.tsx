@@ -44,6 +44,7 @@ import { errorToastSlice } from "@/stores/errorToastSlice";
 import ValidationErrorNotification from "@/components/Custom/ValidationErrorNotification";
 import CKEditorClassic from "@/components/Custom/CKEditor/CKEditorClassic";
 import Placeholder from "@/components/Custom/CKEditorPlugins/ConstructionList/placeholder";
+import { fetchHashtags } from "@/stores/reducers/hashtags/actions";
 
 window.DateTime = DateTime;
 
@@ -58,6 +59,7 @@ type CustomErrors = {
     city: string | null;
     propertyType: string | null;
     amenities: string | null;
+    hashtags: string | null;
     prepayment: string | null;
     channels: string | null;
     description: string | null;
@@ -68,6 +70,7 @@ function Main() {
     const maxFilesize = 1.5;
     const regionsState = useAppSelector((state) => state.region);
     const amenitiesState = useAppSelector((state) => state.amenity);
+    const hashtagsState = useAppSelector((state) => state.hashtag);
     const propertyTypesState = useAppSelector((state) => state.propertyType);
     const { isCreated, status, error } = useAppSelector(
         (state) => state.object
@@ -129,6 +132,7 @@ function Main() {
     const [selectedCity, setSelectedCity] = useState("-1");
     const [editorData, setEditorData] = useState("");
     const [selectedAmenities, setSelectedAmenities] = useState([]);
+    const [selectedHashtags, setSelectedHashtags] = useState([]);
     const [selectedPropertyType, setSelectedPropertyType] = useState("-1");
     const [selectedPrepayment, setSelectedPrepayment] = useState("-1");
     const [isActivated, setIsActivated] = useState(true);
@@ -143,6 +147,7 @@ function Main() {
         city: null,
         propertyType: null,
         amenities: null,
+        hashtags: null,
         prepayment: null,
         channels: null,
         description: null,
@@ -153,7 +158,8 @@ function Main() {
     const regionsValidationRef = useRef<HTMLDivElement>(null);
     const citiesValidationRef = useRef<HTMLDivElement>(null);
     const propertyTypesValidationRef = useRef<HTMLDivElement>(null);
-    const convnveniencesValidationRef = useRef<HTMLDivElement>(null);
+    const amenitiesValidationRef = useRef<HTMLDivElement>(null);
+    const hashtagsValidationRef = useRef<HTMLDivElement>(null);
     const prepaymentValidationRef = useRef<HTMLDivElement>(null);
     const editorValidationRef = useRef<HTMLDivElement>(null);
 
@@ -171,6 +177,7 @@ function Main() {
             city: null,
             propertyType: null,
             amenities: null,
+            hashtags: null,
             prepayment: null,
             channels: null,
             description: null,
@@ -193,8 +200,12 @@ function Main() {
             errors.propertyType = "Обязательно выберите тип недвижимости";
         }
         if (!selectedAmenities.length) {
-            addDangerBorder(convnveniencesValidationRef.current);
+            addDangerBorder(amenitiesValidationRef.current);
             errors.amenities = "Обязательно выберите хотя бы одно удобство";
+        }
+        if (!selectedHashtags.length) {
+            addDangerBorder(hashtagsValidationRef.current);
+            errors.hashtags = "Обязательно выберите хотя бы один хэштег";
         }
         if (selectedPrepayment == "-1") {
             addDangerBorder(prepaymentValidationRef.current);
@@ -252,6 +263,7 @@ function Main() {
             apartment_id: Number(selectedPropertyType),
             description: editorData,
             convenience: selectedAmenities.map(Number),
+            hashtags: selectedHashtags.map(Number),
             price: Number(formData.get("price")),
             prepayment_percentage: Number(selectedPrepayment),
             min_ded: Number(formData.get("min_ded")),
@@ -270,6 +282,7 @@ function Main() {
     useEffect(() => {
         dispatch(fetchRegions());
         dispatch(fetchAmenities());
+        dispatch(fetchHashtags());
         dispatch(fetchPropertyTypes());
     }, []);
 
@@ -755,7 +768,7 @@ function Main() {
                             </h2>
                         </div>
                         <div
-                            ref={convnveniencesValidationRef}
+                            ref={amenitiesValidationRef}
                             className={clsx(
                                 "mt-3 border rounded-md border-transparent",
                                 {
@@ -799,6 +812,60 @@ function Main() {
                             <div className="mt-2 text-danger">
                                 {typeof customErrors.amenities === "string" &&
                                     customErrors.amenities}
+                            </div>
+                        )}
+                    </div>
+                    <div className="p-5 mt-5 intro-y box">
+                        <div className="flex flex-col items-center intro-y sm:flex-row">
+                            <h2 className="mr-auto text-lg font-medium">
+                                Хэштеги
+                            </h2>
+                        </div>
+                        <div
+                            ref={hashtagsValidationRef}
+                            className={clsx(
+                                "mt-3 border rounded-md border-transparent",
+                                {
+                                    "border-danger-important":
+                                        customErrors.hashtags,
+                                }
+                            )}
+                        >
+                            <TomSelect
+                                value={selectedHashtags}
+                                onChange={(e) => {
+                                    setSelectedHashtags(e.target.value);
+
+                                    setCustomErrors((prev) => ({
+                                        ...prev,
+                                        hashtags: null,
+                                    }));
+                                }}
+                                options={{
+                                    placeholder: "Выберите хэштеги",
+                                    plugins: {
+                                        dropdown_header: {
+                                            title: "Хэштеги",
+                                        },
+                                    },
+                                    onDelete: () => {
+                                        return;
+                                    },
+                                }}
+                                className="w-full"
+                                multiple
+                            >
+                                {hashtagsState.hashtags.map((hashtag) => (
+                                    <option key={hashtag.id} value={hashtag.id}>
+                                        {hashtag.name}
+                                    </option>
+                                ))}
+                            </TomSelect>
+                        </div>
+                        {customErrors.hashtags && (
+                            <div className="mt-2 text-danger">
+                                {typeof customErrors.hashtags === "string" &&
+                                    customErrors.hashtags}
                             </div>
                         )}
                     </div>

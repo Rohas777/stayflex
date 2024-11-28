@@ -27,6 +27,7 @@ export interface ObjectCreateType {
     min_ded: number;
     prepayment_percentage: number;
     convenience: number[];
+    hashtags: number[];
     description: string;
     active: boolean;
     letter: string;

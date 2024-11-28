@@ -9,6 +9,7 @@ import cityReducer from "./reducers/cities/slice";
 import logsReducer from "./reducers/logsReducer/slice";
 import propertyTypeReducer from "./reducers/property-types/slice";
 import amenityReducer from "./reducers/amenities/slice";
+import hashtagReducer from "./reducers/hashtags/slice";
 import objectReducer from "./reducers/objects/slice";
 import clientReducer from "./reducers/clients/slice";
 import tariffReducer from "./reducers/tariffs/slice";
@@ -31,6 +32,7 @@ export const store = configureStore({
         city: cityReducer,
         propertyType: propertyTypeReducer,
         amenity: amenityReducer,
+        hashtag: hashtagReducer,
         object: objectReducer,
         client: clientReducer,
         tariff: tariffReducer,

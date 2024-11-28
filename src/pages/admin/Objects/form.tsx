@@ -495,9 +495,7 @@ function ReservationForm({
                                                               (reservation) => {
                                                                   if (
                                                                       reservation.id ===
-                                                                      reservationState
-                                                                          .reservationOne
-                                                                          ?.id
+                                                                      currentReservation?.id
                                                                   ) {
                                                                       return null;
                                                                   }
@@ -589,9 +587,7 @@ function ReservationForm({
                                                               (reservation) => {
                                                                   if (
                                                                       reservation.id ===
-                                                                      reservationState
-                                                                          .reservationOne
-                                                                          ?.id
+                                                                      currentReservation?.id
                                                                   ) {
                                                                       return null;
                                                                   }

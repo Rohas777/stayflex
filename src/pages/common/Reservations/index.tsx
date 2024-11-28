@@ -243,7 +243,20 @@ function Main() {
                                     </select>`);
                             if (response.status === "completed") {
                                 selector = stringToHTML(
-                                    `<span class="text-green-500">Завершена</span>`
+                                    `<span class="text-success/20">Завершена</span>`
+                                );
+                            }
+
+                            const end_date = response.date?.split(" - ")[1];
+                            if (
+                                response.status === "rejected" &&
+                                end_date &&
+                                new Date(
+                                    convertStringDate(end_date)
+                                ).toLocaleString() < new Date().toLocaleString()
+                            ) {
+                                selector = stringToHTML(
+                                    `<span class="text-danger/30">Завершена</span>`
                                 );
                             }
                             const prevStatus = response.status;

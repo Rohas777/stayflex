@@ -14,6 +14,10 @@ export interface IObject {
     photos: string[];
     active: boolean;
     letter: string;
+    hashtags: {
+        id: number;
+        name: string;
+    }[];
     city: {
         id: number;
         name: string;
