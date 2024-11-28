@@ -375,13 +375,13 @@ function Scheduler({
                                                                             placement:
                                                                                 "bottom",
                                                                         }}
-                                                                    >
-                                                                        {
-                                                                            reservation
-                                                                                .client
-                                                                                .fullname
-                                                                        }
-                                                                    </Tippy>
+                                                                        className="absolute size-full inset-0"
+                                                                    ></Tippy>
+                                                                    {
+                                                                        reservation
+                                                                            .client
+                                                                            .fullname
+                                                                    }
                                                                     <b className="hidden">
                                                                         &#8594;
                                                                     </b>
