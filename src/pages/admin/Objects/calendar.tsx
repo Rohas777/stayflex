@@ -138,8 +138,8 @@ function ReservationsCalendar({
                 const status = reservationEventType(reservation?.status as any);
                 return {
                     title: reservation.client.fullname,
-                    start: reservation.start_date,
-                    end: reservation.end_date + "T12:00:01",
+                    start: reservation.start_date + "T14:00:00",
+                    end: reservation.end_date + "T12:00:00",
                     extendedProps: { reservation: reservation },
                     classNames: status.classNames,
                     textColor: status.textColor,

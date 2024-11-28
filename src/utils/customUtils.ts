@@ -240,7 +240,6 @@ export const getDaysBetweenDates = (startDate: string, endDate: string) => {
 
     const differenceInMillis = end.getTime() - start.getTime();
     const days = differenceInMillis / (1000 * 60 * 60 * 24);
-    console.log(days);
     return Math.floor(days);
 };
 

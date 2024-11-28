@@ -85,12 +85,12 @@ function Scheduler({
             ) {
                 const days = getDaysBetweenDates(startDate, lastDate);
                 cell.style.width = `${days * 40 + 20}px`;
-                cell.querySelector("span")?.classList.remove("hidden");
+                cell.querySelector("b")?.classList.remove("hidden");
             } else {
                 cell.style.width = `${
                     Number(cell.getAttribute("data-days")) * 40 - 20
                 }px`;
-                cell.querySelector("span")?.classList.add("hidden");
+                cell.querySelector("b")?.classList.add("hidden");
             }
         });
 
@@ -346,10 +346,12 @@ function Scheduler({
                                                                     data-start={
                                                                         reservation.start_date
                                                                     }
-                                                                    data-days={getDaysBetweenDates(
-                                                                        reservation.start_date,
-                                                                        reservation.end_date
-                                                                    )}
+                                                                    data-days={
+                                                                        getDaysBetweenDates(
+                                                                            reservation.start_date,
+                                                                            reservation.end_date
+                                                                        ) + 1
+                                                                    }
                                                                     className={`fc-event flex justify-between items-center cursor-pointer z-[100] absolute h-[28px] whitespace-nowrap p-1 rounded-md left-[10px] text-white ${reservationClasses(
                                                                         reservation
                                                                     )}`}
@@ -361,16 +363,28 @@ function Scheduler({
                                                                         );
                                                                     }}
                                                                 >
-                                                                    <div className="truncate">
+                                                                    <Tippy
+                                                                        content={
+                                                                            getDaysBetweenDates(
+                                                                                reservation.start_date,
+                                                                                reservation.end_date
+                                                                            ) +
+                                                                            " дн."
+                                                                        }
+                                                                        options={{
+                                                                            placement:
+                                                                                "bottom",
+                                                                        }}
+                                                                    >
                                                                         {
                                                                             reservation
                                                                                 .client
                                                                                 .fullname
                                                                         }
-                                                                    </div>
-                                                                    <span className="hidden">
+                                                                    </Tippy>
+                                                                    <b className="hidden">
                                                                         &#8594;
-                                                                    </span>
+                                                                    </b>
                                                                 </div>
                                                             );
                                                         }

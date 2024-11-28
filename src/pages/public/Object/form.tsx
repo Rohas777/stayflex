@@ -120,7 +120,12 @@ function ReservationForm({
             errors.end_date = validateEndDaterange(startDate, endDate).error;
         }
 
-        if (getDaysBetweenDates(startDate, endDate) < object.min_ded) {
+        if (
+            getDaysBetweenDates(
+                formatDate(new Date(startDate)),
+                formatDate(new Date(endDate))
+            ) < object.min_ded
+        ) {
             errors.date =
                 "Минимальный срок бронирования: " +
                 object.min_ded +

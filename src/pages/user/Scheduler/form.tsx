@@ -180,7 +180,10 @@ function ReservationForm({
             errors.tel = "Обязательно введите телефон клиента";
         }
         if (
-            getDaysBetweenDates(startDate, endDate) < selectedObject?.min_ded!
+            getDaysBetweenDates(
+                formatDate(new Date(startDate)),
+                formatDate(new Date(endDate))
+            ) < selectedObject?.min_ded!
         ) {
             errors.date =
                 "Минимальный срок бронирования: " +
