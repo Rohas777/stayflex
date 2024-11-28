@@ -539,7 +539,7 @@ function Main() {
 
     return (
         <>
-            <div className="flex mt-8 intro-y sm:flex-row">
+            <div className="flex items-start mt-8 intro-y sm:flex-row">
                 <h2 className="mr-auto text-lg font-medium">
                     Список броней клиента
                     <br />
