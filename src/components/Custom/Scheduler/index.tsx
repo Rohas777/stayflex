@@ -346,12 +346,10 @@ function Scheduler({
                                                                     data-start={
                                                                         reservation.start_date
                                                                     }
-                                                                    data-days={
-                                                                        getDaysBetweenDates(
-                                                                            reservation.start_date,
-                                                                            reservation.end_date
-                                                                        ) + 1
-                                                                    }
+                                                                    data-days={getDaysBetweenDates(
+                                                                        reservation.start_date,
+                                                                        reservation.end_date
+                                                                    )}
                                                                     className={`fc-event flex justify-between items-center cursor-pointer z-[100] absolute h-[28px] whitespace-nowrap p-1 rounded-md left-[10px] text-white ${reservationClasses(
                                                                         reservation
                                                                     )}`}
