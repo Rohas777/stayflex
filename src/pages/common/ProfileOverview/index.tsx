@@ -18,9 +18,11 @@ function Main() {
                             <div className="text-lg font-medium sm:whitespace-normal">
                                 {authorizedUser?.fullname}
                             </div>
-                            <div className="text-slate-500 text-center lg:text-left">
-                                Баланс: {authorizedUser?.balance}
-                            </div>
+                            {!authorizedUser?.is_admin && (
+                                <div className="text-slate-500 text-center lg:text-left">
+                                    Баланс: {authorizedUser?.balance}
+                                </div>
+                            )}
                         </div>
                     </div>
                     <div className="flex-1 px-5 pt-5 mt-6 border-t border-l border-r lg:mt-0 border-slate-200/60 dark:border-darkmode-400 lg:border-t-0 lg:pt-0">

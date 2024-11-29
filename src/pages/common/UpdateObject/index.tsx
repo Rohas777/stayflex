@@ -286,7 +286,7 @@ function Main() {
 
         const convenience_and_removed_photos = {
             convenience: selectedAmenities.map(Number),
-            // hashtags: selectedHashtags.map(Number), //FIXME
+            hashtag: selectedHashtags.map(Number),
             removed_photos: filterDeletedPhotos(
                 photos,
                 objectState.objectOne?.photos!

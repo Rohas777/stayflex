@@ -91,9 +91,11 @@ function Main() {
                                 <div className="font-medium">
                                     {authorizedUser?.fullname}
                                 </div>
-                                <div className="text-xs text-white/70 mt-0.5 dark:text-slate-500">
-                                    Баланс: {authorizedUser?.balance}
-                                </div>
+                                {!authorizedUser?.is_admin && (
+                                    <div className="text-xs text-white/70 mt-0.5 dark:text-slate-500">
+                                        Баланс: {authorizedUser?.balance}
+                                    </div>
+                                )}
                             </Menu.Header>
                             <Menu.Divider className="bg-white/[0.08]" />
                             <Menu.Item className="hover:bg-white/5">

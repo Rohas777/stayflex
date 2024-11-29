@@ -18,6 +18,7 @@ import Icon from "@/components/Custom/Icon";
 import { ReservationClientCreateType } from "@/stores/reducers/reservations/types";
 import { createClientReservation } from "@/stores/reducers/reservations/actions";
 import ImageZoom from "@/components/Base/ImageZoom";
+import { object } from "yup";
 
 function Main() {
     const [reservationModal, setReservationModal] = useState(false);
@@ -240,11 +241,15 @@ function Main() {
                             <div className="flex items-center mb-4 text-lg font-medium text-slate-600 dark:text-slate-300">
                                 Хэштеги:
                             </div>
-                            <div className="flex flex-wrap gap-5 gap-y-2">
+                            <div className="flex flex-wrap gap-2 gap-y-2">
                                 {objectOne?.hashtags.map((hashtag) => (
-                                    <p className="flex items-center text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-darkmode-400 px-2 rounded">
+                                    <Link
+                                        key={hashtag.id}
+                                        to={`/objects/${objectOne.author.id}/?hashtags=${hashtag.id}`}
+                                        className="flex items-center text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-darkmode-400 px-2 rounded hover:bg-slate-200 dark:hover:bg-darkmode-300 transition duration-200 ease-in"
+                                    >
                                         {hashtag.name}
-                                    </p>
+                                    </Link>
                                 ))}
                             </div>
                         </div>

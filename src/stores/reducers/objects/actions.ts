@@ -139,10 +139,20 @@ export const fetchObjectById = createAsyncThunk(
 );
 export const fetchObjectsByUser = createAsyncThunk(
     "object/fetchByUser",
-    async (id: number, thunkAPI) => {
+    async ({ id, hashtags }: { id: number; hashtags?: number[] }, thunkAPI) => {
         try {
-            const response = await instance.get(`/object/userid/${id}`);
-            return response.data;
+            if (hashtags) {
+                const str = hashtags
+                    .map((item) => `hashtags=${item}`)
+                    .join("&");
+                const response = await instance.get(
+                    `/object/userid/${id}?${str}`
+                );
+                return response.data;
+            } else {
+                const response = await instance.get(`/object/userid/${id}`);
+                return response.data;
+            }
         } catch (error: any) {
             if (!!checkErrorsBase(error)) {
                 return thunkAPI.rejectWithValue(checkErrorsBase(error));

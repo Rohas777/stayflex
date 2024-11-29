@@ -1,19 +1,35 @@
 import { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "@/stores/hooks";
-import { Link, useParams } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
 import { fetchObjectsByUser } from "@/stores/reducers/objects/actions";
 import { Status } from "@/stores/reducers/types";
 import Loader from "@/components/Custom/Loader/Loader";
 import Icon from "@/components/Custom/Icon";
+import { fetchHashtags } from "@/stores/reducers/hashtags/actions";
+import Button from "@/components/Base/Button";
 
 function Main() {
     const dispatch = useAppDispatch();
     const { objects, status, error } = useAppSelector((state) => state.object);
+    const hashtagsState = useAppSelector((state) => state.hashtag);
     const params = useParams();
+    const location = useLocation();
+
+    const hashtagsIds = location.search
+        .replace("?hashtags=", "")
+        .split(",")
+        .map((hashtag) => Number(hashtag));
 
     useEffect(() => {
         if (!params.user_id) return;
-        dispatch(fetchObjectsByUser(Number(params.user_id)));
+
+        dispatch(
+            fetchObjectsByUser({
+                id: Number(params.user_id),
+                hashtags: hashtagsIds,
+            })
+        );
+        dispatch(fetchHashtags());
     }, []);
 
     if (status === Status.LOADING) {
@@ -52,6 +68,22 @@ function Main() {
                             </div>
                         </div>
                     )}
+                </div>
+            </div>
+            <div className="p-5 mt-5 intro-y box">
+                <div>
+                    Применённые хэштеги:{" "}
+                    {hashtagsState.hashtags.map((hashtag) => {
+                        if (!hashtagsIds.includes(hashtag.id)) return;
+                        return (
+                            <span
+                                key={hashtag.id}
+                                className="inline-flex items-center text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-darkmode-400 px-2 rounded"
+                            >
+                                {hashtag.name}
+                            </span>
+                        );
+                    })}
                 </div>
             </div>
             {/* END: Profile Info */}
