@@ -11,7 +11,7 @@ import ValidationErrorNotification from "@/components/Custom/ValidationErrorNoti
 import { IMail } from "@/stores/models/IMail";
 import Loader from "@/components/Custom/Loader/Loader";
 import { UpdateMail } from "@/stores/reducers/mails/types";
-import { Clipboard } from "ckeditor5";
+import { Clipboard, SourceEditing } from "ckeditor5";
 import Placeholder from "@/components/Custom/CKEditorPlugins/ConstructionList/placeholder";
 import CKEditorClassic from "@/components/Custom/CKEditor/CKEditorClassic";
 import tippy from "tippy.js";
@@ -271,9 +271,17 @@ function MailForm({
                                 }}
                                 config={{
                                     toolbar: {
-                                        items: ["|", "placeholder"],
+                                        items: [
+                                            "|",
+                                            "placeholder",
+                                            "sourceEditing",
+                                        ],
                                     },
-                                    plugins: [Clipboard, Placeholder],
+                                    plugins: [
+                                        Clipboard,
+                                        Placeholder,
+                                        SourceEditing,
+                                    ],
                                     //@ts-ignore
                                     placeholderConfig: currentMail.constructions
                                         ? {
