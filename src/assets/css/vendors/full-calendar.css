@@ -248,4 +248,7 @@
     .fc-day-today {
         background-color: var(--fc-today-bg-color);
     }
+    .fc-day-past {
+        background-color: rgb(241 245 249);
+    }
 }

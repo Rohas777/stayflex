@@ -273,6 +273,9 @@ export const isDateRangeLocked = (
         const lockStart = new Date(lock.start_date);
         const lockEnd = new Date(lock.end_date);
 
+        lockEnd.setDate(lockEnd.getDate() - 1);
+        lockStart.setDate(lockStart.getDate() + 1);
+
         if (start < lockEnd && end > lockStart) {
             return true;
         }

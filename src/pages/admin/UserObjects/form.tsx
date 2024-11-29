@@ -495,16 +495,36 @@ function ReservationForm({
                                                         ?.approve_reservation
                                                         ? objectsState.objectOne?.approve_reservation.map(
                                                               (reservation) => {
+                                                                  const start =
+                                                                      new Date(
+                                                                          reservation.start_date
+                                                                      );
+                                                                  start.setDate(
+                                                                      start.getDate() +
+                                                                          1
+                                                                  );
+                                                                  const end =
+                                                                      new Date(
+                                                                          reservation.end_date
+                                                                      );
+                                                                  end.setDate(
+                                                                      end.getDate() -
+                                                                          1
+                                                                  );
                                                                   if (
                                                                       currentReservation &&
-                                                                      reservation.id ===
-                                                                          currentReservation?.id
+                                                                      currentReservation.id ===
+                                                                          reservation?.id
                                                                   ) {
                                                                       return null;
                                                                   }
                                                                   return [
-                                                                      reservation.start_date,
-                                                                      reservation.end_date,
+                                                                      formatDate(
+                                                                          start
+                                                                      ),
+                                                                      formatDate(
+                                                                          end
+                                                                      ),
                                                                   ];
                                                               }
                                                           )
@@ -588,16 +608,36 @@ function ReservationForm({
                                                         ?.approve_reservation
                                                         ? objectsState.objectOne?.approve_reservation.map(
                                                               (reservation) => {
+                                                                  const start =
+                                                                      new Date(
+                                                                          reservation.start_date
+                                                                      );
+                                                                  start.setDate(
+                                                                      start.getDate() +
+                                                                          1
+                                                                  );
+                                                                  const end =
+                                                                      new Date(
+                                                                          reservation.end_date
+                                                                      );
+                                                                  end.setDate(
+                                                                      end.getDate() -
+                                                                          1
+                                                                  );
                                                                   if (
                                                                       currentReservation &&
-                                                                      reservation.id ===
-                                                                          currentReservation?.id
+                                                                      currentReservation.id ===
+                                                                          reservation?.id
                                                                   ) {
                                                                       return null;
                                                                   }
                                                                   return [
-                                                                      reservation.start_date,
-                                                                      reservation.end_date,
+                                                                      formatDate(
+                                                                          start
+                                                                      ),
+                                                                      formatDate(
+                                                                          end
+                                                                      ),
                                                                   ];
                                                               }
                                                           )

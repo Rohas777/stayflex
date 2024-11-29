@@ -7,6 +7,7 @@ import Loader from "@/components/Custom/Loader/Loader";
 import Icon from "@/components/Custom/Icon";
 import { fetchHashtags } from "@/stores/reducers/hashtags/actions";
 import Button from "@/components/Base/Button";
+import Tippy from "@/components/Base/Tippy";
 
 function Main() {
     const dispatch = useAppDispatch();
@@ -26,7 +27,7 @@ function Main() {
         dispatch(
             fetchObjectsByUser({
                 id: Number(params.user_id),
-                hashtags: hashtagsIds,
+                hashtags: location.search ? hashtagsIds : undefined,
             })
         );
         dispatch(fetchHashtags());
@@ -70,22 +71,32 @@ function Main() {
                     )}
                 </div>
             </div>
-            <div className="p-5 mt-5 intro-y box">
-                <div>
-                    Применённые хэштеги:{" "}
-                    {hashtagsState.hashtags.map((hashtag) => {
-                        if (!hashtagsIds.includes(hashtag.id)) return;
-                        return (
-                            <span
-                                key={hashtag.id}
-                                className="inline-flex items-center text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-darkmode-400 px-2 rounded"
-                            >
-                                {hashtag.name}
-                            </span>
-                        );
-                    })}
+            {location.search && (
+                <div className="p-5 mt-5 intro-y box flex items-center">
+                    <Link to={location.pathname}>
+                        <Tippy content="Сбросить">
+                            <Icon
+                                icon="RefreshCwOff"
+                                className="size-6 mr-2 hover:text-primary"
+                            />
+                        </Tippy>
+                    </Link>
+                    <div>
+                        Применённые хэштеги:{" "}
+                        {hashtagsState.hashtags.map((hashtag) => {
+                            if (!hashtagsIds.includes(hashtag.id)) return;
+                            return (
+                                <span
+                                    key={hashtag.id}
+                                    className="inline-flex items-center text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-darkmode-400 px-2 rounded"
+                                >
+                                    {hashtag.name}
+                                </span>
+                            );
+                        })}
+                    </div>
                 </div>
-            </div>
+            )}
             {/* END: Profile Info */}
             <div className="grid grid-cols-12 gap-6 mt-5">
                 {/* BEGIN: Users Layout */}

@@ -58,19 +58,10 @@ function ReservationsCalendar({
     const { reservations, statusAll } = useAppSelector(
         (state) => state.reservation
     );
-    const { authorizedUser } = useAppSelector((state) => state.user);
-    const { objectOne } = useAppSelector((state) => state.object);
-    const reservationActions = reservationSlice.actions;
     const clientActions = clientSlice.actions;
     const dispatch = useAppDispatch();
 
     const options: CalendarOptions = {
-        // plugins: [interactionPlugin, dayGridPlugin, timeGridPlugin, listPlugin],
-        // headerToolbar: {
-        //     left: "prev,next today",
-        //     center: "title",
-        //     right: "dayGridMonth,timeGridWeek,timeGridDay,listYear",
-        // },
         plugins: [interactionPlugin, dayGridPlugin],
         headerToolbar: {
             left: "prev,next today",
@@ -84,10 +75,6 @@ function ReservationsCalendar({
         navLinkDayClick: (date, jsEvent) => {
             return;
         },
-
-        // buttonText: {
-        //     today: "Сегодня",
-        // },
         displayEventTime: false,
         events: events,
         eventClassNames: (info) => {

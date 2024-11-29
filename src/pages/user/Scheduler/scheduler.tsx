@@ -49,6 +49,41 @@ function Scheduler({
     const { authorizedUser } = useAppSelector((state) => state.user);
     const dispatch = useAppDispatch();
 
+    function findEarliestStartDate(reservations: IReservation[]) {
+        // Получаем сегодняшнюю дату
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // Убираем время, оставляем только дату
+
+        // Инициализируем переменную для хранения самой ранней даты
+        let earliestEvent = null;
+
+        for (const event of reservations) {
+            // Преобразуем строки дат в объекты Date
+            const startDate = new Date(event.start_date);
+            const endDate = new Date(event.end_date);
+
+            // Проверяем, что дата окончания больше или равна сегодняшнему дню
+            if (endDate >= today) {
+                // Если мы еще не нашли подходящий объект или текущий startDate раньше
+                if (event.status !== "approved" && event.status !== "new")
+                    continue;
+                if (
+                    !earliestEvent ||
+                    startDate < new Date(earliestEvent.start_date)
+                ) {
+                    earliestEvent = event;
+                }
+            }
+        }
+
+        // Если подходящий объект не найден, возвращаем сегодняшнюю дату
+        if (!earliestEvent) {
+            return today.toISOString().split("T")[0]; // Форматируем в строку YYYY-MM-DD
+        }
+
+        return earliestEvent.start_date;
+    }
+
     const findApprovedReservation = (date: string, objectID: number) => {
         const founded = reservations.filter((reservation) => {
             return (
@@ -75,25 +110,30 @@ function Scheduler({
         headerToolbar: {
             left: "prev,next today",
             center: "title",
-            right: "resourceTimeline1Month,resourceTimeline2Month",
+            right: "resourceTimeline1Month,resourceTimeline2Month,resourceTimeline3Month",
         },
         initialView: "resourceTimeline1Month",
         views: {
+            resourceTimeline3Month: {
+                type: "resourceTimeline",
+                duration: { days: 90 },
+                buttonText: "90 дней",
+            },
             resourceTimeline2Month: {
                 type: "resourceTimeline",
-                duration: { months: 2 },
-                buttonText: "2 месяца",
+                duration: { days: 60 },
+                buttonText: "60 дней",
             },
             resourceTimeline1Month: {
                 type: "resourceTimeline",
-                duration: { month: 1 },
-                buttonText: "Месяц",
+                duration: { days: 30 },
+                buttonText: "30 дней",
             },
         },
         height: "auto",
         locale: ruLocale,
         weekNumberCalculation: "ISO",
-        initialDate: new Date(),
+        initialDate: findEarliestStartDate(reservations),
         navLinks: true,
         navLinkDayClick: (date, jsEvent) => {
             return;
@@ -243,18 +283,6 @@ function Scheduler({
             });
         });
     }, []);
-
-    useEffect(() => {
-        const calendarScroll = calendarContainerRef.current?.querySelector(
-            ".fc-scroller.fc-scroller-liquid-absolute:has(.fc-day-today)"
-        );
-        const todayCell = calendarContainerRef.current?.querySelector(
-            ".fc-day-today"
-        ) as HTMLDivElement;
-        if (calendarScroll && todayCell) {
-            calendarScroll.scrollLeft = todayCell.offsetLeft - 40;
-        }
-    }, [calendarRef.current, calendarContainerRef.current]);
 
     return (
         <>

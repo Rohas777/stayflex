@@ -63,12 +63,6 @@ function ReservationsCalendar({
     const dispatch = useAppDispatch();
 
     const options: CalendarOptions = {
-        // plugins: [interactionPlugin, dayGridPlugin, timeGridPlugin, listPlugin],
-        // headerToolbar: {
-        //     left: "prev,next today",
-        //     center: "title",
-        //     right: "dayGridMonth,timeGridWeek,timeGridDay,listYear",
-        // },
         plugins: [interactionPlugin, dayGridPlugin],
         headerToolbar: {
             left: "prev,next today",

@@ -64,18 +64,25 @@ function ReservationsCalendar({
     const clientActions = clientSlice.actions;
     const dispatch = useAppDispatch();
 
-    const foundEvent = (date: string) =>
-        (
-            events as [
-                {
-                    start: string;
-                    end: string;
-                    extendedProps: { reservation: IReservation };
-                }
-            ]
-        ).find((event) => {
-            return !(date < event.start || date > event.end);
+    const findApprovedReservation = (date: string, objectID: number) => {
+        const founded = reservations.filter((reservation) => {
+            return (
+                date >= reservation.start_date && date < reservation.end_date
+            );
         });
+        let filtered: IReservation | undefined;
+        founded.forEach((reservation) => {
+            if (
+                reservation.object.id === objectID &&
+                reservation.status === "approved"
+            ) {
+                filtered = reservation;
+                return;
+            }
+        });
+
+        return filtered;
+    };
 
     const options: CalendarOptions = {
         // plugins: [interactionPlugin, dayGridPlugin, timeGridPlugin, listPlugin],
@@ -112,12 +119,13 @@ function ReservationsCalendar({
         },
         dayCellClassNames: (props) => {
             const classes: string[] = [];
-            const foundedEvent = foundEvent(formatDate(props.date));
+            const foundedEvent = findApprovedReservation(
+                formatDate(props.date),
+                objectID
+            );
 
             if (
-                (foundedEvent &&
-                    foundedEvent.extendedProps.reservation.status ===
-                        "approved") ||
+                foundedEvent ||
                 formatDate(props.date) < formatDate(new Date())
             ) {
                 classes.push("cursor-not-allowed");
@@ -135,13 +143,12 @@ function ReservationsCalendar({
             setReservationModal(true);
         },
         dateClick: (info) => {
-            const foundedEvent = foundEvent(info.dateStr);
+            const foundedEvent = findApprovedReservation(
+                info.dateStr,
+                objectID
+            );
 
-            if (
-                foundedEvent &&
-                foundedEvent.extendedProps.reservation.status === "approved"
-            )
-                return;
+            if (foundedEvent) return;
 
             if (authorizedUser?.id !== objectOne?.author.id) return;
             if (formatDate(info.date) < formatDate(new Date())) return;

@@ -569,7 +569,7 @@ function Main() {
         initTabulator();
         reInitOnResizeWindow();
 
-        dispatch(fetchObjectsByUser(Number(params.id)));
+        dispatch(fetchObjectsByUser({ id: Number(params.id) }));
         dispatch(fetchUserById(Number(params.id)));
         dispatch(objectActions.resetObjectOne());
     }, []);
