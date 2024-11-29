@@ -62,7 +62,6 @@ function MailForm({
                 constructionSelectorBtn?.classList.add("bg-success/30");
                 constructionSelect?.classList.add("!bg-success/30");
                 constructionSelect?.classList.remove("!bg-danger/30");
-                return true;
             }
             if (String(data).indexOf(construction.construction) === -1) {
                 constructionSelectorBtn?.classList.remove("bg-success/30");

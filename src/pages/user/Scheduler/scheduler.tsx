@@ -111,6 +111,14 @@ function Scheduler({
             return ["cursor-pointer", "transition", "hover:opacity-80"];
         },
         eventClick: (info) => {
+            // if (
+            //     info.event.extendedProps.reservation.end_date <
+            //     formatDate(new Date())
+            // )
+            //     return;
+
+            // if (authorizedUser?.id !== objectOne?.author.id) return;
+
             onClickEvent(info.event.extendedProps.reservation.id);
         },
 

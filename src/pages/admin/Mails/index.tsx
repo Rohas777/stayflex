@@ -34,7 +34,7 @@ function Main() {
     const [isFormOpened, setIsFormOpened] = useState(false);
     const [isSendFormOpened, setIsSendFormOpened] = useState(false);
     const [isPreviewOpened, setIsPreviewOpened] = useState(false);
-    const [formattedMails, setFormattedMails] = useState<IMail[]>([]); //FIXME -
+    const [formattedMails, setFormattedMails] = useState<IMail[]>([]);
     const [currentMail, setCurrentMail] = useState<IMail | null>(null);
 
     const { mails, status, error, statusActions, isSended, isUpdated } =
@@ -91,25 +91,11 @@ function Main() {
         dispatch(fetchMails());
     }, []);
 
-    //FIXME ------------------------------------
     useEffect(() => {
         if (!mails || !mails.length || status !== Status.SUCCESS) return;
 
-        const tempMails = mails.map((mail) => {
-            if (mail.slug !== "authorization") return mail;
-            return {
-                ...mail,
-                constructions: [
-                    {
-                        name: "Код авторизации",
-                        construction: "(?code)",
-                    },
-                ],
-            };
-        });
-
         setFormattedMails(
-            tempMails.map((mail) => {
+            mails.map((mail) => {
                 const constructions = mail.constructions
                     ? mail.constructions.map((construction) => {
                           return {
@@ -125,7 +111,6 @@ function Main() {
             })
         );
     }, [mails, status]);
-    //FIXME ------------------------------------
 
     if (status === Status.LOADING) return <Loader />;
 
