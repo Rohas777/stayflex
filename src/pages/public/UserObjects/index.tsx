@@ -31,7 +31,7 @@ function Main() {
             })
         );
         dispatch(fetchHashtags());
-    }, []);
+    }, [location.search]);
 
     if (status === Status.LOADING) {
         return <Loader />;
