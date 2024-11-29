@@ -370,12 +370,13 @@ function ReservationForm({
         );
     }, [selectedObjectID]);
 
-    if (!isCreate && !currentReservation) {
+    if (!isCreate && !currentReservation && !isLoaderOpen) {
         return <Loader />;
     }
     if (
         objectsState.status === Status.LOADING &&
-        clientsState.statusByPhone !== Status.LOADING
+        clientsState.statusByPhone !== Status.LOADING &&
+        !isLoaderOpen
     ) {
         return <Loader />;
     }

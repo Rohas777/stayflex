@@ -10,7 +10,6 @@ import {
     tariffActivate,
 } from "@/stores/reducers/tariffs/actions";
 import { Status } from "@/stores/reducers/types";
-import LoadingIcon from "@/components/Base/LoadingIcon";
 import { ITariff } from "@/stores/models/ITariff";
 import * as lucideIcons from "lucide-react";
 import { tariffSlice } from "@/stores/reducers/tariffs/slice";

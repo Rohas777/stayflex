@@ -1,4 +1,4 @@
-import Scheduler from "@/components/Custom/Scheduler";
+// import Scheduler from "@/components/Custom/Scheduler";
 import Loader from "@/components/Custom/Loader/Loader";
 import OnDevMark from "@/components/Custom/OnDevMark";
 import { useAppDispatch, useAppSelector } from "@/stores/hooks";
@@ -33,9 +33,9 @@ import { IReservation } from "@/stores/models/IReservation";
 import Button from "@/components/Base/Button";
 import TomSelect from "@/components/Base/CustomTomSelect";
 import Notification from "@/components/Base/Notification";
+import SchedulerComponent from "./scheduler";
 
 function Main() {
-    const [daysRange, setDaysRange] = useState("30");
     const [reservationModal, setReservationModal] = useState(false);
     const [currentReservation, setCurrentReservation] =
         useState<IReservation | null>(null);
@@ -162,7 +162,7 @@ function Main() {
         dispatch(fetchReservations());
     }, []);
 
-    if (statusAll === Status.LOADING) return <Loader />;
+    if (statusAll === Status.LOADING && !isLoaderOpen) return <Loader />;
 
     return (
         <>
@@ -190,25 +190,10 @@ function Main() {
                         <span className="block size-3 bg-slate-200 rounded-sm"></span>{" "}
                         - Завершена
                     </div>
-                    <TomSelect
-                        value={daysRange}
-                        onChange={(e) => {
-                            setDaysRange(e.target.value);
-                        }}
-                        options={{
-                            controlInput: undefined,
-                            searchField: undefined,
-                        }}
-                        className="w-28"
-                    >
-                        <option value="30">30 дней</option>
-                        <option value="60">60 дней</option>
-                        <option value="90">90 дней</option>
-                    </TomSelect>
                 </div>
             </div>
             <div className="mt-5 intro-y box p-5">
-                <Scheduler
+                <SchedulerComponent
                     reservations={reservations}
                     onClickEvent={(reservation_id) => {
                         setCurrentReservation(
@@ -217,7 +202,7 @@ function Main() {
                         setCurrentUnreservedData(null);
                         setReservationModal(true);
                     }}
-                    onClickDate={(date: string, object_id: number) => {
+                    onClickDate={(date, object_id) => {
                         setCurrentUnreservedData({
                             start_date: date,
                             objectID: object_id,
@@ -225,7 +210,6 @@ function Main() {
                         setCurrentReservation(null);
                         setReservationModal(true);
                     }}
-                    daysRange={Number(daysRange)}
                 />
             </div>
             {/* BEGIN: Form Modal */}

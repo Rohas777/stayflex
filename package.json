@@ -10,12 +10,15 @@
         "preview": "vite preview"
     },
     "dependencies": {
+        "@bitnoi.se/react-scheduler": "^0.3.1",
         "@ckeditor/ckeditor5-react": "^9.3.1",
         "@fullcalendar/core": "^6.1.10",
         "@fullcalendar/daygrid": "^6.1.10",
         "@fullcalendar/interaction": "^6.1.10",
         "@fullcalendar/list": "^6.1.10",
         "@fullcalendar/react": "^6.1.10",
+        "@fullcalendar/resource": "^6.1.15",
+        "@fullcalendar/resource-timeline": "^6.1.15",
         "@fullcalendar/timegrid": "^6.1.10",
         "@headlessui/react": "^1.7.18",
         "@hookform/resolvers": "^3.3.4",

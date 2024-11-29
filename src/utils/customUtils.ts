@@ -1,4 +1,5 @@
 import { DropzoneElement } from "@/components/Base/Dropzone";
+import { IObjectReservation, IReservation } from "@/stores/models/IReservation";
 import { DropzoneFile } from "dropzone";
 
 /**
@@ -272,7 +273,7 @@ export const isDateRangeLocked = (
         const lockStart = new Date(lock.start_date);
         const lockEnd = new Date(lock.end_date);
 
-        if (start <= lockEnd && end >= lockStart) {
+        if (start < lockEnd && end > lockStart) {
             return true;
         }
     }
@@ -351,3 +352,57 @@ export const resizeDropzoneFiles = async (
 
     return files;
 };
+
+export function getObjectReservations(reservations: IReservation[]) {
+    if (!Array.isArray(reservations)) return [] as IObjectReservation[];
+    return reservations.reduce((acc, reservation) => {
+        // Ищем объект по его id в аккумуляторе
+        const existingObject = acc.find(
+            (item) => item.id === reservation.object.id
+        );
+
+        if (existingObject) {
+            // Если объект найден, добавляем новую резервацию
+            existingObject.reservations.push({
+                id: reservation.id,
+                start_date: reservation.start_date,
+                end_date: reservation.end_date,
+                status: reservation.status,
+                description: reservation.description,
+                letter: reservation.letter,
+                client: reservation.client,
+                adult_places: reservation.adult_places,
+                child_places: reservation.child_places,
+            });
+
+            // Сортируем массив reservations по start_date
+            existingObject.reservations.sort((a, b) => {
+                return (
+                    new Date(a.start_date).getTime() -
+                    new Date(b.start_date).getTime()
+                );
+            });
+        } else {
+            // Если объект не найден, создаем новый элемент
+            acc.push({
+                id: reservation.object.id,
+                name: reservation.object.name,
+                reservations: [
+                    {
+                        id: reservation.id,
+                        start_date: reservation.start_date,
+                        end_date: reservation.end_date,
+                        status: reservation.status,
+                        description: reservation.description,
+                        letter: reservation.letter,
+                        client: reservation.client,
+                        adult_places: reservation.adult_places,
+                        child_places: reservation.child_places,
+                    },
+                ],
+            });
+        }
+
+        return acc;
+    }, [] as IObjectReservation[]);
+}

@@ -218,3 +218,34 @@
         }
     }
 }
+
+.scheduler {
+    *::-webkit-scrollbar {
+        height: 5px;
+        width: 5px;
+        /* background-color: transparent; */
+    }
+
+    *::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    *::-webkit-scrollbar-thumb {
+        border-radius: 10px;
+        background-color: rgb(var(--color-primary) / 0.3);
+    }
+    .fc-button {
+        white-space: nowrap !important;
+    }
+
+    .fc-timeline-slot-frame {
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .fc-scroller:has(.fc-timeline-header) {
+        overflow: hidden !important;
+    }
+    .fc-day-today {
+        background-color: var(--fc-today-bg-color);
+    }
+}
