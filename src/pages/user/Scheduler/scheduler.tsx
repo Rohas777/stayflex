@@ -141,6 +141,9 @@ function Scheduler({
                 day: "numeric",
             },
         ],
+        slotLabelClassNames: (info) => {
+            return ["pointer-events-none", "capitalize"];
+        },
         height: "auto",
         locale: ruLocale,
         weekNumberCalculation: "ISO",
