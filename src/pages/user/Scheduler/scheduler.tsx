@@ -130,6 +130,17 @@ function Scheduler({
                 buttonText: "30 дней",
             },
         },
+        slotLabelFormat: [
+            {
+                month: "long",
+            },
+            {
+                weekday: "short",
+            },
+            {
+                day: "numeric",
+            },
+        ],
         height: "auto",
         locale: ruLocale,
         weekNumberCalculation: "ISO",
