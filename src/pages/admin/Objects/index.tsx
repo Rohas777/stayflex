@@ -49,6 +49,7 @@ interface Response {
     owner?: string;
     active?: boolean;
     type?: string;
+    reservation_count?: number;
 }
 
 function Main() {
@@ -178,6 +179,24 @@ function Main() {
                             return `<div class="flex lg:justify-center">
                                         <div class="font-medium whitespace-nowrap">${response.type}</div>
                                     </div>`;
+                        },
+                    },
+                    {
+                        title: "Броней",
+                        minWidth: 200,
+                        field: "reservation_count",
+                        hozAlign: "center",
+                        headerHozAlign: "center",
+                        vertAlign: "middle",
+                        print: false,
+                        download: false,
+                        sorter: "number",
+                        formatter(cell) {
+                            const response: Response = cell.getData();
+                            return `<a href="/admin/reservations/object/${response.id}/" target="_blank" class="absolute inset-0 h-full items-center justify-center flex w-full font-medium whitespace-nowrap hover:text-primary">
+                                        ${response.reservation_count}
+                                        <i data-lucide="external-link" class="absolute top-1/2 -translate-y-1/2 right-2 size-4"></i>
+                                    </a>`;
                         },
                     },
                     {
@@ -559,6 +578,7 @@ function Main() {
                 owner: object.author.fullname,
                 active: object.active,
                 type: object.apartment.name,
+                reservation_count: object.reservation_count,
             }));
             tabulator.current
                 ?.setData(formattedData.reverse())

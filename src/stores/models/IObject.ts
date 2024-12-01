@@ -14,6 +14,7 @@ export interface IObject {
     photos: string[];
     active: boolean;
     letter: string;
+    reservation_count: number;
     hashtags: {
         id: number;
         name: string;

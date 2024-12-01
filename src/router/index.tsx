@@ -11,6 +11,7 @@ import UpdateObject from "../pages/common/UpdateObject";
 import Clients from "../pages/common/Clients";
 import Reservations from "../pages/common/Reservations";
 import ClientReservations from "../pages/common/ClientReservations";
+import ObjectReservations from "../pages/common/ObjectReservations";
 
 import ObjectsClient from "../pages/user/Objects";
 import CreateObject from "../pages/user/CreateObject";
@@ -91,6 +92,10 @@ function Router() {
                 {
                     path: "reservations/client/:id",
                     element: <ClientReservations />,
+                },
+                {
+                    path: "reservations/object/:id",
+                    element: <ObjectReservations />,
                 },
                 {
                     path: "channels",
@@ -185,6 +190,10 @@ function Router() {
                 {
                     path: "/admin/reservations/client/:id",
                     element: <ClientReservations />,
+                },
+                {
+                    path: "/admin/reservations/object/:id",
+                    element: <ObjectReservations />,
                 },
                 {
                     path: "/admin/logs",

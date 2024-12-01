@@ -48,7 +48,7 @@ export const sendMail = createAsyncThunk(
     "mail/send",
     async (mailData: SendMail, thunkAPI) => {
         try {
-            const response = await instance.post("/admin/email/send", mailData);
+            const response = await instance.post("/email/send", mailData);
             return response.data;
         } catch (error: any) {
             if (!!checkErrorsBase(error)) {

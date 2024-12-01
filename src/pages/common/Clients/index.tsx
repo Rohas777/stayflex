@@ -228,7 +228,7 @@ function Main() {
                                 placement: "bottom",
                                 animation: "shift-away",
                             });
-                            // a.append(sendA, info); //FIXME -
+                            a.append(sendA, info);
                             a.append(info);
                             if (response?.reservation_count! < 1) {
                                 const deleteA =
