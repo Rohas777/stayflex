@@ -8,19 +8,28 @@ import { FormLabel, FormInput, InputGroup } from "@/components/Base/Form";
 import { useEffect, useState } from "react";
 import TomSelect from "@/components/Base/TomSelect";
 import { startLoader, stopLoader } from "@/utils/customUtils";
-import { UserTariffUpdateType } from "@/stores/reducers/users/types";
-import { useAppSelector } from "@/stores/hooks";
+import {
+    UserTariffUpdateType,
+    UserUpdateType,
+} from "@/stores/reducers/users/types";
+import { useAppDispatch, useAppSelector } from "@/stores/hooks";
 import { Status } from "@/stores/reducers/types";
 import ValidationErrorNotification from "@/components/Custom/ValidationErrorNotification";
+import Icon from "@/components/Custom/Icon";
+import Tippy from "@/components/Base/Tippy";
+import { Dialog } from "@/components/Base/Headless";
+import UserBalanceEditForm from "./editBalanceForm";
 
 interface UserBalanceUpdateFormProps {
     onUpdate: (userData: UserTariffUpdateType) => void;
+    onEdit: (userData: UserUpdateType) => void;
     setIsLoaderOpen: React.Dispatch<React.SetStateAction<boolean>>;
     isLoaderOpen: boolean;
 }
 
 function UserBalanceUpdateForm({
     onUpdate,
+    onEdit,
     setIsLoaderOpen,
     isLoaderOpen,
 }: UserBalanceUpdateFormProps) {
@@ -28,6 +37,7 @@ function UserBalanceUpdateForm({
     const { userOne, statusOne } = useAppSelector((state) => state.user);
 
     const [selectedTariff, setSelectedTariff] = useState<string>("-1");
+    const [editBalanceModal, setEditBalanceModal] = useState(false);
 
     const [showValidationNotification, setShowValidationNotification] =
         useState(false);
@@ -90,9 +100,25 @@ function UserBalanceUpdateForm({
                             Обязательное
                         </span>
                     </FormLabel>
-                    <p className="mt-1 mb-3 text-xs ">
-                        Баланс пользователя: {userOne?.balance}
-                    </p>
+                    <div className="flex items-center justify-between mt-1 mb-3">
+                        <p className="text-xs">
+                            Баланс пользователя: {userOne?.balance}
+                        </p>
+                        <Tippy
+                            content="Изменить баланс"
+                            options={{ placement: "bottom" }}
+                        >
+                            <Button
+                                variant="secondary"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    setEditBalanceModal(true);
+                                }}
+                            >
+                                <Icon icon="Pencil" className="w-4 h-4" />
+                            </Button>
+                        </Tippy>
+                    </div>
                     <InputGroup className="w-full">
                         <InputGroup.Text
                             id="input-group-balance"
@@ -122,7 +148,7 @@ function UserBalanceUpdateForm({
                     )}
                 </div>
                 <Button type="submit" variant="primary" className="w-full mt-5">
-                    Обновить
+                    Пополнить
                 </Button>
             </form>
             <ValidationErrorNotification
@@ -131,6 +157,33 @@ function UserBalanceUpdateForm({
                     setShowValidationNotification(false);
                 }}
             />
+
+            {/* BEGIN: Modal Content */}
+            <Dialog
+                open={editBalanceModal}
+                onClose={() => {
+                    setEditBalanceModal(false);
+                }}
+            >
+                <Dialog.Panel>
+                    <a
+                        onClick={(event: React.MouseEvent) => {
+                            event.preventDefault();
+                            setEditBalanceModal(false);
+                        }}
+                        className="absolute top-0 right-0 mt-3 mr-3"
+                        href="#"
+                    >
+                        <Icon icon="X" className="w-8 h-8 text-slate-400" />
+                    </a>
+                    <UserBalanceEditForm
+                        isLoaderOpen={isLoaderOpen}
+                        setIsLoaderOpen={setIsLoaderOpen}
+                        onEdit={onEdit}
+                    />
+                </Dialog.Panel>
+            </Dialog>
+            {/* END: Modal Content */}
         </>
     );
 }

@@ -31,6 +31,7 @@ export interface UserUpdateType {
     fullname: string;
     phone: string;
     id: number;
+    balance: number;
 }
 export interface UserTariffUpdateType {
     user_id: number;

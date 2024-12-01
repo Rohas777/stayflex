@@ -246,9 +246,33 @@
         overflow: hidden !important;
     }
     .fc-day-today {
-        background-color: var(--fc-today-bg-color);
+        background-color: rgba(255, 220, 40, 0.35);
+        font-weight: 700;
     }
     .fc-day-past {
         background-color: rgb(241 245 249);
+    }
+}
+
+.dark .scheduler {
+    color: white;
+    .fc-day-past {
+        background-color: transparent;
+    }
+    .fc .fc-scrollgrid-section-sticky > * {
+        background-color: transparent;
+    }
+    .fc-timeline-slot-frame {
+        border-bottom: 1px solid transparent;
+    }
+
+    .fc-resource-timeline-divider.fc-cell-shaded {
+        /* width: 1px; */
+        background-color: transparent;
+        border: 1px solid transparent !important;
+    }
+    .fc-button-group button,
+    .fc-toolbar-chunk button {
+        color: white !important;
     }
 }

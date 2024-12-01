@@ -142,7 +142,7 @@ function Scheduler({
             },
         ],
         slotLabelClassNames: (info) => {
-            return ["pointer-events-none", "capitalize"];
+            return ["pointer-events-none", "capitalize", "font-normal"];
         },
         height: "auto",
         locale: ruLocale,

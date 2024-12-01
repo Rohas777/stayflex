@@ -105,6 +105,7 @@ function UserUpdateForm({
             mail: String(formData.get("email")),
             phone: tel!,
             id: userOne!.id,
+            balance: userOne!.balance,
         };
         onUpdate(userData);
     };

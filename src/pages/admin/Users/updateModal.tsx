@@ -30,6 +30,7 @@ import UserBalanceUpdateForm from "./updateBalanceForm";
 interface UserUpdateModalProps {
     onUpdateUser: (userData: UserUpdateType) => void;
     onUpdateUserTariff: (userData: UserTariffUpdateType) => void;
+    onEditUserTariff: (userData: UserUpdateType) => void;
     setIsLoaderOpen: React.Dispatch<React.SetStateAction<boolean>>;
     isLoaderOpen: boolean;
 }
@@ -37,6 +38,7 @@ interface UserUpdateModalProps {
 function UserUpdateModal({
     onUpdateUser,
     onUpdateUserTariff,
+    onEditUserTariff,
     setIsLoaderOpen,
     isLoaderOpen,
 }: UserUpdateModalProps) {
@@ -92,6 +94,7 @@ function UserUpdateModal({
                         </Tab.Panel>
                         <Tab.Panel className="leading-relaxed">
                             <UserBalanceUpdateForm
+                                onEdit={onEditUserTariff}
                                 onUpdate={onUpdateUserTariff}
                                 setIsLoaderOpen={setIsLoaderOpen}
                                 isLoaderOpen={isLoaderOpen}

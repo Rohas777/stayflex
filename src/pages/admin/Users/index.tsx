@@ -696,6 +696,7 @@ function Main() {
                         setIsLoaderOpen={setIsLoaderOpen}
                         onUpdateUser={onUpdate}
                         onUpdateUserTariff={onUpdateTariff}
+                        onEditUserTariff={onUpdate}
                     />
                 </Dialog.Panel>
             </Dialog>
